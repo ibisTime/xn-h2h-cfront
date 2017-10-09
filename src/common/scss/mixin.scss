@@ -1,0 +1,92 @@
+@mixin bg-image($url) {
+  background-image: url($url + "@2x.png");
+  @media (-webkit-min-device-pixel-ratio: 3), (min-device-pixel-ratio: 3) {
+    background-image: url($url + "@3x.png");
+  }
+}
+
+@mixin no-wrap() {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@mixin extend-click() {
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: -0.2rem;
+    left: -0.2rem;
+    right: -0.2rem;
+    bottom: -0.2rem;
+  }
+}
+
+@mixin border-bottom-1px($color) {
+  position: relative;
+
+  &:after {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid $color;
+    content: ' ';
+  }
+}
+
+@mixin border-top-1px($color) {
+  position: relative;
+
+  &:before {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border-top: 1px solid $color;
+    content: ' ';
+  }
+}
+
+@mixin border-none() {
+  &:after {
+    display: none;
+  }
+  &:before {
+    display: none;
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.5),(min-device-pixel-ratio: 1.5) {
+  .border-bottom-1px {
+    &::after {
+      -webkit-transform: scaleY(0.7);
+      transform: scaleY(0.7);
+    }
+  }
+  .border-top-1px {
+    &::before {
+      -webkit-transform: scaleY(0.7);
+      transform: scaleY(0.7);
+    }
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2),(min-device-pixel-ratio: 2) {
+  .border-bottom-1px {
+    &::after {
+      -webkit-transform: scaleY(0.5);
+      transform: scaleY(0.5);
+    }
+  }
+  .border-top-1px {
+    &::before {
+      -webkit-transform: scaleY(0.5);
+      transform: scaleY(0.5);
+    }
+  }
+}
