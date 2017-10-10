@@ -18,7 +18,6 @@
   </div>
 </template>
 <script>
-  import Scroll from 'base/scroll/scroll';
   import calendar from 'base/calendar/calendar';
   import SignMask from 'components/sign-mask/sign-mask';
   import {getPageBizSysConfig} from 'api/general';
@@ -54,7 +53,6 @@
       }
     },
     components: {
-      Scroll,
       calendar,
       SignMask
     }
@@ -71,7 +69,6 @@
     width: 100%;
     height: 100%;
     background: #fff;
-    overflow: scroll;
 
 	.jf-wrapper{
 		width: 100%;

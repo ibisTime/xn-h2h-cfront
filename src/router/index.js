@@ -22,7 +22,7 @@ const Publish = () => import('components/publish/publish');
 // 商品分类
 const PublishCates = () => import('components/publish-cates/publish-cates');
 // 交易圈子
-const TradeCircle = () => import('components/tradeCircle/tradeCircle');
+const TradeCircle = () => import('components/trade-circle/trade-circle');
 
 export default new Router({
   routes: [
@@ -59,7 +59,7 @@ export default new Router({
           ]
         },
         {
-          path: 'tradeCircle',
+          path: 'trade',
           component: TradeCircle
         }
       ]
