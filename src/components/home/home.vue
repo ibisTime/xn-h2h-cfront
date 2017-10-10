@@ -32,9 +32,11 @@
           <i class="icon-right"></i>
         </div>
       </div>
-      <div class="trade-wrapper">
-        <div class="trade-icon"></div>
-      </div>
+      <router-link to="/home/tradeCircle"tag="div">
+        <div class="trade-wrapper">
+          <div class="trade-icon"></div>
+        </div>
+      </router-link>
       <div class="split"></div>
       <div class="mall-cates border-bottom-1px">
         <div class="item active">

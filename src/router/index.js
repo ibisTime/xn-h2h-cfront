@@ -21,6 +21,8 @@ const Cate = () => import('components/cate/cate');
 const Publish = () => import('components/publish/publish');
 // 商品分类
 const PublishCates = () => import('components/publish-cates/publish-cates');
+// 交易圈子
+const TradeCircle = () => import('components/tradeCircle/tradeCircle');
 
 export default new Router({
   routes: [
@@ -55,6 +57,10 @@ export default new Router({
               component: PublishCates
             }
           ]
+        },
+        {
+          path: 'tradeCircle',
+          component: TradeCircle
         }
       ]
     },
