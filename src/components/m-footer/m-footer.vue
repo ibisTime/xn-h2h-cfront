@@ -1,5 +1,5 @@
 <template>
-  <div class="foot-wrapper">
+  <div class="foot-wrapper" @click.stop>
     <router-link tag="div" class="foot-item item-0" to="/home">
       <i></i>
       <p>首页</p>
@@ -8,12 +8,10 @@
       <i></i>
       <p>分类</p>
     </router-link>
-    <router-link tag="div" class="foot-item item-2" to="/publish">
-      <div class="pub-item">
-        <i></i>
-      </div>
+    <div class="foot-item item-2" @click="goPublish">
+      <div class="pub-item"><i></i></div>
       <div class="title">发布</div>
-    </router-link>
+    </div>
     <router-link tag="div" class="foot-item item-3" to="/message">
       <i></i>
       <p>消息</p>
@@ -30,6 +28,11 @@
       currentIndex: {
         type: Number,
         default: 0
+      }
+    },
+    methods: {
+      goPublish() {
+        this.$emit('goPublish');
       }
     }
   };
@@ -56,6 +59,7 @@
       align-items: center;
       flex-direction: column;
       justify-content: center;
+      text-align: center;
 
       >i {
         display: inline-block;
@@ -86,6 +90,8 @@
         height: 0.94rem;
         font-size: 0;
         top: -0.34rem;
+        left: 50%;
+        transform: translate(-50%, 0);
 
         i {
           display: inline-block;
@@ -97,6 +103,9 @@
       }
 
       &.item-2 {
+        flex-direction: row;
+        justify-content: center;
+
         i {
           @include bg-image('publish');
         }
@@ -111,6 +120,8 @@
           font-size: $font-size-small-s;
           position: absolute;
           bottom: 0.11rem;
+          left: 50%;
+          transform: translate(-50%, 0);
         }
       }
 

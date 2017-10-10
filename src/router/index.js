@@ -9,8 +9,15 @@ const Home = () => import('components/home/home');
 const Notice = () => import('components/notice/notice');
 // 分享
 const Recommend = () => import('components/recommend/recommend');
+// 推荐历史
+const Children = () => import('components/children/children');
 // 签到
 const Sign = () => import('components/sign/sign');
+
+// 发布
+const Publish = () => import('components/publish/publish');
+// 商品分类
+const PublishCates = () => import('components/publish-cates/publish-cates');
 
 export default new Router({
   routes: [
@@ -24,13 +31,33 @@ export default new Router({
       children: [
         {
           path: 'recommend',
-          component: Recommend
+          component: Recommend,
+          children: [
+            {
+              path: 'history',
+              component: Children
+            }
+          ]
         },
         {
           path: 'sign',
           component: Sign
+        },
+        {
+          path: 'publish',
+          component: Publish,
+          children: [
+            {
+              path: 'cate',
+              component: PublishCates
+            }
+          ]
         }
       ]
+    },
+    {
+      path: '/publish',
+      component: Publish
     },
     {
       path: '/notice',

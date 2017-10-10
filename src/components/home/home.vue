@@ -62,7 +62,7 @@
         </ul>
       </div>
     </scroll>
-    <m-footer></m-footer>
+    <m-footer @goPublish="goPublish"></m-footer>
     <router-view></router-view>
   </div>
 </template>
@@ -90,6 +90,9 @@
       this.loop = true;
     },
     methods: {
+      goPublish() {
+        this.$router.push('/home/publish');
+      },
       getImgSyl(imgs) {
         return {
           backgroundImage: `url(${formatImg(imgs)})`
@@ -243,7 +246,7 @@
         .text {
           display: inline-block;
           position: relative;
-          font-size: $font-size-medium-x;
+          font-size: $font-size-medium-xx;
         }
 
         &.active {
