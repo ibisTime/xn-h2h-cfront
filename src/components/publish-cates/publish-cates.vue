@@ -33,6 +33,8 @@
   import Scroll from 'base/scroll/scroll';
   import Loading from 'base/loading/loading';
   import MHeader from 'components/m-header/m-header';
+  import {mapMutations, mapGetters} from 'vuex';
+  import {SET_PUBLISH_MALL_CATE} from 'store/mutation-types';
 
   export default {
     data() {
@@ -90,7 +92,10 @@
           return _rightData;
         }
         return [];
-      }
+      },
+      ...mapGetters([
+        'publishMallCate'
+      ])
     },
     methods: {
       choseMenu(index) {
@@ -105,7 +110,10 @@
       },
       rightCls(index) {
         return index === this.rightIndex ? 'active' : '';
-      }
+      },
+      ...mapMutations({
+        setMallCate: SET_PUBLISH_MALL_CATE
+      })
     },
     components: {
       MHeader,

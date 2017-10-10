@@ -5,17 +5,20 @@
         <div class="title">想卖多少钱<span @click="confirm">确认</span></div>
         <div class="sell-price border-bottom-1px">
           <input type="number" placeholder="¥0.00" v-model="sellPrice"/>
+          <span v-show="spErr" class="error-tip">{{spErr}}</span>
         </div>
         <div class="item border-bottom-1px">
           <label>原价</label>
           <div class="input-item">
             <input type="number" placeholder="¥0.00" v-model="oriPrice">
+            <span v-show="spErr" class="error-tip">{{spErr}}</span>
           </div>
         </div>
         <div class="item">
           <label>运费</label>
-          <div class="input-item">
+          <div class="input-item freight">
             <input type="number" placeholder="¥0.00" v-model="freight">
+            <span v-show="frErr" class="error-tip">{{frErr}}</span>
           </div>
           <div class="input-item">
             <div @click.stop="choseFree" class="free" :class="freeCls">包邮</div>
@@ -26,14 +29,19 @@
   </transition>
 </template>
 <script>
+  import {amountValid, emptyValid} from 'common/js/util';
+
   export default {
     data() {
       return {
         showFlag: false,
         sellPrice: '',
+        spErr: '',
         isFree: false,
         freight: '',
-        oriPrice: ''
+        frErr: '',
+        oriPrice: '',
+        oriErr: ''
       };
     },
     computed: {
@@ -52,8 +60,45 @@
         this.isFree = !this.isFree;
       },
       confirm() {
-        console.log('confirm');
-        this.hide();
+        if (this.valid()) {
+          this.$emit('confirm', this.sellPrice, this.oriPrice, this.freight, this.isFree);
+          this.hide();
+        }
+      },
+      valid() {
+        let r1 = this.validSellPrice();
+        let r2 = this.validOriPrice();
+        let r3 = this.validFreight();
+        return r1 && r2 && r3;
+      },
+      validSellPrice() {
+        let result = emptyValid(this.sellPrice);
+        if (result.err) {
+          this.spErr = result.msg;
+          return false;
+        }
+        result = amountValid(this.sellPrice);
+        this.spErr = result.msg;
+        return !result.err;
+      },
+      validOriPrice() {
+        let result = emptyValid(this.oriPrice);
+        if (result.err) {
+          this.oriErr = result.msg;
+          return false;
+        }
+        result = amountValid(this.oriPrice);
+        this.oriErr = result.msg;
+        return !result.err;
+      },
+      validFreight() {
+        let result = emptyValid(this.freight);
+        if (!result.err) {
+          result = amountValid(this.freight);
+          this.frErr = result.msg;
+          return !result.err;
+        }
+        return true;
       }
     }
   };
@@ -85,6 +130,12 @@
       width: 100%;
       background: #fff;
 
+      .error-tip {
+        font-size: $font-size-medium-s;
+        white-space: nowrap;
+        color: #ff0000;
+      }
+
       .title {
         padding: 0.2rem 0.3rem;
         font-size: $font-size-small;
@@ -102,6 +153,8 @@
       .sell-price {
         padding: 0.05rem 0.3rem 0.25rem;
         font-size: $font-size-large;
+        display: flex;
+        align-items: center;
 
         input {
           width: 100%;
@@ -121,9 +174,23 @@
 
         .input-item {
           flex: 1;
-          padding-right: 0.3rem;
+          display: flex;
+          align-items: center;
+
+          &.freight {
+            .error-tip {
+              position: absolute;
+              right: 0.3rem;
+              top: 0.05rem;
+            }
+          }
+
+          input {
+            flex: 1;
+          }
 
           .free {
+            flex: 1;
             font-size: $font-size-medium;
             background-repeat: no-repeat;
             background-position: 1rem center;

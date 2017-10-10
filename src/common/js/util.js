@@ -343,7 +343,7 @@ export function emptyValid(value) {
     err: 0,
     msg: ''
   };
-  if (!value) {
+  if (isUnDefined(value)) {
     result.err = 1;
     result.msg = '不能为空';
   }

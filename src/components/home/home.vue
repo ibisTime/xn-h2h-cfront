@@ -7,6 +7,9 @@
             <a :href="item.url||'javascript:void(0)'" :style="getImgSyl(item.pic)"></a>
           </div>
         </slider>
+        <router-link tag="div" to="/home/sign" class="sign-wrapper">
+          <i class="sign-icon"></i>
+        </router-link>
       </div>
       <div class="cates-wrapper">
         <div class="cate-item">
@@ -76,7 +79,7 @@
       return {
         banners: [
           {
-            url: '',
+            url: 'https://www.baidu.com',
             pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg'
           },
           {
@@ -131,6 +134,27 @@
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
+      }
+
+      .sign-wrapper {
+        position: absolute;
+        top: 0.2rem;
+        right: 0.2rem;
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 50%;
+        font-size: 0;
+        background: rgba(0, 0, 0, 0.6);
+
+        .sign-icon {
+          display: inline-block;
+          width: 100%;
+          height: 100%;
+          background-repeat: no-repeat;
+          background-position: 55% 44%;
+          background-size: 0.6rem;
+          @include bg-image('sign');
+        }
       }
     }
 

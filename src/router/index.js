@@ -14,6 +14,9 @@ const Children = () => import('components/children/children');
 // 签到
 const Sign = () => import('components/sign/sign');
 
+// 分类
+const Cate = () => import('components/cate/cate');
+
 // 发布
 const Publish = () => import('components/publish/publish');
 // 商品分类
@@ -43,6 +46,22 @@ export default new Router({
           path: 'sign',
           component: Sign
         },
+        {
+          path: 'publish',
+          component: Publish,
+          children: [
+            {
+              path: 'cate',
+              component: PublishCates
+            }
+          ]
+        }
+      ]
+    },
+    {
+      path: '/cate',
+      component: Cate,
+      children: [
         {
           path: 'publish',
           component: Publish,

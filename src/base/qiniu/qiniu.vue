@@ -12,6 +12,7 @@
 </template>
 <script>
   import request from 'superagent-bluebird-promise';
+  import {Base64} from 'js-base64';
   import {isFunction} from 'common/js/util';
 
   export default {
@@ -114,9 +115,10 @@
         }
         return r;
       },
-      uploadByBase64(base64) {
+      uploadByBase64(base64, key) {
         base64 = base64.substr(base64.indexOf('base64,') + 7);
-        return request.post('http://upload.qiniu.com/putb64/-1')
+        key = Base64.encode(key);
+        return request.post('http://upload.qiniu.com/putb64/-1/key/' + key)
           .set('Content-Type', 'application/octet-stream')
           .set('Authorization', `UpToken ${this.token}`)
           .send(base64)

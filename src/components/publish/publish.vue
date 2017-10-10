@@ -22,7 +22,9 @@
         <div class="split"></div>
         <div class="infos">
           <div class="info-item border-bottom-1px" @click="goCate">分类<div class="label icon-right">选择分类</div></div>
-          <div class="info-item border-bottom-1px" @click="showPrice">价格<div class="label">开个价</div></div>
+          <div class="info-item border-bottom-1px" @click="showPrice">价格
+            <div class="label" :class="sellCls">{{sellText}}</div>
+          </div>
           <div class="info-item">同步到圈子<div class="label">
             <switch-option class="option"></switch-option>
           </div></div>
@@ -31,7 +33,7 @@
           <button @click="publish">发布</button>
         </div>
       </div>
-      <price-mask ref="priceMask"></price-mask>
+      <price-mask ref="priceMask" @confirm="updatePrice"></price-mask>
       <router-view></router-view>
     </div>
   </transition>
@@ -42,6 +44,9 @@
   import MHeader from 'components/m-header/m-header';
   import PhotoScroll from 'components/photo-scroll/photo-scroll';
   import PriceMask from 'components/price-mask/price-mask';
+  import {mapMutations, mapGetters} from 'vuex';
+  import {SET_PUBLISH_MALL_CATE} from 'store/mutation-types';
+  import {isUnDefined} from 'common/js/util';
 
   export default {
     data() {
@@ -49,17 +54,31 @@
         photos: [],
         name: '',
         description: '',
-        isNew: false
+        isNew: false,
+        sellPrice: '',
+        oriPrice: '',
+        freight: '',
+        isFree: false
       };
     },
     created() {
       this.showBack = false;
       this.border = true;
+      this.setMallCate([]);
     },
     computed: {
       newCls() {
         return this.isNew ? 'active' : '';
-      }
+      },
+      sellCls() {
+        return isUnDefined(this.sellPrice) ? '' : 'text';
+      },
+      sellText() {
+        return isUnDefined(this.sellPrice) ? '开个价' : this.sellPrice;
+      },
+      ...mapGetters([
+        'publishMallCate'
+      ])
     },
     methods: {
       choseNew() {
@@ -74,12 +93,21 @@
       updatePhotos(photos) {
         this.photos = photos;
       },
+      updatePrice(sellPrice, oriPrice, freight, isFree) {
+        this.sellPrice = sellPrice;
+        this.oriPrice = oriPrice;
+        this.freight = freight;
+        this.isFree = isFree;
+      },
       publish() {
         console.log('click');
       },
       close() {
         this.$router.back();
-      }
+      },
+      ...mapMutations({
+        setMallCate: SET_PUBLISH_MALL_CATE
+      })
     },
     components: {
       MHeader,
@@ -195,6 +223,10 @@
 
             .option {
               margin-top: 0.19rem;
+            }
+
+            &.text {
+              color: $color-text;
             }
           }
         }

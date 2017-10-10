@@ -63,7 +63,7 @@
       transition: all 0.1s;
 
       &.active {
-        background-color: $primary-color;
+        background-color: #76d472;
         border-color: transparent;
         transition: all 0.2s ease 0.1s;
       }

@@ -1,3 +1,5 @@
-const state = {};
+const state = {
+  publishMallCate: []
+};
 
 export default state;
