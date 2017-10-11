@@ -85,7 +85,7 @@
         this.isNew = !this.isNew;
       },
       goCate() {
-        this.$router.push(this.$route.path + '/cate');
+        this.$router.push(this.$route.path + '/category');
       },
       showPrice() {
         this.$refs.priceMask.show();
