@@ -32,7 +32,7 @@
           <i class="icon-right"></i>
         </div>
       </div>
-      <router-link to="/home/tradeCircle"tag="div">
+      <router-link to="/home/trade"tag="div">
         <div class="trade-wrapper">
           <div class="trade-icon"></div>
         </div>
