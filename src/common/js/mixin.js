@@ -19,3 +19,13 @@ export const commonMixin = {
     }
   }
 };
+
+export const directiveMixin = {
+  directives: {
+    focus: {
+      inserted: function (el) {
+        el.focus();
+      }
+    }
+  }
+};

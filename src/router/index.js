@@ -16,8 +16,10 @@ const Sign = () => import('components/sign/sign');
 
 // 分类
 const Cate = () => import('components/category/category');
-// 大类
+// 所有大类
 const MajorCategories = () => import('components/major-categories/major-categories');
+// 大类商品列表
+const CategoryList = () => import('components/category-list/category-list');
 // 搜索
 const Search = () => import('components/search/search');
 
@@ -89,6 +91,16 @@ export default new Router({
         {
           path: 'search',
           component: Search
+        },
+        {
+          path: 'list',
+          component: CategoryList,
+          children: [
+            {
+              path: 'search',
+              component: Search
+            }
+          ]
         }
       ]
     },

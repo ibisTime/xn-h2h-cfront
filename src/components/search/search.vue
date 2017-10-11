@@ -5,59 +5,99 @@
         <div class="inner">
           <div class="search">
             <div class="search-icon"></div>
-            <input type="text" placeholder="请输入商品名称" v-model="keyword"/>
+            <input v-focus type="text" ref="searchInput" placeholder="请输入商品名称" v-model="query"/>
+            <i v-show="query" class="close-icon" @click="clearInput"></i>
           </div>
           <div class="cancel" @click="back">取消</div>
         </div>
       </header>
-      <div v-show="keyword" class="result-wrapper">
-        <scroll>
+      <div v-show="query" class="result-wrapper">
+        <scroll ref="resultScroll" :pullUpLoad="pullUpLoad" :data="list">
           <ul>
-            <li></li>
+            <li class="border-bottom-1px" @click="saveSearch">热水器</li>
           </ul>
         </scroll>
       </div>
-      <div v-show="!keyword" class="history-wrapper">
+      <div v-show="!query" class="history-wrapper">
         <div class="title">
           <h1>历史搜索</h1>
-          <i class="del-icon" @click="clear"></i>
+          <i class="del-icon" @click="showConfirm"></i>
         </div>
-        <scroll :pullUpLoad="pullUpLoad">
+        <scroll @beforeScrollStart="blurInput" :data="searchHistory" ref="historyScroll" :pullUpLoad="pullUpLoad">
           <ul>
-            <li>牙刷</li>
-            <li>iphone</li>
-            <li>牙刷</li>
-            <li>iphone</li>
-            <li>牙刷</li>
-            <li>iphone</li>
-            <li>牙刷</li>
-            <li>iphone</li>
+            <li v-for="item in searchHistory" @click="addQuery(item)">{{item}}</li>
           </ul>
         </scroll>
       </div>
+      <confirm ref="confirm" @confirm="clearSearchHistory" text="是否清空所有搜索历史" confirmBtnText="清空"></confirm>
     </div>
   </transition>
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
+  import Confirm from 'base/confirm/confirm';
+  import {mapGetters, mapActions} from 'vuex';
+  import {debounce} from 'common/js/util';
+  import {directiveMixin} from 'common/js/mixin';
 
   export default {
+    mixins: [directiveMixin],
     data() {
       return {
-        keyword: ''
+        query: '',
+        list: []
       };
     },
     created() {
       this.pullUpLoad = null;
+      this.$watch('query', debounce((newQuery) => {
+        if (!newQuery) {
+          setTimeout(() => {
+            this.$refs.historyScroll.refresh();
+          }, 20);
+        } else {
+          this.search();
+        }
+      }, 200));
+    },
+    computed: {
+      ...mapGetters([
+        'searchHistory'
+      ])
     },
     methods: {
+      search() {
+        console.log('query');
+        setTimeout(() => {
+          this.$refs.resultScroll.refresh();
+        }, 20);
+      },
+      addQuery(query) {
+        this.query = query;
+      },
+      saveSearch() {
+        this.saveSearchHistory(this.query);
+      },
+      showConfirm() {
+        this.$refs.confirm.show();
+      },
+      blurInput() {
+        this.$refs.searchInput.blur();
+      },
+      clearInput() {
+        this.query = '';
+      },
       back() {
         this.$router.back();
       },
-      clear() {}
+      ...mapActions([
+        'saveSearchHistory',
+        'clearSearchHistory'
+      ])
     },
     components: {
-      Scroll
+      Scroll,
+      Confirm
     }
   };
 </script>
@@ -76,7 +116,7 @@
     header {
       height: 0.88rem;
       padding: 0.14rem 0 0.14rem 0.3rem;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid $color-border;
 
       .inner {
         height: 0.6rem;
@@ -87,11 +127,13 @@
           flex: 1;
           height: 0.6rem;
           display: flex;
+          align-items: center;
           border-radius: 0.3rem;
           background: #f3f4f8;
 
           .search-icon {
             flex: 0 0 0.54rem;
+            height: 0.34rem;
             background-repeat: no-repeat;
             background-position: 0.2rem center;
             background-size: 0.24rem;
@@ -100,9 +142,18 @@
 
           input {
             flex: 1;
-            padding-right: 0.3rem;
             font-size: $font-size-medium;
             background: transparent;
+          }
+
+          .close-icon {
+            display: inline-block;
+            width: 0.7rem;
+            height: 0.34rem;
+            background-size: 0.3rem;
+            background-position: center;
+            background-repeat: no-repeat;
+            @include bg-image('close');
           }
         }
 
@@ -116,7 +167,12 @@
     }
 
     .history-wrapper {
-      padding: 0.78rem 0.3rem 0.3rem;
+      position: absolute;
+      top: 0.88rem;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.78rem 0.3rem 0.6rem;
 
       .title {
         position: relative;
@@ -136,7 +192,7 @@
 
       h1 {
         font-size: $font-size-medium-x;
-        margin-bottom: 0.34rem;
+        padding-bottom: 0.34rem;
       }
 
       ul {
@@ -150,6 +206,28 @@
           border-radius: 0.3rem;
           font-size: $font-size-medium-s;
           background: #f3f4f8;
+        }
+      }
+    }
+
+    .result-wrapper {
+      position: absolute;
+      top: 0.88rem;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0 0.3rem;
+
+      li {
+        padding-left: 0.3rem;
+        height: 1rem;
+        line-height: 1rem;
+        @include border-bottom-1px($color-border);
+        font-size: $font-size-medium;
+        color: $color-text-l;
+
+        &:last-child {
+          @include border-none();
         }
       }
     }

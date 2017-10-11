@@ -1,16 +1,19 @@
 import storage from 'good-storage';
 
-const AVATAR_KEY = '__avatar__';
-const AVATAR_MAX_LEN = 9;
+const SEARCH_KEY = '__search__';
+const SEARCH_MAX_LEN = 50;
 
 function insertArray(arr, val, compare, maxLen) {
   const index = arr.findIndex(compare);
-  if (index > -1) {
+  if (index === 0) {
     return;
   }
-  arr.push(val);
+  if (index > 0) {
+    arr.splice(index, 1);
+  }
+  arr.unshift(val);
   if (maxLen && arr.length > maxLen) {
-    arr.shift();
+    arr.pop();
   }
 }
 
@@ -21,41 +24,29 @@ function deleteFromArray(arr, compare) {
   }
 }
 
-export function saveAvatar(avatar) {
-  let avatars = storage.get(AVATAR_KEY, []);
-  insertArray(avatars, avatar, (item) => {
-    return item.key === avatar.key;
-  }, AVATAR_MAX_LEN);
-  try {
-    storage.set(AVATAR_KEY, avatars);
-  } catch (e) {
-    console.log('err', e);
-  }
-  return avatars;
+export function saveSearch(query) {
+  let searches = storage.get(SEARCH_KEY, []);
+  insertArray(searches, query, (item) => {
+    return item === query;
+  }, SEARCH_MAX_LEN);
+  storage.set(SEARCH_KEY, searches);
+  return searches;
 }
 
-export function deleteAvatar(avatar) {
-  let avatars = storage.get(AVATAR_KEY, []);
-  deleteFromArray(avatars, (item) => {
-    return item.key === avatar.key;
+export function deleteSearch(query) {
+  let searches = storage.get(SEARCH_KEY, []);
+  deleteFromArray(searches, (item) => {
+    return item === query;
   });
-  try {
-    storage.set(AVATAR_KEY, avatars);
-  } catch (e) {
-    console.log('err', e);
-  }
-  return avatars;
+  storage.set(SEARCH_KEY, searches);
+  return searches;
 }
 
-export function clearAvatar() {
-  try {
-    storage.remove(AVATAR_KEY);
-  } catch (e) {
-    console.log('err', e);
-  }
+export function clearSearch() {
+  storage.remove(SEARCH_KEY);
   return [];
 }
 
-export function loadAvatar() {
-  return storage.get(AVATAR_KEY, []);
+export function loadSearch() {
+  return storage.get(SEARCH_KEY, []);
 }

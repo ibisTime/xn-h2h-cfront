@@ -7,7 +7,7 @@
         </router-link>
       </div>
       <div class="cates clearfix">
-        <div class="item">
+        <div class="item" @click="goList(0)">
           <img src="./demo.png"/>
           <p>数码</p>
         </div>
@@ -57,6 +57,9 @@
       return {};
     },
     methods: {
+      goList(code) {
+        this.$router.push(`/category/list?code=${code}`);
+      },
       goAllCates() {
         this.$router.push('/category/categories');
       },

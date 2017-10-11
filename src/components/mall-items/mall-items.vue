@@ -54,7 +54,7 @@
     li {
       display: flex;
       padding: 0.3rem;
-      @include border-bottom-1px(#eee);
+      @include border-bottom-1px($color-border);
 
       &:last-child {
         @include border-none();

@@ -130,6 +130,19 @@ export function setTitle(title) {
   }
 }
 
+// 延时函数的执行
+export function debounce(func, delay) {
+  let timer;
+  return function (...args) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
 // 清除内容里的标签
 export function clearTag(content) {
   return content.replace(/<[^>]+>|<\/[^>]+>|<[^>]+\/>|&nbsp;/ig, '');

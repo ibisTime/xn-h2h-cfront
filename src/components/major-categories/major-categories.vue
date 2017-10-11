@@ -63,7 +63,7 @@
       height: 1rem;
       padding-left: 0.1rem;
       padding-right: 0.3rem;
-      @include border-bottom-1px(#eee);
+      @include border-bottom-1px($color-border);
 
       &:last-child {
         @include border-none();

@@ -205,7 +205,7 @@
       }
 
       .border-bottom-1px {
-        @include border-bottom-1px(#eee);
+        @include border-bottom-1px($color-border);
       }
     }
   }

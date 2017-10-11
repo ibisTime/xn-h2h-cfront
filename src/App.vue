@@ -14,8 +14,11 @@
 <script type="text/ecmascript-6">
   import Loading from 'base/loading/loading';
   import {isLogin, setUser} from 'common/js/util';
+  import {getPosition} from 'common/js/location';
   import {getAppId} from 'api/general';
   import {wxLogin} from 'api/user';
+  import {mapMutations, mapGetters} from 'vuex';
+  import {SET_LOCATION} from 'store/mutation-types';
 
   export default {
     data() {
@@ -23,11 +26,17 @@
         loadingFlag: true
       };
     },
+    computed: {
+      ...mapGetters([
+        'location'
+      ])
+    },
     created() {
       setUser({
         token: 'TU201708022049457128381TK201709251504487642621',
         userId: 'U1111111111111111'
       });
+      this.getLocation();
       if (!isLogin()) {
         if (/code=([^&]+)&state=/.exec(location.href)) {
           let code = RegExp.$1;
@@ -63,6 +72,30 @@
       }
     },
     methods: {
+      getLocation() {
+        if (!this.location) {
+          getPosition().then((data) => {
+            let addressComponent = data.addressComponent;
+            let province = addressComponent.province;
+            let city = addressComponent.city || province;
+            let area = addressComponent.district;
+            let township = addressComponent.township;
+            let result = {
+              position: {
+                lng: data.position.getLng(),
+                lat: data.position.getLat()
+              },
+              addressComponent: {
+                province,
+                city,
+                area,
+                township
+              }
+            };
+            this.setLocation(result);
+          });
+        }
+      },
       wxLogin(code, userReferee) {
         wxLogin(code, userReferee).then((data) => {
           setUser(data);
@@ -83,7 +116,10 @@
             location.replace(`${url}?appid=${appId}&redirect_uri=${redirectUri}${suffix}`);
           }, 100);
         });
-      }
+      },
+      ...mapMutations({
+        setLocation: SET_LOCATION
+      })
     },
     components: {
       Loading

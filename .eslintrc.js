@@ -31,6 +31,7 @@ module.exports = {
   'globals': {
     'wx': true,
     'WeixinJSBridge': true,
+    'AMap': true,
     'PIC_PREFIX': true
   }
 }

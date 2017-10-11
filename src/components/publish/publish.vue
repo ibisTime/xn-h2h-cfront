@@ -206,7 +206,7 @@
           padding: 0 0.3rem;
 
           &.border-bottom-1px {
-            @include border-bottom-1px(#eee);
+            @include border-bottom-1px($color-border);
           }
 
           .label {
