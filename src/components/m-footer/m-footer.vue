@@ -4,7 +4,7 @@
       <i></i>
       <p>首页</p>
     </router-link>
-    <router-link tag="div" class="foot-item item-1" to="/cate">
+    <router-link tag="div" class="foot-item item-1" to="/category">
       <i></i>
       <p>分类</p>
     </router-link>

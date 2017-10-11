@@ -15,12 +15,16 @@ const Children = () => import('components/children/children');
 const Sign = () => import('components/sign/sign');
 
 // 分类
-const Cate = () => import('components/cate/cate');
+const Cate = () => import('components/category/category');
+// 大类
+const MajorCategories = () => import('components/major-categories/major-categories');
+// 搜索
+const Search = () => import('components/search/search');
 
 // 发布
 const Publish = () => import('components/publish/publish');
 // 商品分类
-const PublishCates = () => import('components/publish-cates/publish-cates');
+const PublishCategories = () => import('components/publish-categories/publish-categories');
 // 交易圈子
 const TradeCircle = () => import('components/trade-circle/trade-circle');
 
@@ -53,8 +57,8 @@ export default new Router({
           component: Publish,
           children: [
             {
-              path: 'cate',
-              component: PublishCates
+              path: 'category',
+              component: PublishCategories
             }
           ]
         },
@@ -65,7 +69,7 @@ export default new Router({
       ]
     },
     {
-      path: '/cate',
+      path: '/category',
       component: Cate,
       children: [
         {
@@ -73,10 +77,18 @@ export default new Router({
           component: Publish,
           children: [
             {
-              path: 'cate',
-              component: PublishCates
+              path: 'category',
+              component: PublishCategories
             }
           ]
+        },
+        {
+          path: 'categories',
+          component: MajorCategories
+        },
+        {
+          path: 'search',
+          component: Search
         }
       ]
     },
