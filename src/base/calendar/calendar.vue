@@ -32,8 +32,8 @@
           <span v-if="dayobject.day.getMonth()+1 != currentMonth" class="other-month">{{ dayobject.day.getDate() }}</span>
           <!--如果是本月  还需要判断是不是这一天-->
           <span v-else>
-        <!--今天  同年同月同日-->
-            <span v-if="dayobject.day.getFullYear() == new Date().getFullYear() && dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active"><i>{{ dayobject.day.getDate() }}</i></span>
+          <!--今天  同年同月同日-->
+            <span v-if="dayobject.day.getFullYear() == new Date().getFullYear() && dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active">{{ dayobject.day.getDate() }}<i></i></span>
             <span v-else>{{ dayobject.day.getDate() }}</span>
           </span>
         </li>
@@ -71,7 +71,7 @@ export default {
       } else {
         this.now = new Date();
         this.d = new Date(this.formatDate(this.now.getFullYear(), this.now.getMonth(), 1));
-        this.d.setDate(35);
+        this.d.setDate(42);
         this.time = new Date(this.formatDate(this.d.getFullYear(), this.d.getMonth() + 1, 1));
         // console.log(time);
       }
@@ -85,7 +85,15 @@ export default {
       this.str = this.formatDate(this.currentYear, this.currentMonth, this.currentDay);
       this.days.length = 0;
 
-      for (let i = 0; i <= 34; i++) {
+      for (let i = this.currentWeek; i > 0; i--) {
+        this.d = new Date(this.str);
+        this.d.setDate(this.d.getDate() - i);
+        this.dayobject.day = this.d;
+        this.days.push({
+          day: this.dayobject.day
+        });
+      }
+      for (let i = 0; i <= 41 - this.currentWeek; i++) {
         this.d = new Date(this.str);
         this.d.setDate(this.d.getDate() + i);
         this.dayobject.day = this.d;
@@ -140,40 +148,43 @@ export default {
           height: 5rem;
           li{
             float: left;
-            width: 0.7rem;
-            height: 1rem;
-            padding: 0.4rem;
-            margin-right: 0.1rem;
+            width: 0.9rem;
+            height: 0.9rem;
+            line-height: 0.5rem;
+            padding: 0.2rem;
             span{
+              display: inline-block;
+              width: 100%;
+              height: 100%;
               text-align: center;
             }        
             i{
-              position: relative;
-              top: 0.2rem;
-              left: -0.05rem;
+              position: absolute;
+              top: 0;
+              left: 0.5rem;
+              display: inline-block;
+              width: 0.3rem;
+              height: 0.3rem;
               text-align: center;
               font-style:normal;
-              padding: 0.2rem;
-              width: 2rem;
-              height: 2rem;
-              border: 0.02rem solid #48b0fb;
-              border-radius: 50%;              
+              background-repeat: no-repeat;
+              background-size: 0.3rem;             
+              @include bg-image('tick');                           
             }
             .other-month{
               color: #CED1C6;
             }
             .active{
               position: relative;
-              top:-0.36rem;;
-              left: -0.4rem;
+              top:-0.3rem;;
+              left: -0.3rem;
               display: inline-block;
-              height: 1rem;
-              width: 1rem;
-              margin: 0.1rem;
-              background-repeat: no-repeat;
-              background-position: 0.6rem 0;
-              background-size: 0.3rem;             
-              @include bg-image('tick');
+              width: 0.7rem;
+              height: 0.7rem;
+              margin: 0.2rem;
+              padding: 0.1rem;
+              border: 0.02rem solid #48b0fb;
+              border-radius: 50%;                
             }
           }          
         }                     
