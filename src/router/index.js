@@ -30,6 +30,9 @@ const PublishCategories = () => import('components/publish-categories/publish-ca
 // 交易圈子
 const TradeCircle = () => import('components/trade-circle/trade-circle');
 
+// 我的
+const User = () => import('components/user/user');
+
 export default new Router({
   routes: [
     {
@@ -111,6 +114,10 @@ export default new Router({
     {
       path: '/notice',
       component: Notice
+    },
+    {
+      path: '/user',
+      component: User
     }
   ]
 });

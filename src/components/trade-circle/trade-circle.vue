@@ -175,7 +175,8 @@
           li{
             float: left;
             width: 0.52rem;
-            height:0.45rem;            
+            height:0.45rem; 
+            background-size: 100%;           
             background-repeat: no-repeat;
             background-position: center;
             margin-left: 0.4rem;
