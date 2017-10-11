@@ -248,7 +248,7 @@
       line-height: 0.9rem;
       height: 0.9rem;
       background-color: #fff;
-      @include border-bottom-1px(#eee)
+      @include border-bottom-1px($color-border);
 
       .item {
         flex: 1;
