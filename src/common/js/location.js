@@ -1,7 +1,7 @@
 /**
  * 获取定位信息
  * */
-export function getPosition() {
+export function getLocation() {
   return new Promise((resolve, reject) => {
     // 调用浏览器定位服务
     let map = new AMap.Map('', {
@@ -15,7 +15,24 @@ export function getPosition() {
       map.addControl(geolocation);
       geolocation.getCurrentPosition();
       AMap.event.addListener(geolocation, 'complete', (data) => {
-        resolve(data);
+        let addressComponent = data.addressComponent;
+        let province = addressComponent.province;
+        let city = addressComponent.city || province;
+        let area = addressComponent.district;
+        let township = addressComponent.township;
+        let result = {
+          position: {
+            lng: data.position.getLng(),
+            lat: data.position.getLat()
+          },
+          addressComponent: {
+            province,
+            city,
+            area,
+            township
+          }
+        };
+        resolve(result);
       });
       AMap.event.addListener(geolocation, 'error', (msg) => {
         reject(msg);

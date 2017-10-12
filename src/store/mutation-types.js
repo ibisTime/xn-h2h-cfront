@@ -4,3 +4,5 @@ export const SET_PUBLISH_MALL_CATE = 'SET_PUBLISH_MALL_CATE';
 export const SET_SEARCH_HISTORY = 'SET_SEARCH_HISTORY';
 // 设置定位信息
 export const SET_LOCATION = 'SET_LOCATION';
+// 设置定位是否失败
+export const SET_IS_LOCA_ERR = 'SET_IS_LOCA_ERR';

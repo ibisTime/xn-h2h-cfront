@@ -9,6 +9,9 @@ const mutations = {
   },
   [types.SET_LOCATION](state, location) {
     state.location = location;
+  },
+  [types.SET_IS_LOCA_ERR](state, flag) {
+    state.isLocaErr = flag;
   }
 };
 

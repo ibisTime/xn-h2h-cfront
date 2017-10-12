@@ -6,7 +6,6 @@
         <scroll class="left-menu"
                 ref="leftScroll"
                 :pullUpLoad="pullUpLoad"
-                :probeType="probeType"
                 :data="list">
           <loading v-show="!list.length" class="loading" title=""></loading>
           <div v-for="(item,index) in list"
@@ -17,8 +16,7 @@
         </scroll>
         <scroll class="right-menu"
                 :data="rightList"
-                :pullUpLoad="pullUpLoad"
-                :probeType="probeType">
+                :pullUpLoad="pullUpLoad">
           <loading v-show="!rightList.length" class="loading" title=""></loading>
           <div class="right-item"
                :class="rightCls"
@@ -81,7 +79,6 @@
       };
     },
     created() {
-      this.probeType = 3;
       this.pullUpLoad = null;
     },
     computed: {
@@ -100,7 +97,7 @@
     methods: {
       choseMenu(index) {
         this.leftIndex = index;
-        this.$refs.leftScroll.scrollToElement(this.$refs.leftMenu[index], 300, 0, 1);
+        this.$refs.leftScroll.scrollToElement(this.$refs.leftMenu[index], 200, false, true);
       },
       choseCate(item) {
         this.$router.back();

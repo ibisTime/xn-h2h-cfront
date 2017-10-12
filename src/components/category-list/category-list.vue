@@ -8,20 +8,136 @@
         </div>
       </header>
       <div class="filter-wrapper">
-        <div class="item active">区域<i class="down-icon icon"></i></div>
-        <div class="item">小类</div>
-        <div class="item">价格<div class="up-down"><i class="up-icon icon"></i><i class="icon down-icon"></i></div></div>
-        <div class="item">筛选<i class="icon select-icon"></i></div>
+        <div class="item area" :class="areaCls" @click="areaClick"><span>{{address}}</span><i class="down-icon icon"></i></div>
+        <div class="item pr3" @click="priceClick">{{smallName}}</div>
+        <div class="item price-item">价格<div class="up-down">
+          <i class="up-icon icon" @click="upClick" :class="upCls"></i>
+          <i class="icon down-icon" @click="downClick" :class="downCls"></i>
+        </div></div>
+        <div class="item" @click="filterClick">筛选<i class="icon select-icon"></i></div>
       </div>
+      <div class="split"></div>
+      <div class="content-wrapper">
+        <scroll>
+          <mall-items></mall-items>
+        </scroll>
+      </div>
+      <category-city ref="cityPicker"
+                     @hide="handleHide"
+                     :outProvIndex="provIndex"
+                     :outCityIndex="cityIndex"
+                     :outAreaIndex="areaIndex"
+                     @cityChose="cityChose"></category-city>
+      <category-small ref="smallCategory"
+                      @confirm="handleConfirm"
+                      :outSmallCode="smallCode"></category-small>
+      <category-filter ref="filterCategory"
+                      @confirm="handleFilter"
+                      :outMinPrice="minPrice"
+                      :outMaxPrice="maxPrice"
+                      :outPriceIndex="priceIndex"
+                      :outIsFree="isFree"
+                       :outIsNew="isNew"></category-filter>
       <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
+  import MallItems from 'components/mall-items/mall-items';
+  import CategoryCity from 'components/category-city/category-city';
+  import CategorySmall from 'components/category-small/category-small';
+  import CategoryFilter from 'components/category-filter/category-filter';
+
+  const UP = 'UP';
+  const DOWN = 'DOWN';
 
   export default {
+    data() {
+      return {
+        areaActive: false,
+        direction: '',
+        province: '',
+        provIndex: 0,
+        city: '',
+        cityIndex: 0,
+        area: '',
+        areaIndex: 0,
+        minPrice: '',
+        maxPrice: '',
+        priceIndex: -1,
+        smallCode: '',
+        smallName: '全部',
+        isFree: false,
+        isNew: false
+      };
+    },
+    computed: {
+      areaCls() {
+        return this.areaActive ? 'active' : '';
+      },
+      upCls() {
+        return this.direction === UP ? 'active' : '';
+      },
+      downCls() {
+        return this.direction === DOWN ? 'active' : '';
+      },
+      address() {
+        if (!this.province) {
+          return '全国';
+        }
+        return this.area || '全部';
+      }
+    },
     methods: {
+      areaClick() {
+        this.areaActive = !this.areaActive;
+        if (this.areaActive) {
+          this.$refs.cityPicker.show();
+          this.$refs.cityPicker.initScroll();
+        } else {
+          this.$refs.cityPicker.hide();
+        }
+      },
+      priceClick() {
+        this.areaActive = false;
+        this.$refs.cityPicker.hide();
+        this.$refs.smallCategory.show();
+      },
+      upClick() {
+        this.direction = this.direction === UP ? '' : UP;
+        this.areaActive = false;
+      },
+      downClick() {
+        this.direction = this.direction === DOWN ? '' : DOWN;
+        this.areaActive = false;
+      },
+      filterClick() {
+        this.$refs.cityPicker.hide();
+        this.$refs.filterCategory.show();
+      },
+      handleHide() {
+        this.areaActive = false;
+      },
+      cityChose(prov, city, area, provIdx, cityIdx, areaIdx) {
+        this.province = prov;
+        this.provIndex = provIdx;
+        this.city = city;
+        this.cityIndex = cityIdx;
+        this.area = area;
+        this.areaIndex = areaIdx;
+      },
+      handleConfirm(smallCode, smallName) {
+        this.smallCode = smallCode;
+        this.smallName = smallName;
+      },
+      handleFilter(min, max, priceIndex, isFree, isNew) {
+        this.minPrice = min;
+        this.maxPrice = max;
+        this.priceIndex = priceIndex;
+        this.isFree = isFree;
+        this.isNew = isNew;
+      },
       back() {
         this.$router.back();
       },
@@ -30,7 +146,11 @@
       }
     },
     components: {
-      Scroll
+      Scroll,
+      MallItems,
+      CategoryCity,
+      CategorySmall,
+      CategoryFilter
     }
   };
 </script>
@@ -44,6 +164,7 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background-color: $color-background;
 
     header {
       display: flex;
@@ -98,17 +219,50 @@
 
       .item {
         flex: 1;
+        height: 0.8rem;
         text-align: center;
         font-size: $font-size-medium;
+
+        &.area {
+          display: flex;
+          overflow: hidden;
+
+          i {
+            flex: 0 0 0.36rem;
+          }
+
+          span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+
+        &.pr3 {
+          padding-right: 0.3rem;
+        }
 
         &:first-child {
           padding-left: 0.3rem;
           text-align: left;
+
+          &.active {
+            color: $primary-color;
+            .down-icon {
+              @include bg-image('down-act');
+            }
+          }
         }
 
         &:last-child {
           padding-right: 0.3rem;
           text-align: right;
+        }
+
+        &.price-item {
+          .icon.active {
+            @include bg-image('down-act');
+          }
         }
 
         .icon {
@@ -134,10 +288,12 @@
 
         .up-down {
           display: inline-block;
+          padding-left: 0.04rem;
           vertical-align: middle;
           width: 0.36rem;
           height: 100%;
           font-size: 0;
+          line-height: 1;
 
           .icon {
             height: 50%;
@@ -145,19 +301,21 @@
 
           .up-icon {
             vertical-align: middle;
-            background-position: 0.12rem center;
+            background-position: center 0.04rem;
             background-size: 0.2rem;
             @include bg-image('down');
             transform: rotate(180deg);
           }
-        }
 
-        &.active {
           .down-icon {
-            @include bg-image('down-act');
+            background-position: center 0.04rem;
           }
         }
       }
+    }
+
+    .split {
+      height: 0.2rem;
     }
 
     &.slide-enter-active, &.slide-leave-active {

@@ -118,7 +118,7 @@
       uploadByBase64(base64, key) {
         base64 = base64.substr(base64.indexOf('base64,') + 7);
         key = Base64.encode(key);
-        return request.post('http://upload.qiniu.com/putb64/-1/key/' + key)
+        return request.post('http://up-z2.qiniu.com/putb64/-1/key/' + key)
           .set('Content-Type', 'application/octet-stream')
           .set('Authorization', `UpToken ${this.token}`)
           .send(base64)

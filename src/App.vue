@@ -8,22 +8,25 @@
         <loading title=""></loading>
       </div>
     </div>
+    <toast :text="text" ref="toast"></toast>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Loading from 'base/loading/loading';
+  import Toast from 'base/toast/toast';
   import {isLogin, setUser} from 'common/js/util';
-  import {getPosition} from 'common/js/location';
+  import {getLocation} from 'common/js/location';
   import {getAppId} from 'api/general';
   import {wxLogin} from 'api/user';
   import {mapMutations, mapGetters} from 'vuex';
-  import {SET_LOCATION} from 'store/mutation-types';
+  import {SET_LOCATION, SET_IS_LOCA_ERR} from 'store/mutation-types';
 
   export default {
     data() {
       return {
-        loadingFlag: true
+        loadingFlag: true,
+        text: ''
       };
     },
     computed: {
@@ -74,25 +77,12 @@
     methods: {
       getLocation() {
         if (!this.location) {
-          getPosition().then((data) => {
-            let addressComponent = data.addressComponent;
-            let province = addressComponent.province;
-            let city = addressComponent.city || province;
-            let area = addressComponent.district;
-            let township = addressComponent.township;
-            let result = {
-              position: {
-                lng: data.position.getLng(),
-                lat: data.position.getLat()
-              },
-              addressComponent: {
-                province,
-                city,
-                area,
-                township
-              }
-            };
+          getLocation().then((result) => {
             this.setLocation(result);
+          }).catch(() => {
+            this.setLocaErr(true);
+            this.text = '定位失败';
+            this.$refs.toast.show();
           });
         }
       },
@@ -118,11 +108,13 @@
         });
       },
       ...mapMutations({
-        setLocation: SET_LOCATION
+        setLocation: SET_LOCATION,
+        setLocaErr: SET_IS_LOCA_ERR
       })
     },
     components: {
-      Loading
+      Loading,
+      Toast
     }
   };
 </script>
