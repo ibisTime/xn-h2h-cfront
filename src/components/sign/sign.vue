@@ -74,57 +74,57 @@
 		width: 100%;
     height: 4.2rem;		
 		background-size: 100% 100%;
-    	@include bg-image('background');
-    	color: #fff;
-    	font-size: $font-size-medium;
+  	@include bg-image('background');
+  	color: #fff;
+  	font-size: $font-size-medium;
 
-    	.signRule{
-    		position: absolute;
-    		top: 0.4rem;
-    		right: 0.3rem; 
-    	}
+  	.signRule{
+  		position: absolute;
+  		top: 0.4rem;
+  		right: 0.3rem; 
+  	}
 
-    	.signIntegral{
-    		position: absolute;
-    		top: 0.4rem;
-    		left: 37%;
-    		width: 2.2rem;
-    		height: 2.2rem;
-    		border-radius: 50%;
-    		background: #65BDFC;
+  	.signIntegral{
+  		position: absolute;
+  		top: 0.4rem;
+  		left: 37%;
+  		width: 2.2rem;
+  		height: 2.2rem;
+  		border-radius: 50%;
+  		background: #65BDFC;
 
-    		.integralContent{
-				position: absolute;
-	    		top: 0.12rem;
-	    		left: 0.12rem;
-	    		width: 1.96rem;
-	    		height: 1.96rem;
-	    		border-radius: 50%;
-	    		background: #fff;
-				color: #48b0fb;
-				text-align: center;
-				h3{
-					margin-top: 0.5rem;
-					font-size: $font-size-medium;
-				}				
-				h4{
-					margin-top: 0.11rem;
-					font-size: $font-size-medium-x;
-				}
-				p{
-					margin-top: 0.11rem;
-					font-size: $font-size-medium-s;
-				}					    		    				
-    		}
-    	}
-
-    	.signTip{
+  		.integralContent{
 			position: absolute;
-			top: 3.6rem;
-    	bottom: 0.32rem;
-    	text-align: center;
-    	width: 100%;
-    	}		
+    		top: 0.12rem;
+    		left: 0.12rem;
+    		width: 1.96rem;
+    		height: 1.96rem;
+    		border-radius: 50%;
+    		background: #fff;
+			color: #48b0fb;
+			text-align: center;
+			h3{
+				margin-top: 0.5rem;
+				font-size: $font-size-medium;
+			}				
+			h4{
+				margin-top: 0.11rem;
+				font-size: $font-size-medium-x;
+			}
+			p{
+				margin-top: 0.11rem;
+				font-size: $font-size-medium-s;
+			}					    		    				
+  		}
+  	}
+
+  	.signTip{
+		position: absolute;
+		top: 3.6rem;
+  	bottom: 0.32rem;
+  	text-align: center;
+  	width: 100%;
+  	}		
 	}
 
   .operate-btn{

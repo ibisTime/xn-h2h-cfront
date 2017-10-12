@@ -33,6 +33,9 @@ const TradeCircle = () => import('components/trade-circle/trade-circle');
 // 我的
 const User = () => import('components/user/user');
 
+// 消息
+const Message = () => import('components/message/message');
+
 export default new Router({
   routes: [
     {
@@ -118,6 +121,10 @@ export default new Router({
     {
       path: '/user',
       component: User
+    },
+    {
+      path: '/message',
+      component: Message
     }
   ]
 });

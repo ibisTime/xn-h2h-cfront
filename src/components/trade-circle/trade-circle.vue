@@ -13,19 +13,22 @@
             </div>
             <div class="clothes">来自服装</div>
           </div>
-          <div class="slider-wrapper">
-            <slider :showDots="showDots" :autoPlay="autoPlay">
+          <!-- <div class="slider-wrapper">
+            <trade-scroll :showDots="showDots" :autoPlay="autoPlay">
               <div class="pic-slider" v-for="item in banners" :key="item.code">
                 <a :href="item.url||'javascript:void(0)'" :style="getImgSyl(item.pic)"></a>
               </div>
-            </slider>
-          </div>
+            </trade-scroll>
+          </div> -->
+          <div class="photos-wrapper">
+            <trade-scroll></trade-scroll>
+          </div>          
           <div class="trade-bottom">
             <div>女款连衣裙 尺码:XL | 身高:160-175 胸围:85-...</div>
             <div class="goods-price">￥<span>20</span></div>
             <ul class="operate-icon">
-              <li class="want"></li>
-              <li class="message"></li>
+              <li class="want">111</li>
+              <li class="message">111</li>
               <li class="more"></li>
             </ul>
           </div>
@@ -36,47 +39,20 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import Slider from 'base/slider/slider';
+  import TradeScroll from 'components/trade-scroll/trade-scroll';
   import Scroll from 'base/scroll/scroll';
-  import {formatImg} from 'common/js/util';
   export default {
     data() {
       return {
-        banners: [
-          {
-            url: '',
-            pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg'
-          },
-          {
-            url: '',
-            pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg'
-          },
-          {
-            url: '',
-            pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg'
-          },
-          {
-            url: '',
-            pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg'
-          }
-        ],
         currentList: true
       };
     },
-    created() {
-      this.showDots = false;
-      this.autoPlay = false;
-    },
-    methods: {
-      getImgSyl(imgs) {
-        return {
-          backgroundImage: `url(${formatImg(imgs)})`
-        };
-      }
-    },
+    created() {},
+    methods: {},
     components: {
       Scroll,
-      Slider
+      TradeScroll
+      // Slider
     }
   };
 </script>
@@ -130,7 +106,7 @@
           line-height: 1.5rem;
           color: #48b0fb;         
         }
-      }
+      }       
 
       .slider-wrapper {
         position: relative;
@@ -139,12 +115,13 @@
         overflow: hidden;
 
         .slider, .pic-slider {
+          display: inline-block;
           height: 2.24rem;
           width: 2.24rem;
         }
 
         a {
-          display: block;
+          display: inline-block;
           height: 2.24rem;
           width: 2.24rem;
           display: inline-block;
@@ -174,13 +151,19 @@
           float: right;
           li{
             float: left;
-            width: 0.52rem;
-            height:0.45rem; 
-            background-size: 100%;           
+            width: 1.3rem;
+            height: 0.45rem;
+            line-height: 0.45rem;  
+            background-size: 0.3rem;           
             background-repeat: no-repeat;
-            background-position: center;
-            margin-left: 0.4rem;
-            margin-top: 0.3rem;            
+            background-position: 0 50%;
+            margin-top: 0.3rem;
+            padding-left: 0.4rem;
+            font-size: $font-size-small;
+            color: #999899;
+            &:last-child{
+              width: 0.3rem;
+            }          
           }
           .want{
             @include bg-image('want');
