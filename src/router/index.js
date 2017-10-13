@@ -35,6 +35,15 @@ const TradeCircle = () => import('components/trade-circle/trade-circle');
 // 我的
 const User = () => import('components/user/user');
 
+// 消息
+const Message = () => import('components/message/message');
+
+// 消息列表
+const MessageList = () => import('components/message-list/message-list');
+
+// 聊天
+const Chat = () => import('components/message-chat/message-chat');
+
 export default new Router({
   routes: [
     {
@@ -152,6 +161,22 @@ export default new Router({
             {
               path: 'category',
               component: PublishCategories
+            }
+          ]
+        }
+      ]
+    },
+    {
+      path: '/message',
+      component: Message,
+      children: [
+        {
+          path: 'list',
+          component: MessageList,
+          children: [
+            {
+              path: 'chat',
+              component: Chat
             }
           ]
         }
