@@ -12,9 +12,12 @@
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    @include border-bottom-1px($color-border);
     font-size: $font-size-medium-x;
     background-color: #fff;
+
+    &.border-bottom-1px {
+      @include border-bottom-1px($color-border);
+    }
 
     &:last-child {
       @include border-none();
@@ -22,7 +25,7 @@
 
     &.is-textarea {
       .item-input-wrapper {
-        padding: 0.1rem 0;
+        padding: 0.1rem 0.2rem;
       }
     }
 
@@ -33,6 +36,12 @@
       flex: 0 0 2rem;
       text-align: left;
       padding-left: 0.3rem;
+    }
+
+    .inner-label {
+      padding: 0 0.16rem;
+      height: 1rem;
+      line-height: 1rem;
     }
 
     .item-input-wrapper {
@@ -55,7 +64,7 @@
         -webkit-box-flex: 1;
         -ms-flex: 1;
         flex: 1;
-        line-height: 1.6;
+        line-height: 1.2;
         background: transparent;
       }
 
@@ -101,7 +110,7 @@
   }
 
   select {
-    font-size: $font-size-medium;
+    font-size: $font-size-medium-x;
   }
 
   .form-btn {
@@ -122,5 +131,95 @@
         background: $color-disable-background;
       }
     }
+  }
+}
+
+.rich-text-description {
+  padding: 0.3rem;
+  padding-top: 0.2rem;
+  font-size: 0.24rem;
+
+  h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+  }
+
+  h1, .h1 {
+    font-size: 0.72rem;
+  }
+
+  h2,.h2 {
+    font-size: 0.6rem;
+  }
+
+  h3,.h3 {
+    font-size: 0.48rem;
+  }
+
+  h4,.h4 {
+    font-size: 0.36rem;
+  }
+
+  h5,.h5 {
+    font-size: 0.28rem;
+  }
+
+  h6,.h6 {
+    font-size: 0.24rem;
+  }
+
+  p, h1, h2, h3, h4, h5 {
+    margin: 0.2rem 0;
+    line-height: 1.8
+  }
+
+  ul, ol {
+    padding-left: 0.4rem;
+
+    li {
+      margin-bottom: 0.26rem;
+    }
+  }
+
+  a {
+    line-height: 0.66rem;
+    color: #337ab7;
+  }
+
+  blockquote {
+    display: block;
+    border-left: 0.16rem solid #d0e5f2;
+    padding: 0.1rem 0.2rem;
+    margin: 0.2rem 0;
+    line-height: 1.4;
+    font-size: 100%;
+    background-color: #f1f1f1
+  }
+
+  table {
+    border: 0;
+    border-collapse: collapse;
+
+    td, th {
+      border: 1px solid #999;
+      padding: 0.06rem;
+      min-width: 1rem;
+      height: 0.4rem;
+    }
+  }
+
+  pre {
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    padding: 0.2rem;
+    margin: 0.1rem 0;
+    font-size: .8em;
+    border-radius: 0.06rem;
+  }
+
+  img {
+    max-width: 100%;
   }
 }

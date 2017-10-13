@@ -1,21 +1,21 @@
 <template>
   <div class="user-wrapper">
     <div class="top-wrapper">
-      <div class="personal">
+      <router-link tag="div" to="/user/setting" class="personal">
         <div class="head-bg">
-          <p class="head-pic"></p>
+          <img :src="(user && user.photo) | formatAvatar"/>
         </div>
         <div class="person-info">
-          <div class="name">ting</div>
+          <div class="name">{{userName}}</div>
           <div class="info">
-            <span>关注：111 </span><span class="split">|</span><span> 粉丝：1111</span>
+            <span>关注：{{totalFollowNum}} </span><span class="split">|</span><span> 粉丝：{{totalFansNum}}</span>
           </div>
         </div>
         <div class="more-w"></div>
-      </div>
+      </router-link>
       <div class="money-info">
-        <div class="remained">余额:<span> 44.00</span></div>
-        <div class="integral">积分:<span> 500</span></div>
+        <router-link to="/user/account" tag="div" class="remained">余额:<span>{{cnyAmount}}</span></router-link>
+        <router-link to="/user/jf-flow" tag="div" class="integral">积分:<span>{{jfAmount}}</span></router-link>
       </div>
     </div>
     <div class="my-order">
@@ -43,20 +43,102 @@
         <li class="item-coupons">优惠券</li>
       </ul>
     </div>
-    <m-footer></m-footer>
+    <div v-show="loadingFlag" class="loading-container">
+      <div class="loading-wrapper">
+        <loading title=""></loading>
+      </div>
+    </div>
+    <m-footer @goPublish="goPublish"></m-footer>
+    <router-view></router-view>
   </div>
 </template>
 <script>
   import MFooter from 'components/m-footer/m-footer';
+  import {SET_USER_STATE, SET_CNY_ACCOUNT, SET_JF_ACCOUNT} from 'store/mutation-types';
+  import {getUser} from 'api/user';
+  import {getAccount} from 'api/account';
+  import {setTitle, formatAmount} from 'common/js/util';
+  import {commonMixin} from 'common/js/mixin';
+  import Loading from 'base/loading/loading';
+  import {mapGetters, mapMutations} from 'vuex';
 
   export default {
+    mixins: [commonMixin],
     data () {
-      return {};
+      return {
+        loadingFlag: true
+      };
     },
-    created() {},
-    methods: {},
+    created() {
+      this.first = true;
+      this._getUser();
+    },
+    computed: {
+      userName() {
+        return this.user && this.user.nickname || '';
+      },
+      cnyAmount() {
+        return formatAmount(this.cnyAccount && this.cnyAccount.amount || 0);
+      },
+      jfAmount() {
+        return formatAmount(this.jfAccount && this.jfAccount.amount || 0);
+      },
+      totalFollowNum() {
+        return this.user && this.user.totalFollowNum || 0;
+      },
+      totalFansNum() {
+        return this.user && this.user.totalFansNum || 0;
+      },
+      ...mapGetters([
+        'user',
+        'cnyAccount',
+        'jfAccount'
+      ])
+    },
+    methods: {
+      _getUser() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          Promise.all([
+            getUser(),
+            getAccount()
+          ]).then(([userData, accountData]) => {
+            this.loadingFlag = false;
+            accountData.forEach((item) => {
+              if (item.currency === 'CNY') {
+                this.setCnyAccount(item);
+              } else if (item.currency === 'JF') {
+                this.setJFAccount(item);
+              }
+            });
+            this.setUser(userData);
+          }).catch(() => {
+            this.loadingFlag = false;
+          });
+        }
+      },
+      shouldGetData() {
+        if (this.$route.path === '/user') {
+          setTitle('我的');
+          return this.first;
+        }
+        return false;
+      },
+      goPublish() {
+        this.$router.push('/user/publish');
+      },
+      ...mapMutations({
+        setCnyAccount: SET_CNY_ACCOUNT,
+        setJFAccount: SET_JF_ACCOUNT,
+        setUser: SET_USER_STATE
+      })
+    },
+    updated() {
+      this._getUser();
+    },
     components: {
-      MFooter
+      MFooter,
+      Loading
     }
   };
 </script>
@@ -70,6 +152,21 @@
     left: 0;
     width: 100%;
     bottom: 1rem;
+
+    .loading-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      .loading-wrapper {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        transform: translate3d(0, -50%, 0);
+      }
+    }
 
     .top-wrapper{
       width: 100%;
@@ -85,17 +182,16 @@
         width:100%;
 
         .head-bg{
+          padding: 0.04rem;
           width: 1.28rem;
           height: 1.28rem;
-          background: #fff;
-          padding: 0.04rem;
           border-radius: 50%;
-          .head-pic{
-            width: 1.2rem;
-            height: 1.2rem;
-            @include bg-image('mine');
-            background-size: 100% 100%;
-            border-radius: 50%;
+          overflow: hidden;
+          background: #fff;
+
+          img {
+            width: 100%;
+            height: 100%;
           }
         }
 
@@ -145,6 +241,7 @@
           line-height: 0.6rem;
 
           span{
+            padding-left: 0.2rem;
             font-size: $font-size-large-s;
             color: #49b1fb;
           }

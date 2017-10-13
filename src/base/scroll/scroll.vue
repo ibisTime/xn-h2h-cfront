@@ -7,10 +7,10 @@
             :isPullUpLoad="isPullUpLoad"
       >
         <div class="pullup-wrapper" v-if="pullUpLoad">
-          <div class="before-trigger" v-if="!hasMore">
+          <div class="before-trigger" v-if="!hasMore && data.length">
             <img src="./end.png" alt=""><span>{{pullUpTxt}}</span>
           </div>
-          <div class="after-trigger" v-else>
+          <div class="after-trigger" v-else-if="hasMore">
             <loading title=""></loading>
           </div>
         </div>

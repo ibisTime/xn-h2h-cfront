@@ -1,79 +1,80 @@
 <template>
-  <transition name="slide-up">
-    <div class="bind-mobile-wrapper" v-show="showFlag">
+  <transition name="slide">
+    <div class="change-mobile-wrapper">
       <div class="form-wrapper">
         <div class="form-item border-bottom-1px">
-          <div class="item-label">手机号</div>
+          <div class="item-label">新手机号</div>
           <div class="item-input-wrapper">
-            <input type="tel" class="item-input" v-model="mobile" @change="_mobileValid" placeholder="请输入手机号">
+            <input type="tel" class="item-input" v-model="mobile" @change="_mobileValid" placeholder="请输入新手机号">
             <span v-show="mobErr" class="error-tip">{{mobErr}}</span>
           </div>
         </div>
         <div class="form-item">
-          <div class="item-label">手机验证码</div>
+          <div class="item-label">验证码</div>
           <div class="item-input-wrapper">
             <input type="tel" class="item-input" v-model="captcha" @change="_captValid" placeholder="请输入验证码">
             <span v-show="captErr" class="error-tip">{{captErr}}</span>
           </div>
           <div class="item-btn">
-            <button @click="sendCaptcha" :disabled="disabled">{{captBtnText}}</button>
+            <button :disabled="sending" @click="sendCaptcha">{{captBtnText}}</button>
           </div>
         </div>
 
         <div class="form-btn">
-          <button @click="_bindMobile">确认</button>
+          <button :disabled="setting" @click="_changeMobile">保存</button>
         </div>
+        <toast ref="toast" text="修改成功"></toast>
       </div>
     </div>
   </transition>
 </template>
 <script>
-  import {mobileValid, captValid, setWxMobAndCapt, setTitle} from 'common/js/util';
-  import {sendCaptcha, getAppId} from 'api/general';
+  import {mapMutations} from 'vuex';
+  import {SET_USER_MOBILE} from 'store/mutation-types';
+  import {sendCaptcha} from 'api/general';
+  import {changeMobile} from 'api/user';
+  import {mobileValid, captValid, setTitle} from 'common/js/util';
+  import Toast from 'base/toast/toast';
 
   export default {
     data() {
       return {
-        showFlag: false,
-        mobile: '',
-        mobErr: '',
+        sending: false,
+        setting: false,
         captcha: '',
         captErr: '',
         captBtnText: '获取验证码',
-        disabled: false
+        mobile: '',
+        mobErr: ''
       };
     },
+    created() {
+      setTitle('修改手机号');
+    },
     methods: {
-      show() {
-        setTitle('绑定手机号');
-        this.showFlag = true;
-      },
-      hide() {
-        this.showFlag = false;
-      },
       sendCaptcha() {
         if (this._mobileValid()) {
-          this.disabled = true;
-          sendCaptcha(this.mobile, 805170).then(() => {
+          this.sending = true;
+          sendCaptcha(this.mobile, 805061).then(() => {
             this._setInterval();
           }).catch(() => {
-            this.disabled = false;
             this._clearInterval();
           });
         }
       },
-      _bindMobile() {
+      _changeMobile() {
         if (this._valid()) {
-          setWxMobAndCapt(this.mobile, this.captcha);
-          getAppId().then((data) => {
-            let appId = data.cvalue;
-            let redirectUri = encodeURIComponent(`${location.origin}?${location.hash}`);
-            let url = 'https://open.weixin.qq.com/connect/oauth2/authorize';
-            let suffix = '&response_type=code&scope=snsapi_userinfo#wechat_redirect';
-            setTimeout(() => {
-              location.replace(`${url}?appid=${appId}&redirect_uri=${redirectUri}${suffix}`);
-            }, 100);
-          });
+          this.setting = true;
+          changeMobile(this.mobile, this.captcha)
+            .then(() => {
+              this.$refs.toast.show();
+              this.setUserMobile(this.mobile);
+              setTimeout(() => {
+                this.$router.back();
+              }, 1000);
+            }).catch(() => {
+              this.setting = false;
+            });
         }
       },
       _valid() {
@@ -97,38 +98,46 @@
           if (i === 0) {
             this._clearInterval();
           } else {
-            this.captBtnText = i-- + '秒后重发';
+            this.captBtnText = i-- + 's';
           }
         }, 1000);
       },
       _clearInterval() {
         if (this.timer) {
-          this.disabled = false;
           clearInterval(this.timer);
+          this.sending = false;
           this.captBtnText = '获取验证码';
         }
-      }
+      },
+      ...mapMutations({
+        setUserMobile: SET_USER_MOBILE
+      })
+    },
+    beforeDestroy() {
+      this.timer && clearInterval(this.timer);
+    },
+    components: {
+      Toast
     }
   };
 </script>
-<style lang="scss" scoped>
+<style lang="scss" scoped rel="stylesheet/scss">
   @import "~common/scss/variable";
-  @import "~common/scss/mixin";
 
-  .bind-mobile-wrapper {
+  .change-mobile-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: $color-background;
+  }
 
-    &.slide-up-enter-active, &.slide-up-leave-active {
-      transition: all 0.3s;
-    }
+  .slide-enter-active, .slide-leave-active {
+    transition: all 0.3s;
+  }
 
-    &.slide-up-enter, &.slide-up-leave-to {
-      top: 100%;
-    }
+  .slide-enter, .slide-leave-to {
+    transform: translate3d(100%, 0, 0);
   }
 </style>

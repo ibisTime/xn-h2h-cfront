@@ -38,7 +38,7 @@
     },
     created() {
       setUser({
-        token: 'TU201708022049457128381TK201709251504487642621',
+        token: 'TSYS_USER_WTWTK201710130935341077766',
         userId: 'U1111111111111111'
       });
       this.getLocation();

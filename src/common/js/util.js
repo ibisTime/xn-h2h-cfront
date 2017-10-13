@@ -230,7 +230,7 @@ export function captValid(capt) {
     err: 0,
     msg: ''
   };
-  if (!capt) {
+  if (isUnDefined(capt)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (!/^\d{4}$/.test(capt)) {
@@ -246,7 +246,7 @@ export function mobileValid(mobile) {
     err: 0,
     msg: ''
   };
-  if (!mobile) {
+  if (isUnDefined(mobile)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (!/^1[3|4|5|7|8]\d{9}$/.test(mobile)) {
@@ -262,7 +262,7 @@ export function tradeValid(trade) {
     err: 0,
     msg: ''
   };
-  if (!trade) {
+  if (isUnDefined(trade)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (trade.length < 6) {
@@ -278,7 +278,7 @@ export function rePwdValid(rePwd, pwd) {
     err: 0,
     msg: ''
   };
-  if (!rePwd) {
+  if (isUnDefined(rePwd)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (pwd !== rePwd) {
@@ -294,12 +294,12 @@ export function nicknameValid(nickname) {
     err: 0,
     msg: ''
   };
-  if (!nickname) {
+  if (isUnDefined(nickname)) {
     result.err = 1;
     result.msg = '昵称不能为空';
-  } else if (nickname.length > 6) {
+  } else if (nickname.length > 10) {
     result.err = 1;
-    result.msg = '昵称不能超过6位';
+    result.msg = '昵称不能超过10位';
   }
   return result;
 }
@@ -310,7 +310,7 @@ export function realNameValid(realName) {
     err: 0,
     msg: ''
   };
-  if (!realName) {
+  if (isUnDefined(realName)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (realName.length > 16) {
@@ -329,7 +329,7 @@ export function subbranchValid(subbranch) {
     err: 0,
     msg: ''
   };
-  if (!subbranch) {
+  if (isUnDefined(subbranch)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (subbranch.length > 255) {
@@ -345,7 +345,7 @@ export function bankcardNumberValid(bankcardNumber) {
     err: 0,
     msg: ''
   };
-  if (!bankcardNumber) {
+  if (isUnDefined(bankcardNumber)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (!/^(\d{16}|\d{19})$/.test(bankcardNumber)) {
@@ -361,7 +361,7 @@ export function amountValid(amount) {
     err: 0,
     msg: ''
   };
-  if (!amount) {
+  if (isUnDefined(amount)) {
     result.err = 1;
     result.msg = '不能为空';
   } else if (!/^\d+(?:\.\d{1,2})?$/.test(amount)) {
@@ -380,6 +380,22 @@ export function emptyValid(value) {
   if (isUnDefined(value)) {
     result.err = 1;
     result.msg = '不能为空';
+  }
+  return result;
+}
+
+// 地址校验
+export function addressValid(value) {
+  let result = {
+    err: 0,
+    msg: ''
+  };
+  if (isUnDefined(value)) {
+    result.err = 1;
+    result.msg = '不能为空';
+  } else if (value.length > 50) {
+    result.err = 1;
+    result.msg = '长度不能超过50位';
   }
   return result;
 }

@@ -34,14 +34,6 @@ export function getPageChildren(start, limit) {
   });
 }
 
-// 购买会员
-export function buyVIP(payType) {
-  return fetch(620219, {
-    payType,
-    userId: getUserId()
-  });
-}
-
 // 绑定手机号
 export function bindMobile(mobile, smsCaptcha, isSendSms = '0') {
   return fetch(805060, {
