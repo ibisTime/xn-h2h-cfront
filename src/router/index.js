@@ -143,7 +143,19 @@ export default new Router({
     },
     {
       path: '/user',
-      component: User
+      component: User,
+      children: [
+        {
+          path: 'publish',
+          component: Publish,
+          children: [
+            {
+              path: 'category',
+              component: PublishCategories
+            }
+          ]
+        }
+      ]
     }
   ]
 });

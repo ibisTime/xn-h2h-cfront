@@ -8,29 +8,29 @@
         <div class="person-info">
           <div class="name">ting</div>
           <div class="info">
-            <span>关注：111 </span>|<span> 粉丝：1111</span>
+            <span>关注：111 </span><span class="split">|</span><span> 粉丝：1111</span>
           </div>
         </div>
-        <div class="more-w"></div>        
+        <div class="more-w"></div>
       </div>
       <div class="money-info">
         <div class="remained">余额:<span> 44.00</span></div>
-        <div class="integral">积分:<span> 500</span></div>        
+        <div class="integral">积分:<span> 500</span></div>
       </div>
     </div>
     <div class="my-order">
       <div class="order-title">
         <p>我的订单</p>
-        <p class="more-g">查看更多<span></span></p>        
+        <p class="more-g">查看更多<span></span></p>
       </div>
       <div class="order-content">
         <ul>
-          <li class="item-payment">待付款</li>
-          <li class="item-sendGoods">待发货</li>
-          <li class="item-delivery">待收货</li>
-          <li class="item-haveGoods">已收货</li>
-          <li class="item-evaluation">已评价</li>
-        </ul>        
+          <li class="item-payment"><div class="icon"></div><p>待付款</p></li>
+          <li class="item-sendGoods"><div class="icon"></div><p>待发货</p></li>
+          <li class="item-delivery"><div class="icon"></div><p>待收货</p></li>
+          <li class="item-haveGoods"><div class="icon"></div><p>已收货</p></li>
+          <li class="item-evaluation"><div class="icon"></div><p>已评价</p></li>
+        </ul>
       </div>
     </div>
     <div class="rests">
@@ -43,7 +43,6 @@
         <li class="item-coupons">优惠券</li>
       </ul>
     </div>
-
     <m-footer></m-footer>
   </div>
 </template>
@@ -74,7 +73,6 @@
 
     .top-wrapper{
       width: 100%;
-      height: 3.47rem;   
       background-size: 100% 100%;
       @include bg-image('background');
       color: #fff;
@@ -82,13 +80,13 @@
 
       .personal{
         display: flex;
+        padding: 0.7rem 0.3rem;
+        align-items: center;
         width:100%;
-        height: 3.47rem;
-        
+
         .head-bg{
           width: 1.28rem;
           height: 1.28rem;
-          margin: 1.5rem 0.3rem 0.7rem 0.3rem;
           background: #fff;
           padding: 0.04rem;
           border-radius: 50%;
@@ -98,31 +96,35 @@
             @include bg-image('mine');
             background-size: 100% 100%;
             border-radius: 50%;
-          }          
+          }
         }
 
         .person-info{
-          flex: 2;
-          padding-top: 1.8rem;
+          flex: 1;
+          padding-left: 0.3rem;
+
           .name{
             font-size: $font-size-large-s;
           }
 
           .info{
             margin-top: 0.24rem;
-            font-size: $font-size-medium;            
+            font-size: $font-size-medium;
+
+            .split {
+              padding: 0 0.2rem;
+            }
           }
         }
 
         .more-w{
           width: 0.3rem;
-          margin-right: 0.3rem;
-          margin-top: 1.8rem;
-          line-height: 1.5rem;
+          height: 1.28rem;
           @include bg-image('moreW');
-          background-size: 65%;
-          background-repeat: no-repeat;                  
-        }        
+          background-size: 0.2rem;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
 
       }
 
@@ -145,18 +147,18 @@
           span{
             font-size: $font-size-large-s;
             color: #49b1fb;
-          }          
+          }
         }
 
         .remained{
           border-right: 1px solid #eee;
-        }        
-      } 
+        }
+      }
 
-    } 
+    }
 
     .my-order{
-      margin-top:1.2rem;
+      margin-top: 0.2rem;
       width: 100%;
       height: 2.7rem;
       background: #fff;
@@ -198,40 +200,48 @@
       .order-content{
         width: 100%;
         height: 1.8rem;
-        font-size: $font-size-small;
+
         ul{
+          display: flex;
+          align-items: center;
           width: 100%;
-          height: 1.8rem;          
-          padding: 0 0.5rem;
+          height: 1.8rem;
+
           li{
-            width: 0.74rem;
-            height: 0.24rem;
-            padding-top: 1rem;
-            margin-top: 0.2rem;
-            margin-right: 0.63rem;
+            flex: 1;
+            text-align: center;
             display: inline-block;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 0.4rem;
-            &:last-child {
-              margin-right: 0;
+            font-size: 0;
+
+            .icon {
+              height: 0.4rem;
+              width: 0.4rem;
+              display: inline-block;
+              margin-bottom: 0.36rem;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 0.4rem;
+            }
+
+            p {
+              font-size: $font-size-small;
             }
           }
-          .item-payment{
+          .item-payment .icon {
             @include bg-image('payment');
           }
-          .item-sendGoods{
+          .item-sendGoods .icon {
             @include bg-image('sendGoods');
           }
-          .item-delivery{
+          .item-delivery .icon {
             @include bg-image('delivery');
           }
-          .item-haveGoods{
+          .item-haveGoods .icon {
             @include bg-image('haveGoods');
           }
-          .item-evaluation{
+          .item-evaluation .icon {
             @include bg-image('evaluation');
-          }          
+          }
         }
 
       }
@@ -244,7 +254,7 @@
       background: #fff;
       font-size: 0;
       li{
-        padding-top: 1.2rem;       
+        padding-top: 1.2rem;
         width: 2.5rem;
         height: 1.9rem;
         display: inline-block;
@@ -255,7 +265,7 @@
         @include border-right-1px(#eee);
         background-repeat: no-repeat;
         background-position: 50% 34%;;
-        background-size: 0.4rem;        
+        background-size: 0.4rem;
       }
       .item-posted{
         @include bg-image('posted');
@@ -271,10 +281,10 @@
       }
       .item-fotoPlace{
         @include bg-image('fotoPlace');
-      } 
+      }
       .item-coupons{
         @include bg-image('coupons');
-      }     
+      }
     }
 
   }
