@@ -22,6 +22,8 @@ const MajorCategories = () => import('components/major-categories/major-categori
 const CategoryList = () => import('components/category-list/category-list');
 // 搜索
 const Search = () => import('components/search/search');
+// 商品详情
+const Detail = () => import('components/detail/detail');
 
 // 发布
 const Publish = () => import('components/publish/publish');
@@ -32,9 +34,6 @@ const TradeCircle = () => import('components/trade-circle/trade-circle');
 
 // 我的
 const User = () => import('components/user/user');
-
-// 消息
-const Message = () => import('components/message/message');
 
 export default new Router({
   routes: [
@@ -73,6 +72,10 @@ export default new Router({
         {
           path: 'trade',
           component: TradeCircle
+        },
+        {
+          path: ':code',
+          component: Detail
         }
       ]
     },
@@ -96,7 +99,13 @@ export default new Router({
         },
         {
           path: 'search',
-          component: Search
+          component: Search,
+          children: [
+            {
+              path: ':code',
+              component: Detail
+            }
+          ]
         },
         {
           path: 'list',
@@ -104,9 +113,23 @@ export default new Router({
           children: [
             {
               path: 'search',
-              component: Search
+              component: Search,
+              children: [
+                {
+                  path: ':code',
+                  component: Detail
+                }
+              ]
+            },
+            {
+              path: ':code',
+              component: Detail
             }
           ]
+        },
+        {
+          path: ':code',
+          component: Detail
         }
       ]
     },
@@ -121,10 +144,6 @@ export default new Router({
     {
       path: '/user',
       component: User
-    },
-    {
-      path: '/message',
-      component: Message
     }
   ]
 });

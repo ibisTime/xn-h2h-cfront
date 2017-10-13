@@ -203,6 +203,27 @@ export function getImgData(fileType, img, dir, next) {
   image.src = img;
 }
 
+// 设置微信登录时填写的手机号和验证码
+export function setWxMobAndCapt (mobile, captcha) {
+  sessionStorage.setItem('__mob__', mobile);
+  sessionStorage.setItem('__capt__', captcha);
+}
+
+// 获取微信登录时填写的手机号和验证码
+export function getWxMobAndCapt () {
+  let mobile = sessionStorage.getItem('__mob__');
+  let captcha = sessionStorage.getItem('__capt__');
+  sessionStorage.removeItem('__mob__');
+  sessionStorage.removeItem('__capt__');
+  if (mobile && captcha) {
+    return {
+      mobile,
+      captcha
+    };
+  }
+  return null;
+}
+
 // 校验短信验证码
 export function captValid(capt) {
   let result = {

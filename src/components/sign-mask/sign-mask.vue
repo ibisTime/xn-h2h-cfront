@@ -5,7 +5,7 @@
         <div class="rule-content">
           <div class="title">
             <div class="title-content left">{{ruleTitle}}</div>
-          </div>          
+          </div>
           <p v-if="isHtml" class="text" :class="textCls" v-html='text'></p>
           <p v-else class="text" :class="textCls">{{text}}</p>
           <div class="operate">
@@ -104,7 +104,7 @@
           padding: 0.38rem 0.3rem;
           line-height: 0.44rem;
           text-align: center;
-          font-size: $font-size-large;
+          font-size: $font-size-large-s;
           color: $color-text-l;
 
           &.alert {
@@ -115,7 +115,7 @@
         .title{
           display: flex;
           align-items: center;
-          text-align: center;          
+          text-align: center;
           font-size: $font-size-medium-x;
 
           .title-content{

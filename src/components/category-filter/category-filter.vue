@@ -139,10 +139,19 @@
           min = '0';
           max = this.priceList[this.priceIndex].value;
         } else {
-          min = +min * 1000;
-          max = +max * 1000;
-          if (min > max) {
-            [min, max] = [max + '', min + ''];
+          if (this.isUndefined(min) || this.isUndefined(max)) {
+            if (!this.isUndefined(min)) {
+              min = +min * 1000 + '';
+            }
+            if (!this.isUndefined(max)) {
+              max = +max * 1000 + '';
+            }
+          } else {
+            min = +min * 1000;
+            max = +max * 1000;
+            if (min > max) {
+              [min, max] = [max + '', min + ''];
+            }
           }
         }
         this.$emit('confirm', min, max, this.priceIndex, this.isFree, this.isNew);

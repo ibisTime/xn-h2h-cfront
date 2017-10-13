@@ -1,22 +1,6 @@
 <template>
   <ul class="mall-items-wrapper">
-    <li class="border-bottom-1px">
-      <div class="img-wrap">
-        <img src="./demo@2x.png"/>
-      </div>
-      <div class="info">
-        <h2>标题标题标题标题标题标题标题标题标题标题标题标题标题标题</h2>
-        <div class="label">
-          <label>来自电脑</label>
-          <label>全新</label>
-        </div>
-        <div class="price">
-          <label>¥</label>39.00<span>原价：¥49</span>
-        </div>
-        <div class="addr">杭州 | 萧山</div>
-      </div>
-    </li>
-    <li class="border-bottom-1px">
+    <li @click="goDetail('xxx')" class="border-bottom-1px">
       <div class="img-wrap">
         <img src="./demo@2x.png"/>
       </div>
@@ -40,6 +24,11 @@
       list: {
         type: Array,
         default: () => []
+      }
+    },
+    methods: {
+      goDetail(code) {
+        this.$router.push(this.$route.path + '/' + code);
       }
     }
   };
@@ -109,7 +98,7 @@
 
         .price {
           margin-top: 0.22rem;
-          font-size: $font-size-large-s;
+          font-size: $font-size-large-ss;
 
           label {
             font-size: $font-size-small-s;

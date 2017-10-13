@@ -77,7 +77,7 @@
           border: 1px solid #383737;
           border-radius: 0.45rem;
           text-align: center;
-          font-size: $font-size-large;
+          font-size: $font-size-large-s;
           color: #fff;
           background-color: $second-color;
         }

@@ -133,7 +133,7 @@
       .error-tip {
         font-size: $font-size-medium-s;
         white-space: nowrap;
-        color: #ff0000;
+        color: $color-red;
       }
 
       .title {
@@ -152,7 +152,7 @@
 
       .sell-price {
         padding: 0.05rem 0.3rem 0.25rem;
-        font-size: $font-size-large;
+        font-size: $font-size-large-s;
         display: flex;
         align-items: center;
 

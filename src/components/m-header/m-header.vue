@@ -75,7 +75,7 @@
         text-align: center;
         padding: 0 2rem;
         line-height: 0.88rem;
-        font-size: $font-size-large;
+        font-size: $font-size-large-s;
       }
 
       .action {

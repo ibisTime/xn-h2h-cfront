@@ -14,7 +14,7 @@
       <div v-show="query" class="result-wrapper">
         <scroll ref="resultScroll" :pullUpLoad="pullUpLoad" :data="list">
           <ul>
-            <li class="border-bottom-1px" @click="saveSearch">热水器</li>
+            <li class="border-bottom-1px" @click="saveSearch('xxx')">热水器</li>
           </ul>
         </scroll>
       </div>
@@ -30,6 +30,7 @@
         </scroll>
       </div>
       <confirm ref="confirm" @confirm="clearSearchHistory" text="是否清空所有搜索历史" confirmBtnText="清空"></confirm>
+      <router-view></router-view>
     </div>
   </transition>
 </template>
@@ -75,8 +76,9 @@
       addQuery(query) {
         this.query = query;
       },
-      saveSearch() {
+      saveSearch(code) {
         this.saveSearchHistory(this.query);
+        this.$router.push(this.$route.path + '/' + code);
       },
       showConfirm() {
         this.$refs.confirm.show();

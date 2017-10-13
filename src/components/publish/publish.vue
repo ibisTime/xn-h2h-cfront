@@ -148,7 +148,7 @@
         background-color: #fff;
 
         .title {
-          font-size: $font-size-large;
+          font-size: $font-size-large-s;
 
           input {
             width: 100%;
@@ -247,7 +247,7 @@
           height: 0.9rem;
           border-radius: 0.1rem;
           text-align: center;
-          font-size: $font-size-large;
+          font-size: $font-size-large-s;
           color: #fff;
           background-color: $primary-color;
         }

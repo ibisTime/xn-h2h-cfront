@@ -102,7 +102,7 @@
           padding: 0.38rem 0.3rem;
           line-height: 0.44rem;
           text-align: center;
-          font-size: $font-size-large;
+          font-size: $font-size-large-s;
           color: $color-text-l;
 
           &.alert {
@@ -114,7 +114,7 @@
           display: flex;
           align-items: center;
           text-align: center;
-          font-size: $font-size-large;
+          font-size: $font-size-large-s;
 
           .operate-btn {
             flex: 1;

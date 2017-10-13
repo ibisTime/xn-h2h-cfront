@@ -2,12 +2,14 @@ import fetch from 'common/js/fetch';
 import {getUserId} from 'common/js/util';
 
 // 微信登录
-export function wxLogin(code, userReferee) {
+export function wxLogin(code, userReferee, mobile, smsCaptcha) {
   let params = {
     code,
     isNeedMobile: 0,
     kind: 'C',
-    type: 'WX_H5'
+    type: 'WX_H5',
+    mobile,
+    smsCaptcha
   };
   if (userReferee) {
     params.userReferee = userReferee;

@@ -8,6 +8,7 @@
         <loading title=""></loading>
       </div>
     </div>
+    <wx-bind-mobile ref="bindMobile"></wx-bind-mobile>
     <toast :text="text" ref="toast"></toast>
   </div>
 </template>
@@ -15,12 +16,13 @@
 <script type="text/ecmascript-6">
   import Loading from 'base/loading/loading';
   import Toast from 'base/toast/toast';
-  import {isLogin, setUser} from 'common/js/util';
+  import {isLogin, setUser, getWxMobAndCapt} from 'common/js/util';
   import {getLocation} from 'common/js/location';
   import {getAppId} from 'api/general';
   import {wxLogin} from 'api/user';
   import {mapMutations, mapGetters} from 'vuex';
   import {SET_LOCATION, SET_IS_LOCA_ERR} from 'store/mutation-types';
+  import WxBindMobile from 'components/wx-bind-mobile/wx-bind-mobile';
 
   export default {
     data() {
@@ -87,12 +89,25 @@
         }
       },
       wxLogin(code, userReferee) {
-        wxLogin(code, userReferee).then((data) => {
-          setUser(data);
-          if (this.$route.path === '/user/recommend') {
-            location.replace(`${location.origin}/?#/home`);
+        let mobAndCapt = getWxMobAndCapt();
+        let mobile;
+        let smsCaptcha;
+        if (mobAndCapt) {
+          mobile = mobAndCapt.mobile;
+          smsCaptcha = mobAndCapt.captcha;
+        }
+        wxLogin(code, userReferee, mobile, smsCaptcha).then((data) => {
+          if (data.isNeedMobile === '1') {
+            this.text = '微信登录需要先绑定手机号';
+            this.$refs.toast.show();
+            this.$refs.bindMobile.show();
           } else {
-            location.replace(`${location.origin}?#${this.$route.fullPath}`);
+            setUser(data);
+            if (this.$route.path === '/user/recommend') {
+              location.replace(`${location.origin}/?#/home`);
+            } else {
+              location.replace(`${location.origin}?#${this.$route.fullPath}`);
+            }
           }
         }).catch(() => {});
       },
@@ -114,7 +129,8 @@
     },
     components: {
       Loading,
-      Toast
+      Toast,
+      WxBindMobile
     }
   };
 </script>
