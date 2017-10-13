@@ -1,30 +1,41 @@
 <template>
   <div class="message-wrapper">
-    <scroll>
-      <div class="message-title">
-        <ul class="clearfix">
-          <li><router-link class='route-item' to='/message/attention'>我的关注(0)</router-link></li>
-          <li><router-link class='route-item' to='/message/fans'>我的粉丝(0)</router-link></li>
-        </ul>        
-      </div>
-        <!-- <div class="split"></div>     -->
-      <router-view></router-view>
-    </scroll>
+    <div class="message-title">
+      <ul class="clearfix">
+        <li class="tab_items"
+          v-for="(tab, index) in tabs"
+          :class="{active:index===selected}"
+          @click="choose(index)">{{tab.tabName}}</li>
+      </ul>        
+    </div> 
+    <div class="content-wrapper">
+    <message-list></message-list>
+    </div>       
     <m-footer></m-footer>
   </div>
 </template>
 <script>
-  import Scroll from 'base/scroll/scroll';
   import MFooter from 'components/m-footer/m-footer';
+  import MessageList from 'components/message-list/message-list';
 
   export default {
-    data() {
-      return {};
+    data () {
+      return {
+        tabs: [
+            {tabName: '我的关注(0)'},
+            {tabName: '我的粉丝(0)'}
+        ],
+        selected: 0
+      };
     },
-    methods: {},
+    methods: {
+      choose (index) {
+        this.selected = index;
+      }
+    },
     components: {
-      Scroll,
-      MFooter
+      MFooter,
+      MessageList
     }
   };
 </script>
@@ -38,7 +49,7 @@
     left: 0;
     width: 100%;
     bottom: 1rem;
-    font-size: $font-size-medium-xx;
+    color: #484848;
 
     .message-title{
       width: 100%;
@@ -47,24 +58,27 @@
       background: #fff;
       @include border-top-1px(#F2F2F2);
       @include border-bottom-1px(#F2F2F2);
+      font-size: $font-size-medium-xx;
+
       ul{ 
-        display: flex;       
+        display: flex;  
+
         li{
           flex: 1;
           height: 0.9rem;
-          text-align: center;
-          .route-item{
-            &:active{
-              border-bottom: 4px solid #48b0fb;
-              box-sizing:border-box;
-              font-weight: 700;
-              color: #48b0fb;            
-            }            
-          } 
-        }
+          text-align: center; 
+          display: block;
+          
+          &.active{
+            border-bottom: 0.05rem solid #48b0fb;
+            box-sizing:border-box;
+            color: #48b0fb;
+          
+          }
+        }        
       }
     }
-
+    
   }
 
 </style>

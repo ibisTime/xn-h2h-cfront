@@ -32,8 +32,6 @@ const PublishCategories = () => import('components/publish-categories/publish-ca
 
 // 消息
 const Message = () => import('components/message/message');
-// 消息列表
-const MessageList = () => import('components/message-list/message-list');
 // 聊天
 const Chat = () => import('components/message-chat/message-chat');
 
@@ -303,14 +301,8 @@ export default new Router({
       component: Message,
       children: [
         {
-          path: 'list',
-          component: MessageList,
-          children: [
-            {
-              path: 'chat',
-              component: Chat
-            }
-          ]
+          path: ':id',
+          component: Chat
         }
       ]
     }
