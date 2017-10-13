@@ -5,7 +5,7 @@
         <div class="form-item border-bottom-1px">
           <div class="item-label">手机号</div>
           <div class="item-input-wrapper">
-            <input type="tel" class="item-input" v-model="mobile" @change="_mobileValid" placeholder="请输入手机号">
+            <input v-focus type="tel" class="item-input" v-model="mobile" @change="_mobileValid" placeholder="请输入手机号">
             <span v-show="mobErr" class="error-tip">{{mobErr}}</span>
           </div>
         </div>
@@ -40,10 +40,12 @@
   import {sendCaptcha} from 'api/general';
   import {bindMobile, getUser} from 'api/user';
   import {mobileValid, captValid, setTitle} from 'common/js/util';
+  import {directiveMixin} from 'common/js/mixin';
   import Loading from 'base/loading/loading';
   import Toast from 'base/toast/toast';
 
   export default {
+    mixins: [directiveMixin],
     data() {
       return {
         sending: false,

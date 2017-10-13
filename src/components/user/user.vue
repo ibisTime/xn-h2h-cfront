@@ -45,7 +45,7 @@
     </div>
     <div v-show="loadingFlag" class="loading-container">
       <div class="loading-wrapper">
-        <loading title=""></loading>
+        <loading></loading>
       </div>
     </div>
     <m-footer @goPublish="goPublish"></m-footer>

@@ -4,9 +4,20 @@
       <scroll :pullUpLoad="pullUpLoad" class="user-content">
         <div>
           <div class="setting-wrapper">
-            <div to="/user/setting/avatar" class="setting-item border-bottom-1px">
+            <div class="setting-item border-bottom-1px">
               <h2>头像</h2>
               <img :src="getAvatar()"/>
+              <qiniu
+                ref="qiniu"
+                style="visibility: hidden;position: absolute;"
+                :token="token"
+                :uploadUrl="uploadUrl"></qiniu>
+              <input class="input-file"
+                     type="file"
+                     :multiple="multiple"
+                     ref="fileInput"
+                     @change="fileChange"
+                     accept="image/*"/>
               <i class="arrow"></i>
             </div>
             <div class="setting-item border-bottom-1px" @click="goNick">
@@ -55,23 +66,52 @@
         <!--<button @click="logout">退出登录</button>-->
         <!--</div>-->
       </scroll>
+      <toast :text="text" ref="toast"></toast>
+      <div v-show="loadingFlag" class="loading-container">
+        <div class="loading-wrapper">
+          <loading :title="title"></loading>
+        </div>
+      </div>
+      <clip-img @choseImage="updateImg"
+                @cancel="handleCancel"
+                ref="clipImg"
+                :imgType="imgType"
+                :imgUrl="imgUrl"></clip-img>
       <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
   import {mapGetters, mapMutations} from 'vuex';
+  import EXIF from 'exif-js';
   import {SET_USER_STATE} from 'store/mutation-types';
-  import {getUser} from 'api/user';
-  import {getAppId} from 'api/general';
-  import {setTitle, clearUser, formatImg} from 'common/js/util';
-  import {commonMixin} from 'common/js/mixin';
+  import Qiniu from 'base/qiniu/qiniu';
   import Scroll from 'base/scroll/scroll';
+  import Toast from 'base/toast/toast';
+  import Loading from 'base/loading/loading';
+  import ClipImg from 'base/clip-img/clip-img';
+  import {getUser, changeAvatar} from 'api/user';
+  import {getAppId, getQiniuToken} from 'api/general';
+  import {setTitle, clearUser, formatImg, getImgData} from 'common/js/util';
+  import {commonMixin} from 'common/js/mixin';
 
   export default {
     mixins: [commonMixin],
+    data() {
+      return {
+        loadingFlag: true,
+        title: '',
+        text: '',
+        token: '',
+        imgType: '',
+        imgUrl: '',
+        imgKey: ''
+      };
+    },
     created() {
       this.pullUpLoad = null;
+      this.multiple = false;
+      this.uploadUrl = 'http://up-z0.qiniu.com';
       if (this.shouldGetData()) {
         this._getUser();
       }
@@ -90,14 +130,92 @@
       shouldGetData() {
         if (this.$route.path === '/user/setting') {
           setTitle('设置');
-          return !this.user;
+          return !this.token;
         }
         return false;
       },
       _getUser() {
-        getUser().then((data) => {
-          this.setUser(data);
+        Promise.all([
+          this.getUser(),
+          this.getQiniuToken()
+        ]).then(() => {
+          this.loadingFlag = false;
         }).catch(() => {});
+      },
+      getUser() {
+        if (this.user) {
+          return Promise.resolve(this.user);
+        }
+        return getUser().then((data) => {
+          this.setUser(data);
+        });
+      },
+      getQiniuToken() {
+        return getQiniuToken().then((data) => {
+          this.token = data.uploadToken;
+        });
+      },
+      /**
+       * 从相册中选择图片
+       * */
+      fileChange(e) {
+        this.title = '上传中...';
+        this.loadingFlag = true;
+        let files;
+        if (e.dataTransfer) {
+          files = e.dataTransfer.files;
+        } else if (e.target) {
+          files = e.target.files;
+        }
+        files = Array.prototype.slice.call(files, 0, 1);
+        let self = this;
+        let file = files[0];
+        let orientation;
+        EXIF.getData(file, function() {
+          orientation = EXIF.getTag(this, 'Orientation');
+        });
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          getImgData(file.type, this.result, orientation, function(data) {
+            let _url = URL.createObjectURL(file);
+            let key = _url.split('/').pop() + '.' + file.name.split('.').pop();
+            self.imgType = file.type;
+            self.imgUrl = data;
+            self.imgKey = key;
+            self.$refs.clipImg.show();
+            self.$refs.fileInput.value = null;
+          });
+        };
+        reader.readAsDataURL(file);
+      },
+      /**
+       * 处理图片上传错误事件
+       * @param error 错误信息
+       */
+      onUploadError(error) {
+        this.text = error.body && error.body.error || `${error.message}:10M` || '图片上传出错';
+        this.$refs.toast.show();
+      },
+      updateImg(base64) {
+        this.$refs.qiniu.uploadByBase64(base64, this.imgKey).then(() => {
+          this.editAvatar();
+        }).catch((err) => {
+          self.onUploadError(err);
+        });
+      },
+      handleCancel() {
+        this.loadingFlag = false;
+      },
+      editAvatar() {
+        changeAvatar(this.imgKey).then(() => {
+          this.loadingFlag = false;
+          this.setUser({
+            ...this.user,
+            photo: this.imgKey
+          });
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
       },
       goNick() {
         this.$router.push('/user/setting/nickname');
@@ -135,7 +253,11 @@
       })
     },
     components: {
-      Scroll
+      Scroll,
+      Qiniu,
+      Toast,
+      Loading,
+      ClipImg
     }
   };
 </script>
@@ -203,6 +325,15 @@
             font-size: $font-size-medium-x;
             color: $color-text-l;
           }
+
+          .input-file {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+          }
         }
       }
 
@@ -222,6 +353,22 @@
           color: #fff;
           background-color: $color-cancel-background;
         }
+      }
+    }
+
+    .loading-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+
+      .loading-wrapper {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        transform: translate3d(0, -50%, 0);
       }
     }
   }
