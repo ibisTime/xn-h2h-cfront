@@ -5,10 +5,6 @@
         <div>
           <div ref="description" class="rich-text-description">
             <div v-html="content"></div>
-            <div class="other-info">
-              <p>服务时间：{{time}}</p>
-              <p>服务热线：<a :href="getTel()">{{telephone}}</a></p>
-            </div>
           </div>
         </div>
       </scroll>
@@ -24,35 +20,20 @@
     data() {
       return {
         content: '',
-        telephone: '',
-        time: '',
         loadingFlag: true
       };
     },
     created() {
-      setTitle('关于我们');
+      setTitle('使用说明');
       this.pullUpLoad = null;
-      Promise.all([
-        getUserSystemConfig('aboutUs'),
-        getUserSystemConfig('telephone'),
-        getUserSystemConfig('serviceTime')
-      ]).then(([aboutus, telephone, time]) => {
+      getUserSystemConfig('aboutUs').then((data) => {
         this.loadingFlag = false;
-        this.telephone = telephone.cvalue;
-        this.time = time.cvalue;
-        this.content = aboutus.cvalue;
+        this.content = data.cvalue;
       }).catch(() => {
         this.loadingFlag = false;
       });
     },
     methods: {
-      getTel() {
-        if (this.telephone) {
-          return `tel://${this.telephone}`;
-        } else {
-          return '';
-        }
-      },
       _refreshScroll() {
         setTimeout(() => {
           this.$refs.scroll.refresh();

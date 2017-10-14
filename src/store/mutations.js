@@ -26,6 +26,11 @@ const mutations = {
     user.nickname = nickname;
     state.user = user;
   },
+  [types.SET_USER_GENDER](state, gender) {
+    let user = state.user || {};
+    user.gender = gender;
+    state.user = user;
+  },
   [types.SET_USER_TRADE_PWD_FLAG](state, tradepwdFlag) {
     let user = state.user || {};
     user.tradepwdFlag = tradepwdFlag;
@@ -50,6 +55,12 @@ const mutations = {
   },
   [types.SET_CURRENT_ADDR_CODE](state, code) {
     state.currentAddrCode = code;
+  },
+  [types.SET_ORDER_LIST](state, list) {
+    state.orderList = list;
+  },
+  [types.SET_CURRENT_ORDER](state, order) {
+    state.currentOrder = order;
   }
 };
 

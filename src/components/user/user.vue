@@ -19,28 +19,28 @@
       </div>
     </div>
     <div class="my-order">
-      <div class="order-title">
+      <router-link to="/user/order" tag="div" class="order-title">
         <p>我的订单</p>
         <p class="more-g">查看更多<span></span></p>
-      </div>
+      </router-link>
       <div class="order-content">
         <ul>
           <li class="item-payment"><div class="icon"></div><p>待付款</p></li>
           <li class="item-sendGoods"><div class="icon"></div><p>待发货</p></li>
           <li class="item-delivery"><div class="icon"></div><p>待收货</p></li>
-          <li class="item-haveGoods"><div class="icon"></div><p>已收货</p></li>
-          <li class="item-evaluation"><div class="icon"></div><p>已评价</p></li>
+          <li class="item-haveGoods"><div class="icon"></div><p>待评价</p></li>
+          <li class="item-evaluation"><div class="icon"></div><p>已完成</p></li>
         </ul>
       </div>
     </div>
     <div class="rests">
       <ul>
-        <li class="item-posted">我发布的</li>
+        <router-link tag="li" to="/user/pub-mine" class="item-posted">我发布的</router-link>
         <li class="item-sell">我卖出的</li>
         <li class="item-enrollment">活动报名</li>
         <li class="item-want">我想要的</li>
         <li class="item-fotoPlace">我的足迹</li>
-        <li class="item-coupons">优惠券</li>
+        <router-link tag="li" to="/user/coupon" class="item-coupons">优惠券</router-link>
       </ul>
     </div>
     <div v-show="loadingFlag" class="loading-container">
@@ -182,9 +182,9 @@
         width:100%;
 
         .head-bg{
-          padding: 0.04rem;
-          width: 1.28rem;
-          height: 1.28rem;
+          width: 1.32rem;
+          height: 1.32rem;
+          border: 0.04rem solid #fff;
           border-radius: 50%;
           overflow: hidden;
           background: #fff;

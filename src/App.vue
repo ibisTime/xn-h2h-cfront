@@ -37,10 +37,10 @@
       ])
     },
     created() {
-      setUser({
-        token: 'TSYS_USER_WTWTK201710130935341077766',
-        userId: 'U1111111111111111'
-      });
+//      setUser({
+//        token: 'TSYS_USER_WTWTK201710130935341077766',
+//        userId: 'U1111111111111111'
+//      });
       this.getLocation();
       if (!isLogin()) {
         if (/code=([^&]+)&state=/.exec(location.href)) {

@@ -10,7 +10,9 @@ const state = {
   jfAccount: null,
   bankcardList: null,
   addressList: [],
-  currentAddrCode: ''
+  currentAddrCode: '',
+  orderList: {},
+  currentOrder: null
 };
 
 export default state;

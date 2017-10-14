@@ -2,31 +2,33 @@
   <transition name="slide">
     <div class="withdraw-wrapper">
       <div class="form-wrapper">
-        <div class="form-item">
-          <div v-show="bankcardList && bankcardList.length" class="content">
-            <template v-for="bankcard in bankcardList">
-              <div class="bankname">{{bankcard.bankName}}</div>
-              <div class="bankcode">
-                <h2>借记卡</h2>
-                <p v-for="bankcard in bankcardList">{{bankcard.bankcardNumber}}</p>
-              </div>
+        <div class="form-item mb20">
+          <div class="item-label">银行卡</div>
+          <div class="item-input-wrapper">
+            <template v-if="bankcardList && bankcardList.length">
+              <select class="item-input" v-model="payCardNo">
+                <option v-for="bankcard in bankcardList" :value="bankcard">
+                  {{bankcard.bankcardNumber}}
+                </option>
+              </select>
+              <i class="arrow"></i>
             </template>
           </div>
         </div>
-        <div class="form-item border-bottom-1px">
-          <div class="item-label">可用金额</div>
-          <div class="inner-label">{{_formatAmount()}}</div>
-        </div>
-        <div class="form-item border-bottom-1px">
+        <div class="form-item">
           <div class="item-label">提现金额</div>
-          <div class="item-input-wrapper">
-            <input type="number" class="item-input" v-model="amount" @change="_amountValid" placeholder="提现金额最多两位小数">
-            <span v-show="amountErr" class="error-tip">{{amountErr}}</span>
-          </div>
+          <div class="inner-label"></div>
+        </div>
+        <div class="form-item big-input">
+          <input type="number" v-model="amount" @input="_amountValid" placeholder="请输入提现金额"/>
+          <span v-show="amountErr" class="error-tip">{{amountErr}}</span>
         </div>
         <div class="form-item border-bottom-1px">
-          <div class="item-label">手续费</div>
-          <div class="inner-label">{{rateAmount}}</div>
+          <div class="item-label1">可用金额{{_formatAmount()}}元</div>
+        </div>
+        <div class="form-item border-bottom-1px">
+          <div class="item-label2">本次提现手续费</div>
+          <div class="inner-label inner-label1">{{rateAmount}}</div>
         </div>
         <div class="form-item">
           <div class="item-label">支付密码</div>
@@ -43,7 +45,7 @@
           <p>提现规则：</p>
           <p>1、每月最大提现次数{{rechargeTimes}}次</p>
           <p>2、提现金额必须是{{times}}的倍数，单笔最高{{maxAmount}}元</p>
-          <p>3、{{toAccount}}到账</p>
+          <p>3、T+{{toAccount}}到账</p>
           <p>4、提现手续费率{{rate}}</p>
         </div>
         <div v-show="!bankcardList || !cnyAccount || !rate" class="loading-container">
@@ -153,13 +155,13 @@
         }
       },
       _getRules() {
-        return getPageAccountSysConfig().then((data) => {
+        return getPageAccountSysConfig(3).then((data) => {
           data.list.forEach((rule) => {
             if(rule.ckey === 'CUSERMONTIMES') {
               this.rechargeTimes = rule.cvalue;
             } else if(rule.ckey === 'CUSERQXBS') {
               this.times = rule.cvalue;
-            } else if(rule.ckey === 'CUSERQXSX') {
+            } else if(rule.ckey === 'CUSERDZTS') {
               this.toAccount = rule.cvalue;
             } else if(rule.ckey === 'QXDBZDJE') {
               this.maxAmount = rule.cvalue;
@@ -300,6 +302,49 @@
         h2 {
           padding-bottom: 0.26rem;
         }
+      }
+    }
+
+    .big-input {
+      padding-left: 0.3rem;
+      font-size: $font-size-large-xxxx;
+      color: #333;
+
+      .error-tip {
+        position: absolute;
+        right: 0.16rem;
+        top: 0.38rem;
+        white-space: nowrap;
+        font-size: $font-size-medium;
+        color: #ff0000;
+      }
+    }
+
+    .form-wrapper {
+      padding-top: 0;
+    }
+
+    .item-label1 {
+      padding: 0.3rem;
+      font-size: $font-size-medium;
+      color: $primary-color;
+    }
+
+    .item-label2 {
+      padding: 0.3rem;
+    }
+
+    .inner-label1 {
+      color: $primary-color;
+    }
+
+    .form-item {
+      &.mb20 {
+        margin-bottom: 0.2rem;
+      }
+
+      .item-label {
+        flex: 0 0 1.6rem;
       }
     }
 

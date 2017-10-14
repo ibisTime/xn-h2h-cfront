@@ -51,6 +51,8 @@ const ChangeMobile = () => import('components/change-mobile/change-mobile');
 const TradePwd = () => import('components/trade-pwd/trade-pwd');
 // 设置生日
 const SetBirthday = () => import('components/set-birthday/set-birthday');
+// 修改性别
+const EditGender = () => import('components/edit-gender/edit-gender');
 // 银行卡列表
 const BankCard = () => import('components/bankcard/bankcard');
 // 新增、修改银行卡
@@ -71,6 +73,16 @@ const JfFlow = () => import('components/jf-flow/jf-flow');
 const Recharge = () => import('components/recharge/recharge');
 // 提现
 const Withdraw = () => import('components/withdraw/withdraw');
+// 我的订单列表
+const Orders = () => import('components/orders/orders');
+// 订单详情
+const OrderDetail = () => import('components/order-detail/order-detail');
+// 优惠券
+const Coupon = () => import('components/coupon/coupon');
+// 优惠券使用说明
+const CouponNote = () => import('components/coupon-note/coupon-note');
+// 我发布的
+const PublishMine = () => import('components/publish-mine/publish-mine');
 
 export default new Router({
   routes: [
@@ -223,6 +235,10 @@ export default new Router({
               component: SetBirthday
             },
             {
+              path: 'gender',
+              component: EditGender
+            },
+            {
               path: 'bankcard',
               component: BankCard,
               children: [
@@ -293,6 +309,36 @@ export default new Router({
         {
           path: 'jf-flow',
           component: JfFlow
+        },
+        {
+          path: 'order',
+          component: Orders,
+          children: [
+            {
+              path: ':code',
+              component: OrderDetail
+            }
+          ]
+        },
+        {
+          path: 'coupon',
+          component: Coupon,
+          children: [
+            {
+              path: 'note',
+              component: CouponNote
+            }
+          ]
+        },
+        {
+          path: 'pub-mine',
+          component: PublishMine,
+          children: [
+            {
+              path: 'publish',
+              component: Publish
+            }
+          ]
         }
       ]
     },

@@ -5,10 +5,14 @@
         <div>
           <ul>
             <li class="border-bottom-1px" v-for="item in flows">
-              <div class="time">{{item.createDatetime | formatDate('yy/MM/dd')}}</div>
+              <div class="date">
+                <div class="day">{{item.createDatetime | formatDate('dd日')}}</div>
+                <div class="time">{{item.createDatetime | formatDate('hh:mm')}}</div>
+              </div>
+              <div class="icon" :class="iconCls(item.transAmount)"></div>
               <div class="info">
+                <p class="trans-amount" :class="iconCls(item.transAmount)">{{formatAmount(item.transAmount)}}</p>
                 <p class="note">{{item.bizNote}}</p>
-                <p class="trans-amount">¥ {{formatAmount(item.transAmount)}}</p>
               </div>
             </li>
           </ul>
@@ -83,6 +87,9 @@
         let prefix = +amount > 0 ? '+' : '';
         return prefix + formatAmount(amount);
       },
+      iconCls(amount) {
+        return amount >= 0 ? 'in' : 'out';
+      },
       ...mapMutations({
         'setCnyAccount': SET_CNY_ACCOUNT
       })
@@ -116,23 +123,58 @@
         li {
           display: flex;
           align-items: flex-start;
-          padding: 0.36rem 0 0.36rem 0.36rem;
+          padding: 0.3rem;
           @include border-bottom-1px($color-border);
 
-          .time {
-            font-size: 0.26rem;
+          .date {
+            white-space: nowrap;
+            text-align: left;
+
+            .day {
+              padding-top: 0.04rem;
+              font-size: $font-size-medium-xx;
+            }
+
+            .time {
+              padding-top: 0.14rem;
+              font-size: $font-size-small;
+              color: $color-text-l;
+            }
+          }
+
+          .icon {
+            margin-left: 0.38rem;
+            flex: 0 0 0.72rem;
+            width: 0.72rem;
+            height: 0.72rem;
+            background-size: 100%;
+
+            &.in {
+              @include bg-image('in');
+            }
+
+            &.out {
+              @include bg-image('out');
+            }
           }
 
           .info {
-            padding-left: 0.36rem;
+            padding-left: 0.52rem;
 
             .note {
-              font-size: 0.26rem;
+              padding-top: 0.18rem;
+              line-height: 1.2;
+              word-break: break-all;
+              font-size: $font-size-small;
             }
 
             .trans-amount {
-              padding-top: 0.14rem;
-              font-size: $font-size-medium-x;
+              font-size: $font-size-large-s;
+              color: $color-red;
+
+              &.out {
+                color: $primary-color;
+              }
             }
           }
         }

@@ -9,7 +9,7 @@
         class="category-item"
         :class="{active: index===currentIndex}"
         :style="_getItemColor(index)">
-        {{item}}
+        {{item.value}}
       </div>
     </div>
   </div>
@@ -134,8 +134,8 @@
       position: relative;
       overflow: hidden;
       white-space: nowrap;
-      color: #fff;
-      background: $primary-color;
+      color: $color-text;
+      background: #fff;
 
       .category-item {
         float: left;
@@ -144,7 +144,7 @@
         padding: 0 0.2rem;
 
         &.active {
-          color: $second-color;
+          color: $primary-color;
         }
       }
     }

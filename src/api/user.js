@@ -86,6 +86,14 @@ export function changeBirthday (birthday) {
   });
 }
 
+// 修改用户性别
+export function changeGender (gender) {
+  return fetch(805097, {
+    gender,
+    userId: getUserId()
+  });
+}
+
 /**
  * 新增收件地址
  * @param params {addressee, mobile, province, city, district, detailAddress, isDefault?}

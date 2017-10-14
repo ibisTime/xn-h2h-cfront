@@ -44,6 +44,12 @@
               <span v-else>设置生日</span>
               <i class="arrow"></i>
             </router-link>
+            <router-link to="/user/setting/gender" tag="div" class="setting-item border-bottom-1px">
+              <h2>性别</h2>
+              <span v-if="user && user.gender">{{getGender()}}</span>
+              <span v-else>设置性别</span>
+              <i class="arrow"></i>
+            </router-link>
             <router-link to="/user/setting/address" tag="div" class="setting-item border-bottom-1px">
               <h2>收货地址</h2>
               <i class="arrow"></i>
@@ -95,6 +101,11 @@
   import {setTitle, clearUser, formatImg, getImgData} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
 
+  const genderList = {
+    '1': '男',
+    '0': '女'
+  };
+
   export default {
     mixins: [commonMixin],
     data() {
@@ -105,7 +116,8 @@
         token: '',
         imgType: '',
         imgUrl: '',
-        imgKey: ''
+        imgKey: '',
+        preview: ''
       };
     },
     created() {
@@ -150,6 +162,9 @@
           this.setUser(data);
         });
       },
+      getGender() {
+        return this.user && this.user.gender && genderList[this.user.gender] || '';
+      },
       getQiniuToken() {
         return getQiniuToken().then((data) => {
           this.token = data.uploadToken;
@@ -193,13 +208,15 @@
        * @param error 错误信息
        */
       onUploadError(error) {
-        this.text = error.body && error.body.error || `${error.message}:10M` || '图片上传出错';
+        this.text = error.body && error.body.error || '图片上传出错';
         this.$refs.toast.show();
       },
       updateImg(base64) {
+        this.preview = base64;
         this.$refs.qiniu.uploadByBase64(base64, this.imgKey).then(() => {
           this.editAvatar();
         }).catch((err) => {
+          this.preview = '';
           self.onUploadError(err);
         });
       },
@@ -214,6 +231,7 @@
             photo: this.imgKey
           });
         }).catch(() => {
+          this.preview = '';
           this.loadingFlag = false;
         });
       },
@@ -235,7 +253,7 @@
         if (!this.user || !this.user.photo) {
           return require('./avatar@2x.png');
         }
-        return formatImg(this.user.photo);
+        return formatImg(this.preview || this.user.photo);
       },
       _reloadPage() {
         getAppId().then((data) => {

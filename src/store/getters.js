@@ -17,3 +17,7 @@ export const bankcardList = state => state.bankcardList;
 export const addressList = state => state.addressList;
 
 export const currentAddrCode = state => state.currentAddrCode;
+
+export const orderList = state => state.orderList;
+
+export const currentOrder = state => state.currentOrder;

@@ -2,11 +2,11 @@
   <transition name="slide">
     <div class="trade-pwd-wrapper">
       <div class="form-wrapper">
-        <div class="form-item">
+        <div class="form-item border-bottom-1px">
           <div class="item-label">手机号</div>
           <div class="inner-label">{{getMobile()}}</div>
         </div>
-        <div class="form-item">
+        <div class="form-item border-bottom-1px">
           <div class="item-label">验证码</div>
           <div class="item-input-wrapper">
             <input type="tel" class="item-input" v-model="captcha" @change="_captValid" placeholder="请输入验证码">
@@ -16,7 +16,7 @@
             <button :disabled="sending" @click="sendCaptcha">{{captBtnText}}</button>
           </div>
         </div>
-        <div class="form-item">
+        <div class="form-item border-bottom-1px">
           <div class="item-label">支付密码</div>
           <div class="item-input-wrapper">
             <input type="password" class="item-input" v-model="tradePwd" @change="_tradeValid" placeholder="请输入支付密码">
