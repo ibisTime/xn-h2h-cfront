@@ -1,54 +1,328 @@
 <template>
   <transition name="slide">
     <div class="order-detail-wrapper">
-      <scroll :pullUpLoad="pullUpLoad">
+      <scroll ref="scroll" :pullUpLoad="pullUpLoad">
         <div class="order-info">
-          <div class="info">订单号：44444444444444</div>
-          <div class="info">下单时间：2019-11-30</div>
-          <div class="info">订单状态：待支付</div>
+          <div class="info">订单号：{{orderCode}}</div>
+          <div class="info">下单时间：{{applyDatetime | formatDate('yyyy-MM-dd hh:mm')}}</div>
+          <div class="info">订单状态：{{status | formatStatus}}</div>
         </div>
         <div class="address-wrapper">
           <div class="inner">
-            <div class="header">收货人：秀袖型<span>19999999999</span></div>
-            <div class="address">收货地址：浙江省 杭州市 余杭区 仓前街道梦想小镇天使村8幢宜车叮叮2楼橙袋科技</div>
+            <div class="header">收货人：{{receiver}}<span>{{reMobile}}</span></div>
+            <div class="address">收货地址：{{reAddress}}</div>
           </div>
         </div>
         <ul class="goods">
-          <li class="border-bottom-1px">
-            <div class="img"></div>
+          <li class="border-bottom-1px" @click="goDetail">
+            <div class="img"><img :src="imgUrl"></div>
             <div class="note">
               <div class="top">
-                <div class="name twoline-ellipsis">商品名称商品名称</div>
-                <div class="desc twoline-ellipsis">商品简介商品简介商品简介</div>
+                <div class="name twoline-ellipsis">{{productName}}</div>
+                <div class="desc twoline-ellipsis">{{productDescription}}</div>
               </div>
-              <div class="price">¥20.00</div>
+              <div class="price">¥{{productAmount | formatAmount}}</div>
             </div>
           </li>
         </ul>
-        <div class="amount-item">商品总额<span>¥20.00</span></div>
-        <div class="amount-item border-bottom-1px">运费<span>+¥10.00</span></div>
-        <div class="pay-item">支付总价<span class="unit">¥</span><span>30.00</span></div>
+        <div class="amount-item">商品总额<span>¥{{productAmount | formatAmount}}</span></div>
+        <div class="amount-item border-bottom-1px">运费<span>¥{{yunfei | formatAmount}}</span></div>
+        <div class="pay-item">支付总价<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
         <div class="logistics">
           <div class="name">物流公司：顺丰快递</div>
           <div class="code">物流单号：45554454545454</div>
         </div>
+        <div class="amount-item remark" v-show="remark"><label>备注：</label><div>{{remark}}</div></div>
       </scroll>
       <div class="btns">
-        <div class="btn cancel">取消</div>
-        <div class="btn">支付</div>
+        <div class="btn cancel" v-show="showCancel()" @click="_cancelOrder">取消订单</div>
+        <div class="btn" v-show="showTk()" @click="_tkOrder">申请退款</div>
+        <div class="btn" v-show="showPay()" @click="payOrder">立即支付</div>
+        <div class="btn" v-show="showReceive()" @click="_receiveOrder">确认收货</div>
+        <div class="btn" v-show="showRating()" @click="ratingOrder">立即评价</div>
+        <div class="btn" v-show="showWatch()">查看评价</div>
       </div>
+      <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
+      <rating ref="rating" @ratingSuc="ratingSuccess" :orderCode="orderCode" :parentCode="parentCode"></rating>
+      <confirm ref="confirm" :text="text" @confirm="receiveOrder"></confirm>
+      <confirm ref="alert" :isAlert="isAlert" :text="ratingContent"></confirm>
+      <confirm-input ref="confirmInput" :text="inputText" @confirm="handleInputConfirm"></confirm-input>
+      <toast :text="toastText" ref="toast"></toast>
+      <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
+  import {mapGetters, mapMutations, mapActions} from 'vuex';
+  import {SET_CURRENT_ORDER} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
+  import FullLoading from 'base/full-loading/full-loading';
+  import Confirm from 'base/confirm/confirm';
+  import ConfirmInput from 'base/confirm-input/confirm-input';
+  import Toast from 'base/toast/toast';
+  import {setTitle, isUnDefined, formatImg} from 'common/js/util';
+  import {getDictList} from 'api/general';
+  import {ORDER_STATUS} from '../orders/config';
+  import {commonMixin} from 'common/js/mixin';
+  import Rating from 'components/rating/rating';
+  import {getOrder, cancelOrder, receiveOrder, tkOrder} from 'api/biz';
 
   export default {
+    mixins: [commonMixin],
+    data() {
+      return {
+        loadingFlag: true,
+        productInfo: {},
+        text: '',
+        loadingText: '正在载入...',
+        currentIndex: 0,
+        ratingContent: '',
+        inputText: '',
+        toastText: ''
+      };
+    },
+    computed: {
+      parentCode() {
+        return this.currentOrder && this.currentOrder.productOrderList[0].code;
+      },
+      orderCode() {
+        return this.$route.params.id;
+      },
+      applyDatetime() {
+        return this.currentOrder && this.currentOrder.applyDatetime;
+      },
+      status() {
+        return this.currentOrder && this.currentOrder.status;
+      },
+      reMobile() {
+        return this.currentOrder && this.currentOrder.reMobile;
+      },
+      receiver() {
+        return this.currentOrder && this.currentOrder.receiver;
+      },
+      reAddress() {
+        return this.currentOrder && this.currentOrder.reAddress;
+      },
+      imgUrl() {
+        return formatImg(this.currentOrder && this.currentOrder.productOrderList[0].productPic || '');
+      },
+      productName() {
+        return this.currentOrder && this.currentOrder.productOrderList[0].productName;
+      },
+      productDescription() {
+        return this.currentOrder && this.currentOrder.productOrderList[0].productDescription;
+      },
+      productAmount() {
+        return this.currentOrder && this.currentOrder.amount1 || 0;
+      },
+      yunfei() {
+        return this.currentOrder && this.currentOrder.yunfei || 0;
+      },
+      totalAmount() {
+        if (this.currentOrder) {
+          let amount = this.currentOrder.amount1;
+          let yunfei = this.currentOrder.yunfei;
+          return amount + yunfei;
+        }
+        return 0;
+      },
+      remark() {
+        return this.currentOrder && this.currentOrder.remark || '';
+      },
+      ...mapGetters([
+        'currentOrder',
+        'orderList'
+      ])
+    },
     created() {
+      setTitle('订单详情');
       this.pullUpLoad = null;
+      this.first = true;
+      this.code = this.$route.params.id;
+      this.wlComps = null;
+      this.getInitData();
+      this.isAlert = true;
+    },
+    updated() {
+      this.getInitData();
+    },
+    methods: {
+      shouldGetData() {
+        if (/\/user\/order\/[^/]+$/.test(this.$route.path) && this.first) {
+          return true;
+        }
+        return false;
+      },
+      getInitData() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          this._getOrder();
+        }
+      },
+      _getOrder() {
+        Promise.all([
+          getOrder(this.code),
+          getDictList('back_kd_company')
+        ]).then(([data, wlComps]) => {
+          if (!this.currentOrder) {
+            this.setCurrentOrder(data);
+          }
+          this.order = data;
+          this.productInfo = data.product || {};
+          this.wlComps = wlComps;
+          this.loadingFlag = false;
+          setTimeout(() => {
+            this.$refs.scroll.refresh();
+          }, 20);
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      showCancel() {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '1';
+        }
+        return false;
+      },
+      showTk() {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '2';
+        }
+        return false;
+      },
+      showPay() {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '1';
+        }
+        return false;
+      },
+      showReceive() {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '3';
+        }
+        return false;
+      },
+      showRating() {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '4';
+        }
+        return false;
+      },
+      showWatch() {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '5';
+        }
+        return false;
+      },
+      getCompany() {
+        if (!this.wlComps || !this.currentOrder.logisticsCompany) {
+          return '';
+        }
+        let orderComp = this.currentOrder.logisticsCompany;
+        let index = this.wlComps.findIndex((item) => {
+          return item.dkey === orderComp;
+        });
+        return ~index ? this.wlComps[index].dvalue : '未知';
+      },
+      _cancelOrder() {
+        this.inputText = '取消原因';
+        this.$refs.confirmInput.show();
+      },
+      handleInputConfirm(text) {
+        this.loadingFlag = true;
+        if (this.currentOrder.status === '1') {
+          this.cancelOrder(text);
+        } else if (this.currentOrder.status === '2') {
+          this.tkOrder(text);
+        }
+      },
+      receiveOrder() {
+        this.loadingFlag = true;
+        this.loadingText = '收货中...';
+        receiveOrder(this.code).then(() => {
+          this.loadingFlag = false;
+          this.toastText = '收货成功';
+          this.$refs.toast.show();
+          this.editOrderListByReceived({
+            code: this.code
+          });
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      tkOrder(text) {
+        this.loadingText = '提交中...';
+        tkOrder(this.code, text).then(() => {
+          this.loadingFlag = false;
+          this.toastText = '退款申请提交成功';
+          this.$refs.toast.show();
+          this.editOrderListByTk({
+            code: this.code
+          });
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      cancelOrder(text) {
+        this.loadingText = '取消中...';
+        cancelOrder(this.code, text).then(() => {
+          this.loadingFlag = false;
+          this.toastText = '取消成功';
+          this.$refs.toast.show();
+          this.editOrderListByCancel({
+            code: this.code
+          });
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      payOrder() {
+        this.$router.push(`${this.$route.path}/pay?code=${this.code}`);
+      },
+      ratingOrder() {
+        this.$refs.rating.show();
+      },
+      _receiveOrder() {
+        this.text = '确认收货';
+        this.$refs.confirm.show();
+      },
+      _tkOrder() {
+        this.inputText = '申请退款原因';
+        this.$refs.confirmInput.show();
+      },
+      ratingSuccess(code) {
+        this.editOrderListByRating({code});
+      },
+      goDetail() {
+        if (this.currentOrder) {
+          this.$router.push(this.$route.path + '/' + this.currentOrder.productOrderList[0].productCode);
+        }
+      },
+      ...mapMutations({
+        'setCurrentOrder': SET_CURRENT_ORDER
+      }),
+      ...mapActions([
+        'editOrderListByRating',
+        'editOrderListByCancel',
+        'editOrderListByReceived',
+        'editOrderListByTk'
+      ])
+    },
+    filters: {
+      formatStatus(status) {
+        if (isUnDefined(status)) {
+          return '未知';
+        }
+        return ORDER_STATUS[status];
+      }
     },
     components: {
-      Scroll
+      Scroll,
+      Rating,
+      Toast,
+      Confirm,
+      ConfirmInput,
+      FullLoading
     }
   };
 </script>
@@ -86,6 +360,7 @@
         padding: 0.32rem 0.3rem;
         background-repeat: repeat-x;
         background-position: 0 100%;
+        background-size: auto 0.04rem;
         @include bg-image('addr');
       }
 
@@ -118,9 +393,11 @@
           width: 1.8rem;
           flex: 0 0 1.8rem;
           height: 1.8rem;
-          background-position: center;
-          background-size: cover;
-          background-image: url('./demo.png');
+
+          img {
+            width: 100%;
+            height: 100%;
+          }
         }
 
         .note {
@@ -202,6 +479,21 @@
           color: $color-text;
           background: #fff;
         }
+      }
+    }
+
+    .remark {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 0.2rem;
+
+      label {
+        width: 0.8rem;
+        flex: 0 0 0.8rem;
+      }
+
+      div {
+        line-height: 1.2;
       }
     }
 

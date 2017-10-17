@@ -54,12 +54,12 @@
             </div>
             <ul v-else class="ratings">
               <li class="mine">
-                <div class="img"><img src="./demo@2x.png"></div>
+                <div class="img"><img :src="this.user && this.user.photo"></div>
                 <div class="rating">说点什么吧，看对眼就上</div>
                 <div class="button"><button @click="showRating">我要留言</button></div>
               </li>
               <li class="info border-bottom-1px" v-for="item in messages">
-                <div class="img"><img src="./demo@2x.png"></div>
+                <div class="img"><img v-lazy="formatImg(item.photo)"></div>
                 <div class="text">
                   <div class="name">{{item.nickname}}</div>
                   <div class="msg">{{item.content}}</div>
@@ -74,9 +74,7 @@
         <div class="btn">联系买家</div>
         <div class="btn buy" @click="goBuy">马上买</div>
       </footer>
-      <div v-if="loadingFlag" class="loading-wrapper">
-        <loading class="loading-content"></loading>
-      </div>
+      <full-loading v-show="loadingFlag"></full-loading>
       <rating ref="rating" :parentCode="$route.params.code" :user="user" @ratingSuc="ratingSuc"></rating>
     </div>
   </transition>
@@ -85,7 +83,7 @@
   import {mapGetters, mapMutations} from 'vuex';
   import {SET_USER_STATE} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Rating from 'components/rating/rating';
   import {getGoodsDetail, getPageComments, collection, read, cancelCollection} from 'api/biz';
   import {getUserById, getUser} from 'api/user';
@@ -97,7 +95,7 @@
     mixins: [commonMixin],
     data() {
       return {
-        loadingFlag: false,
+        loadingFlag: true,
         messages: [],
         noramlPic: [],
         specialPic: [],
@@ -145,17 +143,20 @@
     },
     created() {
       this.code = this.$route.params.code;
-      this.getDetail();
+      Promise.all([
+        this.getDetail(),
+        this.getUser()
+      ]).then(() => {
+        this.loadingFlag = false;
+      }).catch(() => {
+        this.loadingFlag = false;
+      });
       this.getPageComments();
-      this.getUser();
       read(this.code).catch(() => {});
     },
     methods: {
       getDetail() {
-        getGoodsDetail(this.code).then((data) => {
-          if (this.user) {
-            this.loadingFlag = false;
-          }
+        return getGoodsDetail(this.code).then((data) => {
           this.getUserById(data.storeCode);
           this.detail = data;
           this.isLike = data.isCollect === '1';
@@ -172,8 +173,6 @@
           }
           this.noramlPic = pics.slice(0, sIdx);
           this.specialPic = pics.slice(sIdx);
-        }).catch(() => {
-          this.loadingFlag = false;
         });
       },
       getPageComments() {
@@ -186,20 +185,19 @@
         }).catch(() => {});
       },
       getUser() {
-        getUser().then((data) => {
-          this.setUser(data);
-          if (this.detail) {
-            this.loadingFlag = false;
-          }
-        }).catch(() => {
-          this.loadingFlag = false;
-        });
+        if (!this.user) {
+          return getUser().then((data) => {
+            this.setUser(data);
+          });
+        } else {
+          return Promise.resolve(this.user);
+        }
       },
       getUserById(userId) {
         getUserById(userId).then((data) => {
           this.publisher = new User(data);
           setTimeout(() => {
-            this.$refs.scroll.refresh();
+            this.$refs.scroll && this.$refs.scroll.refresh();
           }, 20);
         });
       },
@@ -223,11 +221,14 @@
       getSyl(pic) {
         return {backgroundImage: `url(${formatImg(pic)})`};
       },
+      formatImg(pic) {
+        return formatImg(pic);
+      },
       showDesc() {
         this.isShow = true;
         this.showAll = false;
         setTimeout(() => {
-          this.$refs.scroll.refresh();
+          this.$refs.scroll && this.$refs.scroll.refresh();
         }, 20);
       },
       imgLoad() {
@@ -254,7 +255,7 @@
     components: {
       Scroll,
       Rating,
-      Loading
+      FullLoading
     }
   };
 </script>

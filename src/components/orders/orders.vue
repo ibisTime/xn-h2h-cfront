@@ -6,71 +6,54 @@
                          :categorys="categorys"
                          @select="selectCategory"></category-scroll>
       </div>
-      <scroll ref="scroll"
-              :data="currentList.data"
-              :hasMore="currentList.hasMore"
-              @pullingUp="getPageOrders"
-              class="orders-content">
-        <div>
-          <ul>
-            <li @click="goDetail">
+      <div class="orders-content">
+        <scroll ref="scroll"
+                :data="currentList.data"
+                :hasMore="currentList.hasMore"
+                @pullingUp="getPageOrders">
+          <ul v-if="currentList">
+            <li v-for="(item, index) in currentList.data" @click="goDetail(item)">
               <div class="time border-bottom-1px">
-                <span class="fl">订单标号：2222222222222222222</span>
-                <span class="fr">2010-11-11</span>
+                <span class="fl">订单编号：{{item.code}}</span>
+                <span class="fr">{{item.applyDatetime | formatDate('yyyy-MM-dd')}}</span>
               </div>
               <div class="infos border-bottom-1px">
-                <div class="img"></div>
+                <div class="img"><img v-lazy="formatImg(item.productOrderList[0].productPic)"/></div>
                 <div class="info">
                   <div class="top">
                     <div class="left">
-                      <p class="name twoline-ellipsis">商品名称商品名称</p>
-                      <p class="desc twoline-ellipsis">商品详情商品详情商品详情商品详情</p>
+                      <p class="name twoline-ellipsis">{{item.productOrderList[0].productName}}</p>
+                      <p class="desc twoline-ellipsis">{{item.productOrderList[0].productDescription}}</p>
                     </div>
                     <div class="right">
-                      <p>¥300.00</p>
+                      <p>¥{{item.amount1 | formatAmount}}</p>
                     </div>
                   </div>
-                  <div class="bottom">总价：<span class="unit">¥</span><span class="price">300.00</span></div>
+                  <div class="bottom">总价：<span class="unit">¥</span><span class="price">{{getTotalAmount(item) | formatAmount}}</span></div>
                 </div>
               </div>
               <div class="clearfix btns">
-                <span class="btn fr" @click.stop="payOrder(item)">立即支付</span>
-                <span class="btn cancel fr" @click.stop="cancelOrder(item)">取消订单</span>
+                <span class="status fl">{{item.status | formatStatus}}</span>
+                <span class="btn fr" v-show="showPayBtn(item.status)" @click.stop="payOrder(item)">立即支付</span>
+                <span class="btn cancel fr" v-show="showCancelBtn(item.status)" @click="_cancelOrder(item)">取消订单</span>
+                <span class="btn cancel fr" v-show="showTkBtn(item.status)" @click.stop="_tkOrder(item)">申请退款</span>
+                <span class="btn fr" v-show="showReceiveBtn(item.status)" @click.stop="_receiveOrder(item)">确认收货</span>
+                <span class="btn fr" v-show="showRatingBtn(item.status)" @click.stop="ratingOrder(item)">立即评价</span>
               </div>
             </li>
           </ul>
-          <!--<ul v-if="currentList">-->
-            <!--<li v-for="(item, index) in currentList.data" class="needsclick" :key="index" @click="goDetail(item)">-->
-              <!--<p class="clearfix time">-->
-                <!--<span class="fl">{{item.createDatetime | formatDate}}</span>-->
-                <!--<span class="fr">{{item.type | formatType}}</span>-->
-              <!--</p>-->
-              <!--<p class="clearfix code">-->
-                <!--<span class="fl">{{item.code}}</span>-->
-                <!--<span class="fr">{{item.amount | formatMoney}}</span>-->
-              <!--</p>-->
-              <!--<p class="clearfix">-->
-                <!--<span class="status fl">{{item.status | formatStatus}}</span>-->
-                <!--<span class="btn fr needsclick" v-show="showPayBtn(item.status)" @click.stop="payOrder(item)">立即支付</span>-->
-                <!--<span class="btn cancel fr needsclick" v-show="showCancelBtn(item.status)" @click.stop="cancelOrder(item)">取消订单</span>-->
-                <!--<span class="btn fr needsclick" v-show="showRatingBtn(item.status)" @click.stop="ratingOrder(item)">立即评价</span>-->
-                <!--<span class="btn fr needsclick" v-show="showReceiveBtn(item.status)" @click.stop="receiveOrder(item)">确认收货</span>-->
-                <!--<span class="btn fr needsclick" v-show="item.status==='10'" @click.stop="goAdviser">联系顾问</span>-->
-              <!--</p>-->
-            <!--</li>-->
-          <!--</ul>-->
-        </div>
-        <div v-show="!currentList.hasMore && !(currentList.data && currentList.data.length)" class="no-result-wrapper">
-          <no-result title="抱歉，暂无订单"></no-result>
-        </div>
-      </scroll>
-      <div v-show="fetching" class="loading-container">
-        <div class="loading-wrapper">
-          <loading title=""></loading>
-        </div>
+          <div v-show="!currentList.hasMore && !(currentList.data && currentList.data.length)" class="no-result-wrapper">
+            <img src="./no-result.png"/><p>暂无订单</p>
+          </div>
+        </scroll>
       </div>
-      <confirm ref="confirm" :text="text" @confirm="handleConfirm"></confirm>
-      <rating ref="rating" @ratingSuc="ratingSuccess" :orderCode="currentCode"></rating>
+      <full-loading v-show="fetching" :title="fetchText"></full-loading>
+
+      <confirm ref="confirm" :text="text" @confirm="receiveOrder"></confirm>
+      <confirm ref="alert" :isAlert="isAlert" :text="ratingContent"></confirm>
+      <confirm-input ref="confirmInput" :text="inputText" @confirm="handleInputConfirm"></confirm-input>
+      <toast :text="toastText" ref="toast"></toast>
+      <rating ref="rating" @ratingSuc="ratingSuccess" :parentCode="currentGoodsCode" :orderCode="currentCode"></rating>
       <router-view @updateNum="handleUpdateNum"></router-view>
     </div>
   </transition>
@@ -80,13 +63,15 @@
   import CategoryScroll from 'base/category-scroll/category-scroll';
   import Scroll from 'base/scroll/scroll';
   import NoResult from 'base/no-result/no-result';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Confirm from 'base/confirm/confirm';
+  import ConfirmInput from 'base/confirm-input/confirm-input';
+  import Toast from 'base/toast/toast';
   import {mapGetters, mapMutations, mapActions} from 'vuex';
   import {SET_ORDER_LIST, SET_CURRENT_ORDER} from 'store/mutation-types';
-  import {getPageOrders, cancelOrder, receiveOrder} from 'api/biz';
+  import {getPageOrders, cancelOrder, receiveOrder, tkOrder} from 'api/biz';
   import {commonMixin} from 'common/js/mixin';
-  import {formatAmount, setTitle} from 'common/js/util';
+  import {formatImg, setTitle} from 'common/js/util';
   import Rating from 'components/rating/rating';
 
   export default {
@@ -94,14 +79,20 @@
     data() {
       return {
         currentCode: '',
+        currentGoodsCode: '',
         fetching: false,
+        fetchText: '',
         categorys: CATEGORYS,
         currentIndex: +this.$route.query.index || 0,
-        text: ''
+        text: '',
+        ratingContent: '',
+        inputText: '',
+        toastText: ''
       };
     },
     created() {
       this.first = true;
+      this.isAlert = true;
       this.getInitData();
     },
     computed: {
@@ -126,18 +117,14 @@
           this.first = false;
           // 清除缓存的订单列表数据
           this.setOrderList({});
-//          this.getPageOrders();
+          this.getPageOrders();
         }
       },
       getPageOrders() {
         let key = this.categorys[this.currentIndex].key;
-        let status = key === 'all' ? '' : key;
-        let statusList = status.split('||');
-        if (statusList.length > 1) {
-          status = statusList;
-        }
+        let statusList = key === 'all' ? [] : key.split('||');
         if (this.currentList.hasMore) {
-          getPageOrders(this.currentList.start, this.currentList.limit, status).then((data) => {
+          getPageOrders(this.currentList.start, this.currentList.limit, statusList).then((data) => {
             let _orderOri = this.orderList[key];
             let _order;
             if (!_orderOri) {
@@ -176,92 +163,97 @@
           this.getPageOrders();
         }
       },
+      getTotalAmount(item) {
+        return +item.amount1 + +item.yunfei;
+      },
+      formatImg(img) {
+        return formatImg(img);
+      },
       goDetail(item) {
-//        this.setCurrentOrder(item);
-//        this.$router.push(`/user/order/${item.code}`);
-        this.$router.push('/user/order/111');
+        this.setCurrentOrder(item);
+        this.$router.push(`/user/order/${item.code}`);
       },
       payOrder(item) {
         this.$router.push(`/user/order/pay?code=${item.code}`);
       },
-      cancelOrder(item) {
-        this.text = '确定取消订单吗';
+      _cancelOrder(item) {
+        this.inputText = '取消原因';
         this.curItem = item;
-        this.$refs.confirm.show();
+        this.$refs.confirmInput.show();
       },
-      handleConfirm() {
+      _tkOrder(item) {
+        this.inputText = '申请退款原因';
+        this.curItem = item;
+        this.$refs.confirmInput.show();
+      },
+      receiveOrder() {
         this.fetching = true;
-        let item = this.curItem;
-        if (item.status === '7') {
-          receiveOrder(item.code).then(() => {
-            this.fetching = false;
-            this.editOrderListByReceived({
-              code: item.code
-            }).then(() => {
-              this.currentCode = item.code;
-              item.status = '8';
-              this.text = '收货成功，确定立即评价吗？';
-              this.$refs.confirm.show();
-            });
-            this.$emit('updateNum', 'toReceiverOrder');
-          }).catch(() => {
-            this.fetching = false;
-          });
-        } else if (item.status === '8') {
+        this.fetchText = '收货中...';
+        receiveOrder(this.curItem.code).then(() => {
           this.fetching = false;
-          this.$refs.rating.show();
-        } else {
-          cancelOrder(item.code).then(() => {
-            this.fetching = false;
-            this.editOrderListByCancel({
-              prevStatus: item.status,
-              code: item.code
-            });
-            if (item.status === '1') {
-              this.$emit('updateNum', 'toMeasureOrder');
-            } else {
-              this.$emit('updateNum', 'toPayOrder');
-            }
-          }).catch(() => {
-            this.fetching = false;
+          this.editOrderListByReceived({
+            code: this.curItem.code
           });
+        }).catch(() => {
+          this.fetching = false;
+        });
+      },
+      handleInputConfirm(text) {
+        this.fetching = true;
+        if (this.curItem.status === '1') {
+          this.cancelOrder(text);
+        } else if (this.curItem.status === '2') {
+          this.tkOrder(text);
         }
+      },
+      cancelOrder(text) {
+        this.fetchText = '取消中...';
+        cancelOrder(this.curItem.code, text).then(() => {
+          this.fetching = false;
+          this.editOrderListByCancel({
+            code: this.curItem.code
+          });
+        }).catch(() => {
+          this.fetching = false;
+        });
+      },
+      tkOrder(text) {
+        this.fetchText = '提交中...';
+        tkOrder(this.curItem.code, text).then(() => {
+          this.fetching = false;
+          this.toastText = '退款申请提交成功';
+          this.$refs.toast.show();
+          this.editOrderListByTk({
+            code: this.curItem.code
+          });
+        }).catch(() => {
+          this.fetching = false;
+        });
       },
       ratingOrder(item) {
         this.currentCode = item.code;
+        this.currentGoodsCode = item.productOrderList[0].code;
         this.$refs.rating.show();
       },
-      receiveOrder(item) {
+      _receiveOrder(item) {
         this.text = '确认收货';
         this.curItem = item;
         this.$refs.confirm.show();
       },
-      goAdviser() {
-        this.$router.push('/user/order/adviser');
-      },
       showPayBtn(status) {
-        if (status === '2') {
-          return true;
-        }
-        return false;
+        return status === '1';
       },
       showCancelBtn(status) {
-        if (status === '1' || status === '2') {
-          return true;
-        }
-        return false;
+        return status === '1';
+      },
+      showTkBtn(status) {
+        return status === '2';
       },
       showRatingBtn(status) {
-        if (status === '8') {
-          return true;
-        }
-        return false;
+        return status === '4';
       },
       showReceiveBtn(status) {
-        if (status === '7') {
-          return true;
-        }
-        return false;
+        return status === '3';
       },
       shouldGetData() {
         if (this.$route.path === '/user/order') {
@@ -284,26 +276,11 @@
       ...mapActions([
         'editOrderListByRating',
         'editOrderListByCancel',
-        'editOrderListByReceived'
+        'editOrderListByReceived',
+        'editOrderListByTk'
       ])
     },
     filters: {
-      formatMoney(money) {
-        let result = formatAmount(money);
-        if (result === '--') {
-          return '';
-        }
-        return `¥${result}`;
-      },
-      formatType(type) {
-        if (type === '0') {
-          return '衬衫';
-        } else if (type === '1') {
-          return 'H+';
-        } else {
-          return '';
-        }
-      },
       formatStatus(status) {
         return ORDER_STATUS[status];
       }
@@ -315,9 +292,11 @@
       CategoryScroll,
       Scroll,
       NoResult,
-      Loading,
+      FullLoading,
       Confirm,
-      Rating
+      Rating,
+      Toast,
+      ConfirmInput
     }
   };
 </script>
@@ -343,21 +322,18 @@
       height: 0.8rem;
       line-height: 0.8rem;
       background: #fff;
+      border-bottom: 1px solid $color-border;
     }
 
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
+    .no-result-wrapper {
+      text-align: center;
+      padding-top: 2.1rem;
+      img {
+        width: 2.2rem;
+      }
+      p {
+        margin-top: 0.3rem;
+        font-size: $font-size-medium;
       }
     }
 
@@ -402,9 +378,11 @@
               width: 1.8rem;
               flex: 0 0 1.8rem;
               height: 1.8rem;
-              background-position: center;
-              background-size: cover;
-              background-image: url('./demo.png');
+
+              img {
+                width: 100%;
+                height: 100%;
+              }
             }
 
             .info {
@@ -477,24 +455,12 @@
           }
 
           .status {
-            display: inline-block;
-            padding: 0.05rem 0.21rem 0.07rem;
-            border-radius: 0.28rem;
-            background: $primary-color;
-            color: #fff;
+            height: 0.64rem;
+            line-height: 0.64rem;
+            color: $color-red;
+            font-size: $font-size-medium-s;
           }
         }
-      }
-
-      .orders-loading {
-        padding-top: 0.4rem;
-      }
-
-      .no-result-wrapper {
-        position: absolute;
-        width: 100%;
-        top: 50%;
-        transform: translateY(-50%);
       }
     }
   }

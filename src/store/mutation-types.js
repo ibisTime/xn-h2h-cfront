@@ -28,8 +28,8 @@ export const SET_JF_ACCOUNT = 'SET_JF_ACCOUNT';
 export const SET_BANKCARD_LIST = 'SET_BANKCARD_LIST';
 // 设置地址列表
 export const SET_ADDRESS_LIST = 'SET_ADDRESS_LIST';
-// 设置当前选择的地址code
-export const SET_CURRENT_ADDR_CODE = 'SET_CURRENT_ADDR_CODE';
+// 设置当前选择的地址
+export const SET_CURRENT_ADDR = 'SET_CURRENT_ADDR';
 // 设置用户订单列表
 export const SET_ORDER_LIST = 'SET_ORDER_LIST';
 // 设置当前选择的订单

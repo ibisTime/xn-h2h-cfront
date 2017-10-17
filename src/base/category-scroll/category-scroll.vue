@@ -141,7 +141,7 @@
         float: left;
         text-align: center;
         font-size: $font-size-medium;
-        padding: 0 0.2rem;
+        padding: 0 0.3rem;
 
         &.active {
           color: $primary-color;

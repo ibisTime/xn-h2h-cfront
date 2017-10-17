@@ -25,11 +25,11 @@
       </router-link>
       <div class="order-content">
         <ul>
-          <li class="item-payment"><div class="icon"></div><p>待付款</p></li>
-          <li class="item-sendGoods"><div class="icon"></div><p>待发货</p></li>
-          <li class="item-delivery"><div class="icon"></div><p>待收货</p></li>
-          <li class="item-haveGoods"><div class="icon"></div><p>待评价</p></li>
-          <li class="item-evaluation"><div class="icon"></div><p>已完成</p></li>
+          <router-link tag="li" to="/user/order?index=1" class="item-payment"><div class="icon"></div><p>待付款</p></router-link>
+          <router-link tag="li" to="/user/order?index=2" class="item-sendGoods"><div class="icon"></div><p>待发货</p></router-link>
+          <router-link tag="li" to="/user/order?index=3" class="item-delivery"><div class="icon"></div><p>待收货</p></router-link>
+          <router-link tag="li" to="/user/order?index=4" class="item-haveGoods"><div class="icon"></div><p>待评价</p></router-link>
+          <router-link tag="li" to="/user/order?index=5" class="item-evaluation"><div class="icon"></div><p>已完成</p></router-link>
         </ul>
       </div>
     </div>
@@ -43,11 +43,7 @@
         <router-link tag="li" to="/user/coupon" class="item-coupons">优惠券</router-link>
       </ul>
     </div>
-    <div v-show="loadingFlag" class="loading-container">
-      <div class="loading-wrapper">
-        <loading></loading>
-      </div>
-    </div>
+    <full-loading v-show="loadingFlag"></full-loading>
     <m-footer @goPublish="goPublish"></m-footer>
     <router-view></router-view>
   </div>
@@ -59,7 +55,7 @@
   import {getAccount} from 'api/account';
   import {setTitle, formatAmount} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import {mapGetters, mapMutations} from 'vuex';
 
   export default {
@@ -138,7 +134,7 @@
     },
     components: {
       MFooter,
-      Loading
+      FullLoading
     }
   };
 </script>
@@ -152,21 +148,6 @@
     left: 0;
     width: 100%;
     bottom: 1rem;
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
-      }
-    }
 
     .top-wrapper{
       width: 100%;

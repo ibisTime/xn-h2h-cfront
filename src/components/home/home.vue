@@ -109,7 +109,7 @@
     },
     methods: {
       shouldGetData() {
-        if (/home$/.test(this.$route.path)) {
+        if (this.$route.path === '/home') {
           return this.first;
         }
         return false;

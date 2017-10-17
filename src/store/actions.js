@@ -23,12 +23,15 @@ function _getOrderList(state, code, prevStatus, nextStatus) {
       allList.data.splice(index, 1, _item);
     }
   }
-
-  if (prevStatus === '3' || prevStatus === '4' || prevStatus === '5' || prevStatus === '6') {
-    prevStatus = '3||4||5||6';
+  if (prevStatus === '2' || prevStatus === '7') {
+    prevStatus = '2||7';
+  } else if (prevStatus === '5' || prevStatus === '8' || prevStatus === '91') {
+    prevStatus = '5||8||91';
   }
-  if (nextStatus === '3' || nextStatus === '4' || nextStatus === '5' || nextStatus === '6') {
-    nextStatus = '3||4||5||6';
+  if (nextStatus === '2' || nextStatus === '7') {
+    nextStatus = '2||7';
+  } else if (nextStatus === '5' || nextStatus === '8' || nextStatus === '91') {
+    nextStatus = '5||8||91';
   }
   // 如果有当前状态的数据，则删除这条订单
   if (state.orderList[prevStatus]) {
@@ -122,16 +125,42 @@ export const deleteAddress = function({commit, state}, {code}) {
 };
 
 // 取消订单后，改变orderList
-export const editOrderListByCancel = function({commit, state}, {prevStatus, code}) {
-  let nextStatus = '11';
+export const editOrderListByCancel = function({commit, state}, {code}) {
+  let prevStatus = '1';
+  let nextStatus = '91';
   let _orderList = _getOrderList(state, code, prevStatus, nextStatus);
   commit(types.SET_ORDER_LIST, _orderList);
+
+  if (state.currentOrder && state.currentOrder.code === code) {
+    let _order = {
+      ...state.currentOrder
+    };
+    _order.status = nextStatus;
+    commit(types.SET_CURRENT_ORDER, _order);
+  }
 };
 
 // 支付订单后，改变orderList
 export const editOrderListByPay = function({commit, state}, {code}) {
+  let prevStatus = '1';
+  let nextStatus = '2';
+
+  let _orderList = _getOrderList(state, code, prevStatus, nextStatus);
+  commit(types.SET_ORDER_LIST, _orderList);
+
+  if (state.currentOrder && state.currentOrder.code === code) {
+    let _order = {
+      ...state.currentOrder
+    };
+    _order.status = nextStatus;
+    commit(types.SET_CURRENT_ORDER, _order);
+  }
+};
+
+// 订单退款申请提交成功后，改变orderList
+export const editOrderListByTk = function ({commit, state}, {code}) {
   let prevStatus = '2';
-  let nextStatus = '3';
+  let nextStatus = '6';
 
   let _orderList = _getOrderList(state, code, prevStatus, nextStatus);
   commit(types.SET_ORDER_LIST, _orderList);
@@ -147,18 +176,34 @@ export const editOrderListByPay = function({commit, state}, {code}) {
 
 // 评论成功后，改变orderList
 export const editOrderListByRating = function({commit, state}, {code}) {
-  let prevStatus = '8';
-  let nextStatus = '9';
+  let prevStatus = '4';
+  let nextStatus = '5';
 
   let _orderList = _getOrderList(state, code, prevStatus, nextStatus);
   commit(types.SET_ORDER_LIST, _orderList);
+
+  if (state.currentOrder && state.currentOrder.code === code) {
+    let _order = {
+      ...state.currentOrder
+    };
+    _order.status = nextStatus;
+    commit(types.SET_CURRENT_ORDER, _order);
+  }
 };
 
 // 收货成功后，改变orderList
 export const editOrderListByReceived = function({commit, state}, {code}) {
-  let prevStatus = '7';
-  let nextStatus = '8';
+  let prevStatus = '3';
+  let nextStatus = '4';
 
   let _orderList = _getOrderList(state, code, prevStatus, nextStatus);
   commit(types.SET_ORDER_LIST, _orderList);
+
+  if (state.currentOrder && state.currentOrder.code === code) {
+    let _order = {
+      ...state.currentOrder
+    };
+    _order.status = nextStatus;
+    commit(types.SET_CURRENT_ORDER, _order);
+  }
 };

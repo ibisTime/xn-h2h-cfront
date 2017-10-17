@@ -10,7 +10,7 @@ const state = {
   jfAccount: null,
   bankcardList: null,
   addressList: [],
-  currentAddrCode: '',
+  currentAddr: null,
   orderList: {},
   currentOrder: null
 };

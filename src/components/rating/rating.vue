@@ -65,7 +65,7 @@
         }
       },
       orderRating() {
-        orderRating(this.content, this.orderCode).then((data) => {
+        orderRating(this.content, this.orderCode, this.parentCode).then((data) => {
           this.disabled = false;
           if (/;filter/.test(data.code)) {
             this.text = '您的评论存在敏感词，我们将进行审核';

@@ -104,7 +104,7 @@ export function formatAmount(amount, len = 2) {
     return '--';
   }
   amount = (+amount / 1000).toString();
-  let reg = new RegExp('(\\.\\d{' + len + '})\\d*', 'ig');
+  let reg = new RegExp('(\\.\\d{' + len + 1 + '})\\d*', 'ig');
   amount = +amount.replace(reg, '$1');
   return amount.toFixed(len);
 }

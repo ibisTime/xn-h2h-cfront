@@ -1,7 +1,10 @@
 <template>
   <ul class="mall-items-wrapper">
     <li v-for="item in data" @click="goDetail(item.code)" class="border-bottom-1px">
-      <div class="img-wrap" :style="getImgStyl(item.pic)"></div>
+      <div class="img-wrap">
+        <img v-lazy="formatImg(item.pic)"/>
+        <div class="discount" v-if="isDiscount(item)">{{getDiscount(item)}}折</div>
+      </div>
       <div class="info">
         <h2 class="twoline-ellipsis">{{item.name}}</h2>
         <div class="label">
@@ -29,13 +32,21 @@
       }
     },
     methods: {
+      isDiscount(item) {
+        let discount = +item.discount;
+        if (discount !== 1) {
+          return true;
+        }
+        return false;
+      },
+      getDiscount(item) {
+        return +item.discount * 10;
+      },
+      formatImg(pic) {
+        return formatImg(pic);
+      },
       goDetail(code) {
         this.$router.push(this.$route.path + '/' + code);
-      },
-      getImgStyl(pic) {
-        return {
-          backgroundImage: `url(${formatImg(pic)})`
-        };
       }
     }
   };
@@ -57,12 +68,31 @@
       }
 
       .img-wrap {
+        position: relative;
         width: 2.4rem;
         flex: 0 0 2.4rem;
         height: 2.4rem;
         overflow: hidden;
-        background-size: cover;
-        background-position: center;
+        font-size: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+        }
+
+        .discount {
+          position: absolute;
+          top: 0;
+          left: 0;
+          padding-top: 0.1rem;
+          width: 0.66rem;
+          height: 0.54rem;
+          text-align: center;
+          font-size: $font-size-small-s;
+          color: #fff;
+          background-size: 0.66rem 0.54rem;
+          @include bg-image('discount');
+        }
       }
 
       .info {

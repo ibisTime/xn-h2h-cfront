@@ -54,8 +54,8 @@
 <script>
   import {addAddress, editAddress, getAddressList} from 'api/user';
   import {mobileValid, setTitle, realNameValid, addressValid} from 'common/js/util';
-  import {mapGetters, mapMutations, mapActions} from 'vuex';
-  import {SET_ADDRESS_LIST} from 'store/mutation-types';
+  import {mapGetters, mapMutations} from 'vuex';
+  import {SET_ADDRESS_LIST, SET_CURRENT_ADDR} from 'store/mutation-types';
   import CityPicker from 'base/city-picker/city-picker';
   import Loading from 'base/loading/loading';
   import Toast from 'base/toast/toast';
@@ -185,21 +185,14 @@
           this.setting = false;
           this.toastText = '新增成功';
           this.$refs.toast.show();
-          if (this.$route.query.lt) {
-            this.addAddrAndSetCur({
-              address: {
-                code: data.code,
-                ...param
-              }
-            });
-          } else {
-            let addressList = this.addressList.slice();
-            addressList.push({
-              code: data.code,
-              ...param
-            });
-            this.setAddressList(addressList);
-          }
+          let _item = {
+            code: data.code,
+            ...param
+          };
+          this.setCurAddr(_item);
+          let addressList = this.addressList.slice();
+          addressList.push(_item);
+          this.setAddressList(addressList);
           setTimeout(() => {
             this.$router.back();
           }, 1000);
@@ -242,11 +235,9 @@
         return !result.err;
       },
       ...mapMutations({
-        setAddressList: SET_ADDRESS_LIST
-      }),
-      ...mapActions([
-        'addAddrAndSetCur'
-      ])
+        setAddressList: SET_ADDRESS_LIST,
+        setCurAddr: SET_CURRENT_ADDR
+      })
     },
     components: {
       CityPicker,

@@ -59,8 +59,8 @@ const mutations = {
   [types.SET_ADDRESS_LIST](state, list) {
     state.addressList = list;
   },
-  [types.SET_CURRENT_ADDR_CODE](state, code) {
-    state.currentAddrCode = code;
+  [types.SET_CURRENT_ADDR](state, code) {
+    state.currentAddr = code;
   },
   [types.SET_ORDER_LIST](state, list) {
     state.orderList = list;

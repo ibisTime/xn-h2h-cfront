@@ -85,6 +85,8 @@ const Coupon = () => import('components/coupon/coupon');
 const CouponNote = () => import('components/coupon-note/coupon-note');
 // 我发布的
 const PublishMine = () => import('components/publish-mine/publish-mine');
+// 支付
+const Pay = () => import('components/pay/pay');
 
 export default new Router({
   routes: [
@@ -202,7 +204,21 @@ export default new Router({
         },
         {
           path: 'confirm',
-          component: OrderConfirm
+          component: OrderConfirm,
+          children: [
+            {
+              path: 'add',
+              component: AddressAddEdit
+            },
+            {
+              path: 'pay',
+              component: Pay
+            },
+            {
+              path: ':code',
+              component: Detail
+            }
+          ]
         },
         {
           path: ':code',
@@ -343,8 +359,18 @@ export default new Router({
           component: Orders,
           children: [
             {
-              path: ':code',
-              component: OrderDetail
+              path: ':id',
+              component: OrderDetail,
+              children: [
+                {
+                  path: 'pay',
+                  component: Pay
+                },
+                {
+                  path: ':code',
+                  component: Detail
+                }
+              ]
             }
           ]
         },
