@@ -19,7 +19,7 @@
   </transition>
 </template>
 <script>
-  import {ratingOrder, rating} from 'api/biz';
+  import {orderRating, goodsRating} from 'api/biz';
   import Toast from 'base/toast/toast';
   import {isUnDefined} from 'common/js/util';
 
@@ -60,12 +60,12 @@
           if (this.orderCode) {
             this.orderRating();
           } else {
-            this.articleRating();
+            this.goodsRating();
           }
         }
       },
       orderRating() {
-        ratingOrder(this.orderCode, this.content).then((data) => {
+        orderRating(this.content, this.orderCode).then((data) => {
           this.disabled = false;
           if (/;filter/.test(data.code)) {
             this.text = '您的评论存在敏感词，我们将进行审核';
@@ -82,8 +82,8 @@
           this.disabled = false;
         });
       },
-      articleRating() {
-        rating(this.parentCode, this.content).then((data) => {
+      goodsRating() {
+        goodsRating(this.content, this.parentCode).then((data) => {
           this.disabled = false;
           if (/;filter/.test(data.code)) {
             this.text = '您的评论存在敏感词，我们将进行审核';
@@ -92,9 +92,9 @@
             this.$emit('ratingSuc', {
               code: data.code,
               content: this.content,
-              commerRealName: this.user && this.user.nickname || '用户',
+              nickname: this.user.nickname || '用户',
               commentDatetime: new Date(),
-              photo: this.user && this.user.photo || this.getDefaultAvatar()
+              photo: this.user.photo
             });
           }
           this.content = '';
@@ -105,13 +105,6 @@
         }).catch(() => {
           this.disabled = false;
         });
-      },
-      getDefaultAvatar() {
-        let avatar = require('./avatar@2x.png');
-        if (/data:image/.test(avatar) || /http(?:s)?/.test(avatar)) {
-          return avatar;
-        }
-        return location.origin + avatar;
       },
       valid() {
         if (isUnDefined(this.content)) {

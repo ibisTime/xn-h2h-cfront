@@ -4,20 +4,20 @@
       <div class="content" @click.stop>
         <div class="title">想卖多少钱<span @click="confirm">确认</span></div>
         <div class="sell-price border-bottom-1px">
-          <input type="number" placeholder="¥0.00" v-model="sellPrice"/>
+          <input type="number" placeholder="¥0.00" @input="validSellPrice" v-model="sellPrice"/>
           <span v-show="spErr" class="error-tip">{{spErr}}</span>
         </div>
         <div class="item border-bottom-1px">
           <label>原价</label>
           <div class="input-item">
-            <input type="number" placeholder="¥0.00" v-model="oriPrice">
-            <span v-show="spErr" class="error-tip">{{spErr}}</span>
+            <input type="number" placeholder="¥0.00" @input="validOriPrice" v-model="oriPrice">
+            <span v-show="spErr" class="error-tip">{{oriErr}}</span>
           </div>
         </div>
         <div class="item">
           <label>运费</label>
           <div class="input-item freight">
-            <input type="number" placeholder="¥0.00" v-model="freight">
+            <input type="number" placeholder="¥0.00" @input="validFreight" v-model="freight">
             <span v-show="frErr" class="error-tip">{{frErr}}</span>
           </div>
           <div class="input-item">
@@ -58,6 +58,10 @@
       },
       choseFree() {
         this.isFree = !this.isFree;
+        if (this.isFree) {
+          this.freight = '0';
+          this.frErr = '';
+        }
       },
       confirm() {
         if (this.valid()) {
@@ -72,28 +76,19 @@
         return r1 && r2 && r3;
       },
       validSellPrice() {
-        let result = emptyValid(this.sellPrice);
-        if (result.err) {
-          this.spErr = result.msg;
-          return false;
-        }
-        result = amountValid(this.sellPrice);
+        let result = amountValid(this.sellPrice);
         this.spErr = result.msg;
         return !result.err;
       },
       validOriPrice() {
-        let result = emptyValid(this.oriPrice);
-        if (result.err) {
-          this.oriErr = result.msg;
-          return false;
-        }
-        result = amountValid(this.oriPrice);
+        let result = amountValid(this.oriPrice);
         this.oriErr = result.msg;
         return !result.err;
       },
       validFreight() {
         let result = emptyValid(this.freight);
         if (!result.err) {
+          this.isFree = false;
           result = amountValid(this.freight);
           this.frErr = result.msg;
           return !result.err;
@@ -173,6 +168,7 @@
         }
 
         .input-item {
+          position: relative;
           flex: 1;
           display: flex;
           align-items: center;
@@ -181,7 +177,7 @@
             .error-tip {
               position: absolute;
               right: 0.3rem;
-              top: 0.05rem;
+              top: 0.06rem;
             }
           }
 

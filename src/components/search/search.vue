@@ -14,11 +14,11 @@
       <div v-show="query" class="result-wrapper">
         <scroll ref="resultScroll" :pullUpLoad="pullUpLoad" :data="list">
           <ul>
-            <li class="border-bottom-1px" @click="saveSearch('xxx')">热水器</li>
+            <li v-for="item in list" class="border-bottom-1px" @click="saveSearch(item.code)">{{item.name}}</li>
           </ul>
         </scroll>
       </div>
-      <div v-show="!query" class="history-wrapper">
+      <div v-show="searchHistory.length && !query" class="history-wrapper">
         <div class="title">
           <h1>历史搜索</h1>
           <i class="del-icon" @click="showConfirm"></i>
@@ -40,6 +40,7 @@
   import {mapGetters, mapActions} from 'vuex';
   import {debounce} from 'common/js/util';
   import {directiveMixin} from 'common/js/mixin';
+  import {getPageGoods} from 'api/biz';
 
   export default {
     mixins: [directiveMixin],
@@ -68,10 +69,13 @@
     },
     methods: {
       search() {
-        console.log('query');
-        setTimeout(() => {
-          this.$refs.resultScroll.refresh();
-        }, 20);
+        getPageGoods({
+          start: 1,
+          limit: 10,
+          name: this.query
+        }).then((data) => {
+          this.list = data.list;
+        });
       },
       addQuery(query) {
         this.query = query;

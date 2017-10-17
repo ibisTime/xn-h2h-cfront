@@ -1,7 +1,7 @@
 import {loadSearch} from 'common/js/cache';
 
 const state = {
-  publishMallCate: [],
+  publishCategory: null,
   searchHistory: loadSearch(),
   location: null,
   isLocaErr: false,

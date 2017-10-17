@@ -1,5 +1,5 @@
-// 设置发布商品页面所属的分类
-export const SET_PUBLISH_MALL_CATE = 'SET_PUBLISH_MALL_CATE';
+// 设置发布商品页面当前选择的分类
+export const SET_PUBLISH_CATEGORY = 'SET_PUBLISH_CATEGORY';
 // 设置搜索历史
 export const SET_SEARCH_HISTORY = 'SET_SEARCH_HISTORY';
 // 设置定位信息
@@ -18,6 +18,8 @@ export const SET_USER_GENDER = 'SET_USER_GENDER';
 export const SET_USER_TRADE_PWD_FLAG = 'SET_USER_TRADE_PWD_FLAG';
 // 设置用户的生日
 export const SET_USER_BIRTHDAY = 'SET_USER_BIRTHDAY';
+// 设置用户的头像
+export const SET_USER_AVATAR = 'SET_USER_AVATAR';
 // 设置人民币账户
 export const SET_CNY_ACCOUNT = 'SET_CNY_ACCOUNT';
 // 设置积分账户

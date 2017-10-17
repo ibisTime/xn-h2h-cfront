@@ -10,18 +10,20 @@
           <loading v-show="!list.length" class="loading" title=""></loading>
           <div v-for="(item,index) in list"
                class="menu-item"
-               :class="leftCls(index)"
-               @click="choseMenu(index)"
+               :class="leftCls(item.code)"
+               @click="choseMenu(item.code,index)"
                ref="leftMenu">{{item.name}}</div>
         </scroll>
         <scroll class="right-menu"
+                ref="rightScroll"
                 :data="rightList"
                 :pullUpLoad="pullUpLoad">
-          <loading v-show="!rightList.length" class="loading" title=""></loading>
+          <loading v-show="rLoadingFlag" class="loading" title=""></loading>
           <div class="right-item"
-               :class="rightCls"
-               v-for="item in rightList"
-               @click="choseCate(item)">{{item.name}}</div>
+               :class="rightCls(item.code)"
+               v-for="(item,index) in rightList"
+               @click="choseCate(item,index)"
+               ref="rightMenu">{{item.name}}</div>
         </scroll>
       </div>
     </div>
@@ -32,84 +34,94 @@
   import Loading from 'base/loading/loading';
   import MHeader from 'components/m-header/m-header';
   import {mapMutations, mapGetters} from 'vuex';
-  import {SET_PUBLISH_MALL_CATE} from 'store/mutation-types';
+  import {SET_PUBLISH_CATEGORY} from 'store/mutation-types';
+  import {getCategories} from 'api/biz';
 
   export default {
     data() {
       return {
-        list: [
-          {
-            name: '数码'
-          }, {
-            name: '数码1'
-          }, {
-            name: '数码2'
-          }, {
-            name: '交通工具'
-          }, {
-            name: '交通工具1'
-          }, {
-            name: '交通工具2'
-          }, {
-            name: '交通工具3'
-          }
-        ],
-        rightData: {
-          '数码2': [
-            {
-              name: '数码'
-            }, {
-              name: '数码1'
-            }, {
-              name: '数码2'
-            }, {
-              name: '交通工具'
-            }, {
-              name: '交通工具1'
-            }, {
-              name: '交通工具2'
-            }, {
-              name: '交通工具3'
-            }
-          ]
-        },
-        leftIndex: 0,
-        rightIndex: -1,
-        rLoadingFlag: true
+        list: [],
+        rightData: {},
+        leftCode: '',
+        rightCode: '',
+        rLoadingFlag: true,
+        rightList: []
       };
     },
     created() {
       this.pullUpLoad = null;
+      this.getInitData();
     },
     computed: {
-      rightList() {
-        if (this.list.length) {
-          let _leftName = this.list[this.leftIndex].name;
-          let _rightData = this.rightData[_leftName] || [];
-          return _rightData;
-        }
-        return [];
-      },
       ...mapGetters([
-        'publishMallCate'
+        'publishCategory'
       ])
     },
     methods: {
-      choseMenu(index) {
-        this.leftIndex = index;
+      getInitData() {
+        if (this.publishCategory) {
+          this.leftCode = this.publishCategory.parentCode;
+          Promise.all([
+            getCategories(0),
+            this.getSmallCategories(this.publishCategory.parentCode)
+          ]).then(([left]) => {
+            this.list = left;
+          }).catch(() => {
+            this.rLoadingFlag = false;
+          });
+        } else {
+          getCategories(0).then((data) => {
+            this.list = data;
+            if (data.length) {
+              this.leftCode = data[0].code;
+              this.getSmallCategories(data[0].code);
+            }
+          });
+        }
+      },
+      getSmallCategories(code) {
+        if (this.rightData[code]) {
+          this.rightList = this.rightData[code];
+          this.rLoadingFlag = false;
+          return Promise.resolve(this.rightData[code]);
+        }
+        this.rightList = [];
+        this.rLoadingFlag = true;
+        return getCategories(code).then((data) => {
+          this.rightData[code] = data;
+          if (!this.list || this.leftCode === code) {
+            this.rightList = data;
+          }
+          this.rLoadingFlag = false;
+          if (this.publishCategory && this.publishCategory.parentCode === code) {
+            this.rightCode = this.publishCategory.code;
+          } else {
+            this.rightCode = '';
+          }
+        }).catch(() => {
+          this.rLoadingFlag = false;
+        });
+      },
+      choseMenu(code, index) {
+        this.leftCode = code;
+        this.getSmallCategories(code);
         this.$refs.leftScroll.scrollToElement(this.$refs.leftMenu[index], 200, false, true);
       },
-      choseCate(item) {
-        this.$router.back();
+      choseCate(item, index) {
+        this.$refs.rightScroll.scrollToElement(this.$refs.rightMenu[index], 200, false, true);
+        this.setCategory(item);
+        setTimeout(() => {
+          this.$router.back();
+        }, 210);
       },
-      leftCls(index) {
-        return index === this.leftIndex ? 'active' : '';
+      leftCls(code) {
+        return code === this.leftCode ? 'active' : '';
       },
-      rightCls(index) {
-        return index === this.rightIndex ? 'active' : '';
+      rightCls(code) {
+        return code === this.rightCode ? 'active' : '';
       },
       ...mapMutations({
-        setMallCate: SET_PUBLISH_MALL_CATE
+        setCategory: SET_PUBLISH_CATEGORY
       })
     },
     components: {

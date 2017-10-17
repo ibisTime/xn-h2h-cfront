@@ -1,8 +1,8 @@
 <template>
   <div class="home-wrapper">
-    <scroll>
+    <scroll :data="currentList" :hasMore="hasMore">
       <div class="slider-wrapper">
-        <slider :loop="loop">
+        <slider v-if="banners.length" :loop="loop">
           <div class="home-slider" v-for="item in banners" :key="item.code">
             <a :href="item.url||'javascript:void(0)'" :style="getImgSyl(item.pic)"></a>
           </div>
@@ -39,47 +39,130 @@
       </router-link>
       <div class="split"></div>
       <div class="mall-cates border-bottom-1px">
-        <div class="item active">
+        <div class="item" :class="item0Cls" @click="selectCategory(0)">
           <div class="text">热门推荐</div>
         </div>
-        <div class="item">
+        <div class="item" :class="item1Cls" @click="selectCategory(1)">
           <div class="text">附近商品</div>
         </div>
       </div>
       <div class="mall-content">
-        <mall-items></mall-items>
+        <mall-items :data="currentList"></mall-items>
       </div>
     </scroll>
+    <toast ref="toast" :text="text"></toast>
     <m-footer @goPublish="goPublish"></m-footer>
     <router-view></router-view>
   </div>
 </template>
 <script>
+  import {mapGetters} from 'vuex';
   import Slider from 'base/slider/slider';
   import Scroll from 'base/scroll/scroll';
+  import Toast from 'base/toast/toast';
   import MFooter from 'components/m-footer/m-footer';
   import MallItems from 'components/mall-items/mall-items';
   import {formatImg} from 'common/js/util';
+  import {getPageGoods} from 'api/biz';
+  import {getBannerList} from 'api/general';
 
   export default {
     data() {
       return {
-        banners: [
-          {
-            url: 'https://www.baidu.com',
-            pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg'
-          },
-          {
-            url: '',
-            pic: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg'
-          }
-        ]
+        banners: [],
+        hasMore: true,
+        currentIndex: 0,
+        goodsObj: {},
+        config: [{
+          start: 1,
+          limit: 10,
+          location: 1,
+          hasMore: true
+        }, {
+          start: 1,
+          limit: 10,
+          hasMore: true
+        }],
+        currentList: [],
+        text: ''
       };
     },
     created() {
+      this.first = true;
       this.loop = true;
+      this.getInitData();
+    },
+    updated() {
+      this.getInitData();
+    },
+    computed: {
+      item0Cls() {
+        return this.currentIndex === 0 ? 'active' : '';
+      },
+      item1Cls() {
+        return this.currentIndex === 1 ? 'active' : '';
+      },
+      ...mapGetters([
+        'location',
+        'isLocaErr'
+      ])
     },
     methods: {
+      shouldGetData() {
+        if (/home$/.test(this.$route.path)) {
+          return this.first;
+        }
+        return false;
+      },
+      getInitData() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          this.getBannerList();
+          this.getPageGoods();
+        }
+      },
+      getPageGoods() {
+        ((index) => {
+          getPageGoods({
+            ...this.config[index]
+          }).then((data) => {
+            this.goodsObj[index] = this.goodsObj[index] || [];
+            this.goodsObj[index] = this.goodsObj[index].concat(data.list);
+            if (data.list.length < 10 || data.totalCount <= 10) {
+              this.config[index].hasMore = false;
+              if (this.currentIndex === index) {
+                this.hasMore = this.config[index].hasMore;
+                this.currentList = this.goodsObj[index];
+              }
+            }
+          });
+        })(this.currentIndex);
+      },
+      getBannerList() {
+        return getBannerList().then((data) => {
+          this.banners = data;
+        });
+      },
+      selectCategory(index) {
+        this.currentIndex = index;
+        this.hasMore = this.config[index].hasMore;
+        this.currentList = this.goodsObj[index] || [];
+        if (!this.goodsObj[index]) {
+          if (index === 1) {
+            if (this.location) {
+              this.getPageGoods();
+            } else if (this.isLocaErr) {
+              this.text = '定位失败';
+              this.$refs.toast.show();
+            } else {
+              this.text = '定位中...';
+              this.$refs.toast.show();
+            }
+          } else {
+            this.getPageGoods();
+          }
+        }
+      },
       goPublish() {
         this.$router.push('/home/publish');
       },
@@ -89,10 +172,23 @@
         };
       }
     },
+    watch: {
+      location(newVal) {
+        if (newVal && this.currentIndex === 1) {
+          this.selectCategory(1);
+        }
+      },
+      isLocaErr(newVal) {
+        if (newVal && this.currentIndex === 1) {
+          this.selectCategory(1);
+        }
+      }
+    },
     components: {
       MFooter,
       Slider,
       Scroll,
+      Toast,
       MallItems
     }
   };
@@ -111,6 +207,7 @@
     .slider-wrapper {
       position: relative;
       height: 3.7rem;
+      width: 100%;
 
       .slider, .home-slider {
         height: 100%;

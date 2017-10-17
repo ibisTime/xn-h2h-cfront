@@ -1,4 +1,4 @@
-export const publishMallCate = state => state.publishMallCate;
+export const publishCategory = state => state.publishCategory;
 
 export const searchHistory = state => state.searchHistory;
 

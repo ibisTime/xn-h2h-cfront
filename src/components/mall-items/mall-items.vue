@@ -1,27 +1,29 @@
 <template>
   <ul class="mall-items-wrapper">
-    <li @click="goDetail('xxx')" class="border-bottom-1px">
-      <div class="img-wrap">
-        <img src="./demo@2x.png"/>
-      </div>
+    <li v-for="item in data" @click="goDetail(item.code)" class="border-bottom-1px">
+      <div class="img-wrap" :style="getImgStyl(item.pic)"></div>
       <div class="info">
-        <h2>标题标题标题标题标题标题标题标题标题标题标题标题标题标题</h2>
+        <h2 class="twoline-ellipsis">{{item.name}}</h2>
         <div class="label">
-          <label>来自电脑</label>
-          <label>全新</label>
+          <label>{{item.typeName}}</label>
+          <label v-if="item.isNew==='1'">全新</label>
         </div>
         <div class="price">
-          <label>¥</label>39.00<span>原价：¥49</span>
+          <label>¥</label>{{item.price | formatAmount}}<span>原价：¥{{item.originalPrice | formatAmount}}</span>
         </div>
-        <div class="addr">杭州 | 萧山</div>
+        <div class="addr">{{item.city}} | {{item.area}}</div>
       </div>
     </li>
   </ul>
 </template>
 <script>
+  import {commonMixin} from 'common/js/mixin';
+  import {formatImg} from 'common/js/util';
+
   export default {
+    mixins: [commonMixin],
     props: {
-      list: {
+      data: {
         type: Array,
         default: () => []
       }
@@ -29,6 +31,11 @@
     methods: {
       goDetail(code) {
         this.$router.push(this.$route.path + '/' + code);
+      },
+      getImgStyl(pic) {
+        return {
+          backgroundImage: `url(${formatImg(pic)})`
+        };
       }
     }
   };
@@ -54,18 +61,18 @@
         flex: 0 0 2.4rem;
         height: 2.4rem;
         overflow: hidden;
-
-        img {
-          width: 100%;
-          height: 100%;
-        }
+        background-size: cover;
+        background-position: center;
       }
 
       .info {
+        display: flex;
         padding: 0.1rem 0 0.1rem 0.2rem;
+        flex-direction: column;
+        justify-content: space-between;
 
         h2 {
-          line-height: 1.2;
+          line-height: 1.3;
           font-size: $font-size-medium;
         }
 

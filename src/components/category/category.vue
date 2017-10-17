@@ -1,47 +1,23 @@
 <template>
   <div class="cate-wrapper">
-    <scroll>
+    <scroll ref="scroll" :data="goods" :hasMore="hasMore">
       <div class="header">
         <router-link class="search" to="/category/search" tag="div">
           <i class="search-icon"></i><span>鞋子</span>
         </router-link>
       </div>
       <div class="cates clearfix">
-        <div class="item" @click="goList(0)">
-          <img src="./demo.png"/>
-          <p>数码</p>
+        <div v-for="item in visiableList" class="item" @click="goList(item.code)">
+          <img :src="item.pic | formatImg"/>
+          <p>{{item.name}}</p>
         </div>
-        <div class="item">
-          <img src="./demo.png"/>
-          <p>数码</p>
-        </div>
-        <div class="item">
-          <img src="./demo.png"/>
-          <p>数码</p>
-        </div>
-        <div class="item">
-          <img src="./demo.png"/>
-          <p>数码</p>
-        </div>
-        <div class="item">
-          <img src="./demo.png"/>
-          <p>数码</p>
-        </div>
-        <div class="item">
-          <img src="./demo.png"/>
-          <p>数码</p>
-        </div>
-        <div class="item">
-          <img src="./demo.png"/>
-          <p>数码</p>
-        </div>
-        <div class="item" @click="goAllCates">
+        <div v-if="showAll" class="item" @click="goAllCates">
           <img src="./all.png"/>
           <p>全部</p>
         </div>
       </div>
       <div class="split"></div>
-      <mall-items></mall-items>
+      <mall-items :data="goods"></mall-items>
     </scroll>
     <m-footer @goPublish="goPublish"></m-footer>
     <router-view></router-view>
@@ -51,12 +27,68 @@
   import Scroll from 'base/scroll/scroll';
   import MFooter from 'components/m-footer/m-footer';
   import MallItems from 'components/mall-items/mall-items';
+  import {getPageGoods, getCategories} from 'api/biz';
+  import {commonMixin} from 'common/js/mixin';
 
   export default {
+    mixins: [commonMixin],
     data() {
-      return {};
+      return {
+        categories: [],
+        goods: [],
+        start: 1,
+        limit: 10,
+        hasMore: true,
+        showAll: false
+      };
+    },
+    created() {
+      this.first = true;
+      this.getInitData();
+    },
+    updated() {
+      this.getInitData();
+    },
+    computed: {
+      visiableList() {
+        if (this.categories.length > 8) {
+          this.showAll = true;
+        }
+        return this.categories.slice(0, 8);
+      }
     },
     methods: {
+      shouldGetData() {
+        if (/category$/.test(this.$route.path)) {
+          return this.first;
+        }
+        return false;
+      },
+      getInitData() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          Promise.all([
+            this.getPageGoods(),
+            this.getCategories()
+          ]).catch(() => {});
+        }
+      },
+      getPageGoods() {
+        return getPageGoods({
+          start: this.start,
+          limit: this.limit
+        }).then((data) => {
+          this.goods = this.goods.concat(data.list);
+          if (data.totalCount <= this.limit || data.list < this.limit) {
+            this.hasMore = false;
+          }
+        });
+      },
+      getCategories() {
+        return getCategories(0).then((data) => {
+          this.categories = data;
+        });
+      },
       goList(code) {
         this.$router.push(`/category/list?code=${code}`);
       },

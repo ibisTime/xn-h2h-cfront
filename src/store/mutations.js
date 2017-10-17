@@ -1,8 +1,9 @@
 import * as types from './mutation-types';
+import User from 'common/bean/user';
 
 const mutations = {
-  [types.SET_PUBLISH_MALL_CATE](state, cate) {
-    state.publishMallCate = cate;
+  [types.SET_PUBLISH_CATEGORY](state, cate) {
+    state.publishCategory = cate;
   },
   [types.SET_SEARCH_HISTORY](state, history) {
     state.searchHistory = history;
@@ -14,31 +15,36 @@ const mutations = {
     state.isLocaErr = flag;
   },
   [types.SET_USER_STATE](state, user) {
-    state.user = user;
+    state.user = new User(user);
   },
   [types.SET_USER_MOBILE](state, mobile) {
-    let user = state.user || {};
+    let user = state.user || new User();
     user.mobile = mobile;
     state.user = user;
   },
   [types.SET_USER_NICKNAME](state, nickname) {
-    let user = state.user || {};
+    let user = state.user || new User();
     user.nickname = nickname;
     state.user = user;
   },
   [types.SET_USER_GENDER](state, gender) {
-    let user = state.user || {};
+    let user = state.user || new User();
     user.gender = gender;
     state.user = user;
   },
   [types.SET_USER_TRADE_PWD_FLAG](state, tradepwdFlag) {
-    let user = state.user || {};
+    let user = state.user || new User();
     user.tradepwdFlag = tradepwdFlag;
     state.user = user;
   },
   [types.SET_USER_BIRTHDAY](state, birthday) {
-    let user = state.user || {};
+    let user = state.user || new User();
     user.birthday = birthday;
+    state.user = user;
+  },
+  [types.SET_USER_AVATAR](state, avatar) {
+    let user = state.user || new User();
+    user.setAvatar(avatar);
     state.user = user;
   },
   [types.SET_CNY_ACCOUNT](state, account) {

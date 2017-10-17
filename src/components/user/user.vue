@@ -3,7 +3,7 @@
     <div class="top-wrapper">
       <router-link tag="div" to="/user/setting" class="personal">
         <div class="head-bg">
-          <img :src="(user && user.photo) | formatAvatar"/>
+          <img :src="user && user.photo"/>
         </div>
         <div class="person-info">
           <div class="name">{{userName}}</div>

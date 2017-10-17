@@ -15,18 +15,18 @@
             <textarea rows="4" placeholder="在这里写下宝贝的广告语吧" v-model="description"></textarea>
           </div>
           <div class="addr">
-            <span>杭州 余杭</span>
+            <span>{{addrText}}</span>
             <div @click.stop="choseNew" class="new" :class="newCls">全新宝贝</div>
           </div>
         </div>
         <div class="split"></div>
         <div class="infos">
-          <div class="info-item border-bottom-1px" @click="goCate">分类<div class="label icon-right">选择分类</div></div>
+          <div class="info-item border-bottom-1px" @click="goCate">分类<div class="label icon-right">{{categoryText}}</div></div>
           <div class="info-item border-bottom-1px" @click="showPrice">价格
             <div class="label" :class="sellCls">{{sellText}}</div>
           </div>
           <div class="info-item">同步到圈子<div class="label">
-            <switch-option class="option"></switch-option>
+            <switch-option class="option" :value="isPublish" @update:value="updatePublish"></switch-option>
           </div></div>
         </div>
         <div class="bottom-btn">
@@ -34,19 +34,23 @@
         </div>
       </div>
       <price-mask ref="priceMask" @confirm="updatePrice"></price-mask>
+      <toast ref="toast" :text="text"></toast>
       <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
+  import {mapMutations, mapGetters} from 'vuex';
+  import {SET_PUBLISH_CATEGORY} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
   import SwitchOption from 'base/switch-option/switch-option';
+  import Loading from 'base/loading/loading';
+  import Toast from 'base/toast/toast';
   import MHeader from 'components/m-header/m-header';
   import PhotoScroll from 'components/photo-scroll/photo-scroll';
   import PriceMask from 'components/price-mask/price-mask';
-  import {mapMutations, mapGetters} from 'vuex';
-  import {SET_PUBLISH_MALL_CATE} from 'store/mutation-types';
   import {isUnDefined} from 'common/js/util';
+  import {publish} from 'api/biz';
 
   export default {
     data() {
@@ -58,13 +62,17 @@
         sellPrice: '',
         oriPrice: '',
         freight: '',
-        isFree: false
+        isFree: false,
+        isPublish: false,
+        text: '',
+        loadingFlag: true
       };
     },
     created() {
+      this.activityCode = this.$route.query.code || '';
       this.showBack = false;
       this.border = true;
-      this.setMallCate([]);
+      this.setCategory(null);
     },
     computed: {
       newCls() {
@@ -76,8 +84,22 @@
       sellText() {
         return isUnDefined(this.sellPrice) ? '开个价' : this.sellPrice;
       },
+      categoryText() {
+        return this.publishCategory ? this.publishCategory.name : '选择分类';
+      },
+      addrText() {
+        if (this.location) {
+          let address = this.location.addressComponent;
+          return address.city + ' ' + address.area;
+        } else if (this.isLocaErr) {
+          return '定位失败';
+        }
+        return '定位中...';
+      },
       ...mapGetters([
-        'publishMallCate'
+        'publishCategory',
+        'location',
+        'isLocaErr'
       ])
     },
     methods: {
@@ -99,19 +121,76 @@
         this.freight = freight;
         this.isFree = isFree;
       },
+      updatePublish(val) {
+        this.isPublish = val;
+      },
+      valid() {
+        let err = true;
+        if (!this.photos.length) {
+          this.text = '照片未上传';
+        } else if (isUnDefined(this.name)) {
+          this.text = '商品名称不能为空';
+        } else if (isUnDefined(this.description)) {
+          this.text = '商品简介不能为空';
+        } else if (this.isLocaErr) {
+          this.text = '定位失败';
+        } else if (!this.publishCategory) {
+          this.text = '商品分类不能为空';
+        } else if (isUnDefined(this.sellPrice)) {
+          this.text = '商品价格不能为空';
+        } else {
+          err = false;
+        }
+        return !err;
+      },
+      prepareParams() {
+        let pic = this.photos.map(item => item.key).join('||');
+        let {province, city, area} = this.location.addressComponent;
+        let {lat: latitude, lng: longitude} = this.location.position;
+        return {
+          province,
+          city,
+          area,
+          latitude,
+          longitude,
+          pic,
+          description: this.description,
+          isNew: this.isNew ? 1 : 0,
+          isPublish: 1,
+          name: this.name,
+          originalPrice: this.oriPrice * 1000,
+          price: this.sellPrice * 1000,
+          yunfei: this.freight * 1000,
+          type: this.publishCategory.code,
+          activityCode: this.activityCode
+        };
+      },
       publish() {
-        console.log('click');
+        if (this.valid) {
+          publish(this.prepareParams()).then(() => {
+            this.loadingFlag = false;
+            this.text = '发布成功';
+            this.$refs.toast.show();
+            setTimeout(() => {
+              this.$router.push('/category');
+            }, 1000);
+          }).catch(() => {
+            this.loadingFlag = false;
+          });
+        }
       },
       close() {
         this.$router.back();
       },
       ...mapMutations({
-        setMallCate: SET_PUBLISH_MALL_CATE
+        setCategory: SET_PUBLISH_CATEGORY
       })
     },
     components: {
       MHeader,
       Scroll,
+      Loading,
+      Toast,
       PriceMask,
       PhotoScroll,
       SwitchOption
@@ -161,6 +240,7 @@
 
           textarea {
             width: 100%;
+            line-height: 1.1;
           }
         }
 

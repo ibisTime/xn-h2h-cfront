@@ -22,7 +22,6 @@
     },
     watch: {
       checked: function (newValue) {
-        console.log(newValue);
         this.$emit('update:value', newValue);
       }
     },

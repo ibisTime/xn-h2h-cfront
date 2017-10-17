@@ -1,36 +1,56 @@
 <template>
   <transition name="slide">
     <div class="major-wrapper">
-      <scroll :data="list">
+      <scroll :data="list" :hasMore="!list.length">
         <ul>
-          <li class="border-bottom-1px">
-            <div class="img"><img src="./demo.png"/></div>
-            <div class="text">手机</div>
-            <div class="arrow"></div>
-          </li>
-          <li class="border-bottom-1px">
-            <div class="img"><img src="./demo.png"/></div>
-            <div class="text">手机</div>
-            <div class="arrow"></div>
-          </li>
-          <li class="border-bottom-1px">
-            <div class="img"><img src="./demo.png"/></div>
-            <div class="text">手机</div>
+          <li v-for="item in list" class="border-bottom-1px" @click="goList(item)">
+            <div class="img"><img :src="item.pic | formatImg"/></div>
+            <div class="text">{{item.name}}</div>
             <div class="arrow"></div>
           </li>
         </ul>
       </scroll>
+      <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
+  import {getCategories} from 'api/biz';
+  import {commonMixin} from 'common/js/mixin';
 
   export default {
+    mixins: [commonMixin],
     data() {
       return {
         list: []
       };
+    },
+    created() {
+      this.first = true;
+      this.getInitData();
+    },
+    updated() {
+      this.getInitData();
+    },
+    methods: {
+      shouldGetData() {
+        if (/category\/categories$/.test(this.$route.path)) {
+          return this.first;
+        }
+        return false;
+      },
+      getInitData() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          getCategories(0).then((data) => {
+            this.list = data;
+          });
+        }
+      },
+      goList(item) {
+        this.$router.push(`/category/categories/list?code=${item.code}`);
+      }
     },
     components: {
       Scroll

@@ -1,118 +1,260 @@
 <template>
   <transition name="slide">
     <div class="goods-detail-wrapper">
-      <scroll>
-        <header>
-          <div class="top">
-            <div class="name">1.5米大床</div>
-            <div class="icon-like" :class="likeCls" @click="collection"></div>
-          </div>
-          <div class="center">
-            <span class="unit">¥</span>
-            <span class="price">100</span>
-            <span class="text">原价¥100</span>
-            <span class="text">运费¥10</span>
-            <span class="text fr">浏览99</span>
-          </div>
-          <div class="bottom">
-            <div class="inner">
-              <i class="icon icon-addr"></i>
-              <span>杭州 | 萧山</span>
-              <i class="icon icon-right"></i>
+      <div class="scroll-wrapper">
+        <scroll :data="messages" :hasMore="hasMore" ref="scroll">
+          <header>
+            <div class="top">
+              <div class="name">{{name}}</div>
+              <div class="icon-like" :class="likeCls" @click="collection"></div>
             </div>
-          </div>
-        </header>
-        <div class="description">
-          <div class="text-content" :class="textCls">哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的哪日对粉丝的</div>
-          <div class="up-down">展开<i class="icon down"></i></div>
-          <div class="pic-wrapper">
-            <div class="normal-pic">
-              <img v-for="item in noramlPic" :src="item"/>
+            <div class="center">
+              <span class="unit">¥</span>
+              <span class="price">{{sellPrice}}</span>
+              <span class="text">原价¥{{oriPrice}}</span>
+              <span class="text">运费¥{{freight}}</span>
+              <span class="text fr">浏览{{readCount}}</span>
             </div>
-            <div class="special-pic">
-              <div class="spec-item" v-for="item in specialPic">
-                <div class="inner" :style="getSyl(item)"></div>
+            <div class="bottom">
+              <div class="inner">
+                <i class="icon icon-addr"></i>
+                <span>{{addr}}</span>
+                <i class="icon icon-right"></i>
+              </div>
+            </div>
+          </header>
+          <div class="description">
+            <div class="text-content" :class="textCls">{{description}}</div>
+            <div class="up-down" v-if="showAll" @click="showDesc">展开<i class="icon down"></i></div>
+            <div class="pic-wrapper">
+              <div class="normal-pic">
+                <img @load="imgLoad" v-for="item in noramlPic" :src="item | formatImg"/>
+              </div>
+              <div class="special-pic">
+                <div class="spec-item" v-for="item in specialPic">
+                  <div class="inner" :style="getSyl(item)"></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="card">
-          <div class="img"><img src="./demo@2x.png"/></div>
-          <div class="content">
-            <div class="name">ISDFSSFF</div>
-            <div class="info">90后 金牛座 女生 刚刚来过</div>
+          <div class="card" v-if="publisher" @click="goUserCenter">
+            <div class="img"><img :src="publisher.photo | formatImg"/></div>
+            <div class="content">
+              <div class="name">{{publisher.nickname}}</div>
+              <div class="info">{{publisherDesc}}</div>
+            </div>
+            <div class="icon-right"></div>
           </div>
-          <div class="icon-right"></div>
-        </div>
-        <div class="message">
-          <div class="title">互动（1）</div>
-          <div v-show="!messages.length" class="no-result">
-            <div class="img"></div>
-            <div class="text">更多宝贝细节，帮大家问问卖家</div>
-            <div class="button"><button>我要留言</button></div>
+          <div class="message">
+            <div class="title">互动（{{totalMesCount}}）</div>
+            <div v-if="!messages.length" class="no-result">
+              <div class="img"></div>
+              <div class="text">更多宝贝细节，帮大家问问卖家</div>
+              <div class="button"><button @click="showRating">我要留言</button></div>
+            </div>
+            <ul v-else class="ratings">
+              <li class="mine">
+                <div class="img"><img src="./demo@2x.png"></div>
+                <div class="rating">说点什么吧，看对眼就上</div>
+                <div class="button"><button @click="showRating">我要留言</button></div>
+              </li>
+              <li class="info border-bottom-1px" v-for="item in messages">
+                <div class="img"><img src="./demo@2x.png"></div>
+                <div class="text">
+                  <div class="name">{{item.nickname}}</div>
+                  <div class="msg">{{item.content}}</div>
+                </div>
+              </li>
+            </ul>
           </div>
-          <ul class="ratings">
-            <li class="mine">
-              <div class="img"><img src="./demo@2x.png"></div>
-              <div class="rating">说点什么吧，看对眼就上</div>
-              <div class="button"><button>我要留言</button></div>
-            </li>
-            <li class="info border-bottom-1px" v-for="item in messages">
-              <div class="img"><img src="./demo@2x.png"></div>
-              <div class="text">
-                <div class="name">{{item.name}}</div>
-                <div class="msg">{{item.content}}</div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </scroll>
+        </scroll>
+      </div>
+      <footer>
+        <div class="price">金额：<span class="unit">¥</span><span>1999.00</span></div>
+        <div class="btn">联系买家</div>
+        <div class="btn buy" @click="goBuy">马上买</div>
+      </footer>
+      <div v-if="loadingFlag" class="loading-wrapper">
+        <loading class="loading-content"></loading>
+      </div>
+      <rating ref="rating" :parentCode="$route.params.code" :user="user" @ratingSuc="ratingSuc"></rating>
     </div>
   </transition>
 </template>
 <script>
-  import Demo from './demo@2x.png';
+  import {mapGetters, mapMutations} from 'vuex';
+  import {SET_USER_STATE} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
-//  import {formatImg} from 'common/js/util';
+  import Loading from 'base/loading/loading';
+  import Rating from 'components/rating/rating';
+  import {getGoodsDetail, getPageComments, collection, read, cancelCollection} from 'api/biz';
+  import {getUserById, getUser} from 'api/user';
+  import {formatImg, formatAmount} from 'common/js/util';
+  import {commonMixin} from 'common/js/mixin';
+  import User from 'common/bean/user';
 
   export default {
+    mixins: [commonMixin],
     data() {
       return {
-        noramlPic: [Demo, Demo, Demo],
-        specialPic: [Demo, Demo, Demo, Demo],
-        messages: [{
-          content: '分三大发的',
-          name: '爱对方'
-        }, {
-          content: '分三大发的',
-          name: '爱对方'
-        }, {
-          content: '分三大发的',
-          name: '爱对方'
-        }],
+        loadingFlag: false,
+        messages: [],
+        noramlPic: [],
+        specialPic: [],
+        detail: null,
         isLike: false,
-        isShow: false
+        isShow: false,
+        showAll: false,
+        description: '',
+        readCount: 0,
+        hasMore: true,
+        publisher: null,
+        start: 1,
+        limit: 10,
+        totalMesCount: 0
       };
     },
     computed: {
+      name() {
+        return this.detail && this.detail.name || '';
+      },
+      sellPrice() {
+        return formatAmount(this.detail && this.detail.price || 0);
+      },
+      oriPrice() {
+        return formatAmount(this.detail && this.detail.originalPrice || 0);
+      },
+      freight() {
+        return formatAmount(this.detail && this.detail.yunfei || 0);
+      },
+      addr() {
+        return this.detail ? `${this.detail.city} | ${this.detail.area}` : '';
+      },
       likeCls() {
         return this.isLike ? 'active' : '';
       },
       textCls() {
         return this.isShow ? 'show' : '';
-      }
+      },
+      publisherDesc() {
+        return this.publisher ? this.publisher.toString() : '';
+      },
+      ...mapGetters([
+        'user'
+      ])
+    },
+    created() {
+      this.code = this.$route.params.code;
+      this.getDetail();
+      this.getPageComments();
+      this.getUser();
+      read(this.code).catch(() => {});
     },
     methods: {
+      getDetail() {
+        getGoodsDetail(this.code).then((data) => {
+          if (this.user) {
+            this.loadingFlag = false;
+          }
+          this.getUserById(data.storeCode);
+          this.detail = data;
+          this.isLike = data.isCollect === '1';
+          this.description = data.description;
+          this.showAll = this.description.length >= 200;
+          this.isShow = this.description.length < 200;
+          let pics = this.detail.pic.split('||');
+          let len = pics.length;
+          let sIdx = 4;
+          if (len <= 4) {
+            sIdx = len;
+          } else if (len % 2) {
+            sIdx = 3;
+          }
+          this.noramlPic = pics.slice(0, sIdx);
+          this.specialPic = pics.slice(sIdx);
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      getPageComments() {
+        getPageComments(this.code, this.start, this.limit).then((data) => {
+          this.messages = this.messages.concat(data.list);
+          this.totalMesCount = data.totalCount;
+          if (data.list.length < this.limit || data.totalCount <= this.limit) {
+            this.hasMore = false;
+          }
+        }).catch(() => {});
+      },
+      getUser() {
+        getUser().then((data) => {
+          this.setUser(data);
+          if (this.detail) {
+            this.loadingFlag = false;
+          }
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      getUserById(userId) {
+        getUserById(userId).then((data) => {
+          this.publisher = new User(data);
+          setTimeout(() => {
+            this.$refs.scroll.refresh();
+          }, 20);
+        });
+      },
       collection() {
-        this.isLike = !this.isLike;
+        if (this.isLike) {
+          this.cancelCollect();
+        } else {
+          this.collect();
+        }
+      },
+      collect() {
+        collection(this.code).then(() => {
+          this.isLike = true;
+        }).catch(() => {});
+      },
+      cancelCollect() {
+        cancelCollection(this.code).then(() => {
+          this.isLike = false;
+        }).catch(() => {});
       },
       getSyl(pic) {
-        return {backgroundImage: `url(${pic})`};
-//        return {backgroundImage: `url(${formatImg(pic)})`};
-      }
+        return {backgroundImage: `url(${formatImg(pic)})`};
+      },
+      showDesc() {
+        this.isShow = true;
+        this.showAll = false;
+        setTimeout(() => {
+          this.$refs.scroll.refresh();
+        }, 20);
+      },
+      imgLoad() {
+        setTimeout(() => {
+          this.$refs.scroll.refresh();
+        }, 20);
+      },
+      showRating() {
+        this.$refs.rating.show();
+      },
+      ratingSuc(item) {
+        this.messages.unshift(item);
+      },
+      goBuy() {
+        this.$router.push('/category/confirm?code=' + this.code);
+      },
+      goUserCenter() {
+        this.$router.push('/user/' + this.publisher.userId);
+      },
+      ...mapMutations({
+        setUser: SET_USER_STATE
+      })
     },
     components: {
-      Scroll
+      Scroll,
+      Rating,
+      Loading
     }
   };
 </script>
@@ -136,6 +278,14 @@
       left: 100%;
     }
 
+    .scroll-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 1rem;
+      width: 100%;
+    }
+
     header {
       padding: 0.3rem;
       padding-bottom: 0.32rem;
@@ -147,6 +297,7 @@
 
         .name {
           flex: 1;
+          line-height: 1.2;
           font-size: $font-size-large;
         }
 
@@ -249,6 +400,7 @@
         overflow: hidden;
 
         &.show {
+          margin-bottom: 0.3rem;
           max-height: none;
         }
       }
@@ -478,6 +630,65 @@
               @include border-none();
             }
           }
+        }
+      }
+    }
+
+    .loading-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+
+      .loading-content {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        transform: translate3d(0, -50%, 0);
+      }
+    }
+
+    footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0.12rem 0.3rem;
+      height: 1rem;
+      background: #fff;
+
+      .price {
+        /*white-space: nowrap;*/
+        font-size: $font-size-medium-s;
+
+        span {
+          font-size: $font-size-medium-x;
+          color: $color-red;
+
+          &.unit {
+            font-size: $font-size-small;
+          }
+        }
+        padding-right: 0.1rem;
+      }
+
+      .btn {
+        flex: 1;
+        margin-left: 0.2rem;
+        height: 0.76rem;
+        line-height: 0.76rem;
+        border-radius: 0.1rem;
+        text-align: center;
+        font-size: $font-size-medium-xx;
+        color: #fff;
+        background: $primary-color;
+
+        &.buy {
+          background: $color-red;
         }
       }
     }

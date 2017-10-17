@@ -90,7 +90,7 @@
 <script>
   import {mapGetters, mapMutations} from 'vuex';
   import EXIF from 'exif-js';
-  import {SET_USER_STATE} from 'store/mutation-types';
+  import {SET_USER_STATE, SET_USER_AVATAR} from 'store/mutation-types';
   import Qiniu from 'base/qiniu/qiniu';
   import Scroll from 'base/scroll/scroll';
   import Toast from 'base/toast/toast';
@@ -226,10 +226,7 @@
       editAvatar() {
         changeAvatar(this.imgKey).then(() => {
           this.loadingFlag = false;
-          this.setUser({
-            ...this.user,
-            photo: this.imgKey
-          });
+          this.setAvatar(this.imgKey);
         }).catch(() => {
           this.preview = '';
           this.loadingFlag = false;
@@ -267,7 +264,8 @@
         });
       },
       ...mapMutations({
-        setUser: SET_USER_STATE
+        setUser: SET_USER_STATE,
+        setAvatar: SET_USER_AVATAR
       })
     },
     components: {

@@ -24,6 +24,8 @@ const CategoryList = () => import('components/category-list/category-list');
 const Search = () => import('components/search/search');
 // 商品详情
 const Detail = () => import('components/detail/detail');
+// 提交订单
+const OrderConfirm = () => import('components/order-confirm/order-confirm');
 
 // 发布
 const Publish = () => import('components/publish/publish');
@@ -144,7 +146,29 @@ export default new Router({
         },
         {
           path: 'categories',
-          component: MajorCategories
+          component: MajorCategories,
+          children: [
+            {
+              path: 'list',
+              component: CategoryList,
+              children: [
+                {
+                  path: 'search',
+                  component: Search,
+                  children: [
+                    {
+                      path: ':code',
+                      component: Detail
+                    }
+                  ]
+                },
+                {
+                  path: ':code',
+                  component: Detail
+                }
+              ]
+            }
+          ]
         },
         {
           path: 'search',
@@ -175,6 +199,10 @@ export default new Router({
               component: Detail
             }
           ]
+        },
+        {
+          path: 'confirm',
+          component: OrderConfirm
         },
         {
           path: ':code',

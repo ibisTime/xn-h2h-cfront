@@ -7,7 +7,7 @@ export function wxLogin(code, userReferee, mobile, smsCaptcha) {
     code,
     isNeedMobile: 0,
     kind: 'C',
-    type: 'WX_H5',
+    type: 'wx_h5',
     mobile,
     smsCaptcha
   };
@@ -22,6 +22,13 @@ export function wxLogin(code, userReferee, mobile, smsCaptcha) {
 export function getUser() {
   return fetch(805121, {
     userId: getUserId()
+  });
+}
+
+// 获取用户详情
+export function getUserById(userId) {
+  return fetch(805121, {
+    userId
   });
 }
 
