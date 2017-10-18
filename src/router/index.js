@@ -124,7 +124,13 @@ export default new Router({
         },
         {
           path: 'trade',
-          component: TradeCircle
+          component: TradeCircle,
+          children: [
+            {
+              path: ':code',
+              component: Detail
+            }
+          ]
         },
         {
           path: ':code',

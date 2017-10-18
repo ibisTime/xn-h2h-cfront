@@ -139,3 +139,22 @@ export function getAddressList() {
 export function getAddress(code) {
   return fetch(805166, {code});
 }
+
+// 签到
+export function sign(location) {
+  return fetch(805148, {
+    location,
+    userId: getUserId()
+  });
+}
+
+// 签到天数
+export function signNum(start, limit) {
+  return fetch(805145, {
+    start,
+    limit,
+    orderDir: 'desc',
+    orderColumn: 'signDatetime',
+    userId: getUserId()
+  });
+}

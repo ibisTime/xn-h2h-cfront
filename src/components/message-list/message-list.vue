@@ -1,7 +1,7 @@
 <template>           
   <div class="list-wrapper" >
     <scroll>
-      <div class="list-item" @click ='goChat(111)' >
+      <div class="list-item" @click ="goChat('111')" >
         <div class="headPic">
         </div>
         <div class="content">
@@ -14,7 +14,8 @@
     <div v-show="!messageList.length && !hasMore" class="no-result">
       <div class="no-result-icon"></div>
       <p class="no-result-text">{{title}}</p>
-    </div>      
+    </div>  
+    <router-view></router-view>    
   </div>   
 </template>
 <script>

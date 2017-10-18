@@ -1,54 +1,100 @@
 <template>
   <div class="trades-wrapper">
-    <scroll>
-      <ul>
-        <li  class="trade-wrapper">
+    <scroll ref="scroll" :hasMore="hasMore" :data="tradeList">
+      <ul class="trades-items-wrapper">
+        <li  v-for="item in tradeList"  @click="goDetail(item.code)"class="trade-wrapper">
           <div class="trade-top">
-            <div class="head-pic"></div>
+            <div class="head-pic" :style="getImgStyl(item.pic)"></div>
             <div class="person-info">
-              <div class="name">群群</div>
+              <div class="name">{{item.name}}</div>
               <div class="area">
-                <span>大连 </span>|<span> 5小时前来过</span>
+                <span>{{item.city}} </span>|<span> 5小时前来过</span>
               </div>
             </div>
-            <div class="clothes">来自服装</div>
+            <div class="clothes">来自{{item.kind}}</div>
           </div>
-          <!-- <div class="slider-wrapper">
-            <trade-scroll :showDots="showDots" :autoPlay="autoPlay">
-              <div class="pic-slider" v-for="item in banners" :key="item.code">
-                <a :href="item.url||'javascript:void(0)'" :style="getImgSyl(item.pic)"></a>
-              </div>
-            </trade-scroll>
-          </div> -->
           <div class="photos-wrapper">
-            <trade-scroll></trade-scroll>
+            <trade-scroll :data="tradeList"></trade-scroll>
           </div>          
           <div class="trade-bottom">
-            <div>女款连衣裙 尺码:XL | 身高:160-175 胸围:85-...</div>
-            <div class="goods-price">￥<span>20</span></div>
+            <div class="description">{{item.description}}</div>
+            <div class="goods-price">￥<span>{{item.price | formatAmount}}</span></div>
             <ul class="operate-icon">
               <li class="want">111</li>
               <li class="message">111</li>
-              <li class="more"></li>
+              <!-- <li class="more"></li> -->
             </ul>
           </div>
         </li>
       </ul>
     </scroll>
+    <!-- <div v-show="!tradeList && !hasMore" class="no-result-wrapper">
+      <no-result title="抱歉，暂无订单"></no-result>
+    </div>   -->  
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import TradeScroll from 'components/trade-scroll/trade-scroll';
   import Scroll from 'base/scroll/scroll';
+  import {getPageGoods, businessNum} from 'api/biz';
+  import {formatImg} from 'common/js/util';
+  import {getDictList} from 'api/general';
+  import {commonMixin} from 'common/js/mixin';
+
+  const LIMIT = 20;
+
   export default {
+    mixins: [commonMixin],
     data() {
       return {
-        currentList: true
+        hasMore: true,
+        start: 1,
+        isPublish: 1,
+        tradeList: []
+
       };
     },
-    created() {},
-    methods: {},
+    created() {
+      this.getInitData();
+    },
+    methods: {
+      getInitData() {
+        this.getTradeCircle();
+        this.getMallTypeDict();
+        if (this.getTradeCircle()) {
+          this.businessNum();
+        }
+      },
+      getTradeCircle () {
+        getPageGoods({
+          start: this.start,
+          limit: LIMIT,
+          isPublish: this.isPublish
+        }).then((data) => {
+          this.hasMore = false;
+          data.list.forEach((item, index) => {
+            this.tradeList.push(item);
+          });
+        });
+      },
+      getImgStyl(pic) {
+        return {
+          backgroundImage: `url(${formatImg(pic)})`
+        };
+      },
+      getMallTypeDict() {
+        return getDictList('mall_type');
+      },
+      goDetail(code) {
+        this.$router.push(this.$route.path + '/' + code);
+      },
+      getBusinessNum(category, entityCode, type) {
+        businessNum(category, entityCode, type).then((data) => {
+          console.log(data);
+        });
+      }
+    },
     components: {
       Scroll,
       TradeScroll
@@ -67,7 +113,10 @@
     width: 100%;
     height: 100%;
     background: #F5F5F5;
-    overflow: scroll;
+    .trades-items-wrapper{
+      position: relative;
+      width: 100%;
+      height: 100%;
     .trade-wrapper{
       border-top: 1px solid #eee;
       background: #fff;
@@ -135,6 +184,12 @@
         margin:0.2rem 0.3rem 0;
         color: #484848;
 
+        .description{
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         .goods-price{
           margin: 0.3rem 0;
           display: inline-block;
@@ -162,7 +217,7 @@
             font-size: $font-size-small;
             color: #999899;
             &:last-child{
-              width: 0.3rem;
+              width: 0.8rem;
             }          
           }
           .want{
@@ -178,6 +233,7 @@
 
       }
 
+    }     
     }
   }
 </style>

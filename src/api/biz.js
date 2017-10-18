@@ -297,3 +297,12 @@ export function getPageCoupons (start, limit) {
     toUser: getUserId()
   });
 }
+
+// 根据业务获取数量
+export function businessNum(category, entityCode, type) {
+  return fetch(801037, {
+    category,
+    entityCode,
+    type
+  });
+}

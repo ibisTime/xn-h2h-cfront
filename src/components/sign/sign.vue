@@ -4,15 +4,15 @@
         <div class="signRule" @click="showRule">签到规则</div>
         <div class="signIntegral">
           <div class="integralContent">
-            <h3>签到成功</h3>
-            <h4>356</h4>
-            <p>已获积分</p>
+            <h3>{{mark}}</h3>
+            <h4>{{jfOwn}}</h4>
+            <p>{{jfText}}</p>
           </div>
         </div>
         <div class="signTip">连续签到29天可获得额外奖励</div>
       </div>
       <div class="date-wrapper">  
-        <calendar :events="fcEvents"  lang="zh"></calendar>     
+        <calendar lang="zh" :dates="signDateList"></calendar>     
       </div>
       <sign-mask ref="mask" :text="text" :isHtml="isHtml"></sign-mask>
   </div>
@@ -20,36 +20,69 @@
 <script>
   import calendar from 'base/calendar/calendar';
   import SignMask from 'components/sign-mask/sign-mask';
-  import {getPageBizSysConfig} from 'api/general';
+  import {getUserSystemConfig} from 'api/general';
+  import {sign, signNum} from 'api/user';
+  import {getAccount} from 'api/account';
+  import {formatAmount, formatDate} from 'common/js/util';
 
-  var demoEvents = [
-    {
-      cssClass: ['family', 'career']
-    }
-  ];
+  // var activeClass = [
+  //   {
+  //     cssClass: ['active']
+  //   }
+  // ];
+  const LIMIT = 30;
 
   export default {
     data () {
       return {
-        fcEvents: demoEvents,
-        text: ''
+        activeClass: '',
+        text: '',
+        mark: '',
+        jfOwn: '',
+        jfText: '',
+        start: 1,
+        signDateList: []
       };
     },
     created() {
-      this.isAlert = true;
       this.isHtml = true;
+      this.getInitData();
     },
     methods: {
+      getInitData() {
+        this.signIn();
+        this.getJF();
+        this.getSignDate();
+      },
+      signIn () {
+        sign().then((data) => {
+          if (data.todaySign === true) {
+            this.mark = '签到成功';
+          }
+        }).catch(() => {
+          this.mark = '签到失败';
+        });
+      },
+      getJF () {
+        getAccount().then((data) => {
+          this.jfOwn = Math.floor(formatAmount(data[1].amount));
+          this.jfText = '已获积分';
+        });
+      },
+      getSignDate () {
+        signNum(this.start, LIMIT).then((data) => {
+          data.list.forEach((item, index) => {
+            this.signDateList.push(formatDate(item.signDatetime, 'yyyy-MM-dd'));
+          });
+        });
+      },
       showRule () {
-        getPageBizSysConfig(1).then((data) => {
-          this.text = `<div>签到规则</div><div>规则内容</div>`;
+        getUserSystemConfig('cardsTradition').then((data) => {
+          this.text = data.cvalue;
         }).catch(() => {
           this.text = '暂无';
         });
         this.$refs.mask.show();
-      },
-      getRules() {
-        this.text = `<div>签到规则</div><div>规则内容</div>`;
       }
     },
     components: {
@@ -134,14 +167,18 @@
 	.date-wrapper{
 		border: none;
 
-		.full-calendar-body{
-				.weeks{
-					border: none;
-          .week{
-            border-right: none;
-          }
-				}
-		}
+		.active{
+      position: relative;
+      top:-0.3rem;;
+      left: -0.3rem;
+      display: inline-block;
+      width: 0.7rem;
+      height: 0.7rem;
+      margin: 0.2rem;
+      padding: 0.1rem;
+      border: 0.02rem solid #48b0fb;
+      border-radius: 50%;                
+    }
 	}
 }  
 </style>
