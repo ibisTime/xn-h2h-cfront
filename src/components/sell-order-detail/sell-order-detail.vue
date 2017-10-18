@@ -1,6 +1,6 @@
 <template>
   <transition name="slide">
-    <div class="order-detail-wrapper">
+    <div class="sell-order-detail-wrapper">
       <scroll ref="scroll" :pullUpLoad="pullUpLoad">
         <div class="order-info">
           <div class="info">订单号：{{orderCode}}</div>
@@ -28,27 +28,25 @@
         <div class="amount-item">商品总额<span>¥{{productAmount | formatAmount}}</span></div>
         <div class="amount-item border-bottom-1px">运费<span>¥{{yunfei | formatAmount}}</span></div>
         <div class="pay-item">支付总价<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
-        <div class="logistics">
-          <div class="name">物流公司：顺丰快递</div>
-          <div class="code">物流单号：45554454545454</div>
+        <div class="logistics" v-if="logisticsCode">
+          <div class="name">物流公司：{{logisticsCompany}}</div>
+          <div class="code">物流单号：{{logisticsCode}}</div>
         </div>
         <div class="amount-item remark" v-show="applyNote"><label>买家嘱咐：</label><div>{{applyNote}}</div></div>
         <div class="amount-item remark" v-show="remark"><label>备注：</label><div>{{remark}}</div></div>
       </scroll>
       <div class="btns">
-        <div class="btn cancel" v-show="showCancel()" @click="_cancelOrder">取消订单</div>
-        <div class="btn" v-show="showTk()" @click="_tkOrder">申请退款</div>
-        <div class="btn" v-show="showPay()" @click="payOrder">立即支付</div>
-        <div class="btn" v-show="showReceive()" @click="_receiveOrder">确认收货</div>
-        <div class="btn" v-show="showRating()" @click="ratingOrder">立即评价</div>
-        <div class="btn" v-show="showWatch()">查看评价</div>
+        <div class="btn" v-show="showCancel()" @click="_cancelOrder">取消订单</div>
+        <div class="btn" v-show="showFhBtn()" @click="_fhOrder">发货</div>
+        <div class="btn" v-show="showHandleTkBtn()" @click="_handleTkOrder">退款处理</div>
+        <div class="btn" v-show="showWatch()" @click="showOrderRating">查看评价</div>
       </div>
       <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
-      <rating ref="rating" @ratingSuc="ratingSuccess" :orderCode="orderCode" :parentCode="parentCode"></rating>
-      <confirm ref="confirm" :text="text" @confirm="receiveOrder"></confirm>
       <confirm ref="alert" :isAlert="isAlert" :text="ratingContent"></confirm>
       <confirm-input ref="confirmInput" :text="inputText" @confirm="handleInputConfirm"></confirm-input>
       <toast :text="toastText" ref="toast"></toast>
+      <deliver-goods ref="deliver" @confirm="fhOrder" :deliverList="deliverList"></deliver-goods>
+      <tk-review ref="review" @confirm="handleTkOrder"></tk-review>
       <router-view></router-view>
     </div>
   </transition>
@@ -66,14 +64,17 @@
   import {ORDER_STATUS} from '../orders/config';
   import {commonMixin} from 'common/js/mixin';
   import Rating from 'components/rating/rating';
-  import {getOrder, cancelOrder, receiveOrder, tkOrder} from 'api/biz';
+  import {getOrder, cancelOrder, getOrderRating, sendOrder, tkReview} from 'api/biz';
+  import DeliverGoods from 'components/deliver-goods/deliver-goods';
+  import TkReview from 'components/tk-review/tk-review';
 
   export default {
     mixins: [commonMixin],
     data() {
       return {
         loadingFlag: true,
-        productInfo: {},
+        wlComps: null,
+        deliverList: [],
         text: '',
         loadingText: '正在载入...',
         currentIndex: 0,
@@ -83,6 +84,22 @@
       };
     },
     computed: {
+      logisticsCompany() {
+        if (this.currentOrder && this.wlComps) {
+          let code = this.currentOrder.logisticsCompany;
+          let result = '';
+          this.wlComps.forEach((item) => {
+            if (item.dkey === code) {
+              result = item.dvalue;
+            }
+          });
+          return result;
+        }
+        return '';
+      },
+      logisticsCode() {
+        return this.currentOrder && this.currentOrder.logisticsCode;
+      },
       parentCode() {
         return this.currentOrder && this.currentOrder.productOrderList[0].productCode;
       },
@@ -139,10 +156,10 @@
       ])
     },
     created() {
+      setTitle('订单详情');
       this.pullUpLoad = null;
       this.first = true;
       this.code = this.$route.params.id;
-      this.wlComps = null;
       this.getInitData();
       this.isAlert = true;
     },
@@ -151,9 +168,8 @@
     },
     methods: {
       shouldGetData() {
-        if (/\/user\/order\/[^/]+$/.test(this.$route.path)) {
-          setTitle('订单详情');
-          return this.first;
+        if (/\/user\/sell-order\/[^/]+$/.test(this.$route.path) && this.first) {
+          return true;
         }
         return false;
       },
@@ -172,7 +188,6 @@
             this.setCurrentOrder(data);
           }
           this.order = data;
-          this.productInfo = data.product || {};
           this.wlComps = wlComps;
           this.loadingFlag = false;
           setTimeout(() => {
@@ -188,27 +203,15 @@
         }
         return false;
       },
-      showTk() {
+      showFhBtn() {
         if (this.currentOrder) {
           return this.currentOrder.status === '2';
         }
         return false;
       },
-      showPay() {
+      showHandleTkBtn() {
         if (this.currentOrder) {
-          return this.currentOrder.status === '1';
-        }
-        return false;
-      },
-      showReceive() {
-        if (this.currentOrder) {
-          return this.currentOrder.status === '3';
-        }
-        return false;
-      },
-      showRating() {
-        if (this.currentOrder) {
-          return this.currentOrder.status === '4';
+          return this.currentOrder.status === '6';
         }
         return false;
       },
@@ -228,6 +231,24 @@
         });
         return ~index ? this.wlComps[index].dvalue : '未知';
       },
+      showOrderRating() {
+        this.loadingFlag = true;
+        this.loadingText = '正在载入...';
+        getOrderRating(this.code).then((data) => {
+          this.loadingFlag = false;
+          this.ratingContent = data.content;
+          this.$refs.alert.show();
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      updateCurOrder(status) {
+        this.setCurrentOrder({
+          ...this.currentOrder,
+          status
+        });
+        this.$emit('updateOrder', this.currentOrder.code, status);
+      },
       _cancelOrder() {
         this.inputText = '取消原因';
         this.$refs.confirmInput.show();
@@ -240,62 +261,60 @@
           this.tkOrder(text);
         }
       },
-      receiveOrder() {
-        this.loadingFlag = true;
-        this.loadingText = '收货中...';
-        receiveOrder(this.code).then(() => {
-          this.loadingFlag = false;
-          this.toastText = '收货成功';
-          this.$refs.toast.show();
-          this.editOrderListByReceived({
-            code: this.code
-          });
-        }).catch(() => {
-          this.loadingFlag = false;
-        });
-      },
-      tkOrder(text) {
-        this.loadingText = '提交中...';
-        tkOrder(this.code, text).then(() => {
-          this.loadingFlag = false;
-          this.toastText = '退款申请提交成功';
-          this.$refs.toast.show();
-          this.editOrderListByTk({
-            code: this.code
-          });
-        }).catch(() => {
-          this.loadingFlag = false;
-        });
-      },
       cancelOrder(text) {
         this.loadingText = '取消中...';
         cancelOrder(this.code, text).then(() => {
           this.loadingFlag = false;
-          this.toastText = '取消成功';
-          this.$refs.toast.show();
-          this.editOrderListByCancel({
-            code: this.code
-          });
+          this.showToast('取消成功');
+          this.updateCurOrder('91');
         }).catch(() => {
           this.loadingFlag = false;
         });
       },
-      payOrder() {
-        this.$router.push(`${this.$route.path}/pay?code=${this.code}`);
+      _fhOrder() {
+        if (!this.deliverList.length) {
+          this.fetchText = '正在载入...';
+          this.fetching = true;
+          getDictList('back_kd_company').then((data) => {
+            this.fetching = false;
+            this.deliverList = data;
+            this.$refs.deliver.show();
+          }).catch(() => {
+            this.fetching = false;
+          });
+        } else {
+          this.$refs.deliver.show();
+        }
       },
-      ratingOrder() {
-        this.$refs.rating.show();
+      fhOrder(code, company) {
+        this.fetching = true;
+        this.fetchText = '发货中...';
+        sendOrder(this.code, code, company.dkey).then(() => {
+          this.fetching = false;
+          this.showToast('发货成功');
+          this.updateCurOrder('3');
+        }).catch(() => {
+          this.fetching = false;
+        });
       },
-      _receiveOrder() {
-        this.text = '确认收货';
-        this.$refs.confirm.show();
+      _handleTkOrder() {
+        this.$refs.review.show();
       },
-      _tkOrder() {
-        this.inputText = '申请退款原因';
-        this.$refs.confirmInput.show();
+      handleTkOrder(result, remark) {
+        this.fetching = true;
+        this.fetchText = '审核中...';
+        tkReview(this.code, result, remark).then(() => {
+          this.fetching = false;
+          this.showToast('审核成功');
+          let nextStatus = result === '1' ? '8' : '7';
+          this.updateCurOrder(nextStatus);
+        }).catch(() => {
+          this.fetching = false;
+        });
       },
-      ratingSuccess(code) {
-        this.editOrderListByRating({code});
+      showToast(text) {
+        this.toastText = text;
+        this.$refs.toast.show();
       },
       goDetail() {
         if (this.currentOrder) {
@@ -326,7 +345,9 @@
       Toast,
       Confirm,
       ConfirmInput,
-      FullLoading
+      FullLoading,
+      DeliverGoods,
+      TkReview
     }
   };
 </script>
@@ -334,7 +355,7 @@
   @import "~common/scss/mixin";
   @import "~common/scss/variable";
 
-  .order-detail-wrapper {
+  .sell-order-detail-wrapper {
     position: fixed;
     top: 0;
     left: 0;

@@ -1,8 +1,8 @@
 <template>
   <transition name="slide">
-    <div class="notice-wrapper">
-      <scroll ref="scroll" :data="notices" :hasMore="hasMore" @pullingUp="getPageNotices" class="scroll-content">
-        <div class="list-content clearfix">
+    <div class="notices-wrapper">
+      <scroll ref="scroll" :data="notices" :hasMore="hasMore" @pullingUp="getPageNotices">
+        <div class="list-content">
           <div v-for="item in notices" class="item border-bottom-1px">
             <div class="img"><i></i></div>
             <div class="content">
@@ -14,7 +14,7 @@
         </div>
       </scroll>
       <div v-show="!hasMore && !notices.length" class="no-result-wrapper">
-        <no-result title="抱歉，暂无消息"></no-result>
+        <no-result title="抱歉，暂无公告"></no-result>
       </div>
     </div>
   </transition>
@@ -38,7 +38,7 @@
       };
     },
     created() {
-      setTitle('系统消息');
+      setTitle('系统公告');
       this.getPageNotices();
     },
     methods: {
@@ -63,66 +63,70 @@
   @import "~common/scss/variable";
   @import "~common/scss/mixin";
 
-  .notice-wrapper {
+  .notices-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: #fff;
+    background: $color-background;
 
-    .scroll-content {
-      position: relative;
-      height: 100%;
+    &.slide-enter-active, &.slide-leave-active {
+      transition: all 0.3s;
+    }
 
-      .list-content {
-        padding-left: 0.36rem;
+    &.slide-enter, &.slide-leave-to {
+      transform: translate3d(100%, 0, 0);
+    }
 
-        .item {
-          display: flex;
-          align-items: top;
-          padding: 0.5rem 0.36rem;
-          padding-left: 0;
-          @include border-bottom-1px($color-border);
+    .list-content {
+      padding-left: 0.36rem;
 
-          .img {
-            width: 0.64rem;
-            height: 0.64rem;
-            flex: 0 0 0.64rem;
-            font-size: 0;
+      .item {
+        display: flex;
+        align-items: top;
+        padding: 0.5rem 0.36rem;
+        padding-left: 0;
+        @include border-bottom-1px($color-border);
+        background-color: #fff;
 
-            i {
-              display: inline-block;
-              width: 100%;
-              height: 100%;
-              background: url(notice.png) no-repeat;
-              background-size: 0.64rem 0.64rem;
-            }
+        .img {
+          width: 0.64rem;
+          height: 0.64rem;
+          flex: 0 0 0.64rem;
+          font-size: 0;
+
+          i {
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+            background: url(notice.png) no-repeat;
+            background-size: 0.64rem 0.64rem;
+          }
+        }
+
+        .content {
+          flex: 1;
+          padding-left: 0.2rem;
+
+          .title {
+            font-size: $font-size-medium;
           }
 
-          .content {
-            flex: 1;
-            padding-left: 0.2rem;
+          .date {
+            padding-top: 0.2rem;
+            font-size: $font-size-small;
+            color: #999;
+          }
 
-            .title {
-              font-size: $font-size-medium;
-            }
-
-            .date {
-              padding-top: 0.2rem;
-              font-size: $font-size-small;
-              color: #999;
-            }
-
-            .desc {
-              margin-top: 0.3rem;
-              padding: 0.3rem;
-              border-radius: 0.12rem;
-              line-height: 1.2;
-              font-size: $font-size-small;
-              color: #999;
-              background: #f5f5f5;
-            }
+          .desc {
+            margin-top: 0.3rem;
+            padding: 0.3rem;
+            border-radius: 0.12rem;
+            line-height: 1.2;
+            font-size: $font-size-small;
+            color: #999;
+            background: #f5f5f5;
           }
         }
       }

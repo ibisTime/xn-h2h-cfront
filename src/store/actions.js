@@ -114,6 +114,30 @@ export const editAddress = function({commit, state}, {address}) {
   commit(types.SET_ADDRESS_LIST, addressList);
 };
 
+// 设置默认地址
+export const setDefaultAddress = function ({commit, state}, {code}) {
+  let addressList = state.addressList.slice();
+  let idx0, idx1;
+  addressList.forEach((address, idx) => {
+    if (address.code === code) {
+      idx1 = idx;
+    } else if (address.isDefault === '1') {
+      idx0 = idx;
+    }
+  });
+  let addr0 = addressList[idx0];
+  addressList.splice(idx0, 1, {
+    ...addr0,
+    isDefault: '0'
+  });
+  let addr1 = addressList[idx1];
+  addressList.splice(idx1, 1, {
+    ...addr1,
+    isDefault: '1'
+  });
+  commit(types.SET_ADDRESS_LIST, addressList);
+};
+
 // 删除地址
 export const deleteAddress = function({commit, state}, {code}) {
   let addressList = state.addressList.slice();

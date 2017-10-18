@@ -1,5 +1,5 @@
 import fetch from 'common/js/fetch';
-import {getUserId} from 'common/js/util';
+import {getUserId, formatDate} from 'common/js/util';
 
 /**
  * 发布商品
@@ -116,6 +116,39 @@ export function cancelPraise (entityCode) {
 }
 
 /**
+ * 分页查询收藏
+ * @param {string} start
+ * @param {string} limit
+ * @param {number} type
+ */
+function xn808950 (start, limit, type) {
+  return fetch(808950, {
+    start,
+    limit,
+    type,
+    userId: getUserId()
+  });
+}
+
+/**
+ * 分页查询收藏
+ * @param {string} start
+ * @param {string} limit
+ */
+export function getPageCollection (start, limit) {
+  return xn808950(start, limit, 1);
+}
+
+/**
+ * 分页查询我的浏览足迹
+ * @param {string} start
+ * @param {string} limit
+ */
+export function getPageReads (start, limit) {
+  return xn808950(start, limit, 3);
+}
+
+/**
  * 评论分页查询
  * @param {string} entityCode
  * @param {string} start
@@ -185,6 +218,9 @@ export function payOrder (code, payType, couponCode) {
 
 /**
  * 分页查询订单
+ * @param {string} start
+ * @param {string} limit
+ * @param {string} status
  * */
 export function getPageOrders(start, limit, status) {
   let params = {
@@ -200,6 +236,22 @@ export function getPageOrders(start, limit, status) {
     params.status = status;
   }
   return fetch(808068, params);
+}
+
+/**
+ * 分页查询我卖出的订单
+ * @param {string} start
+ * @param {string} limit
+ */
+export function getPageSellOrders (start, limit) {
+  let params = {
+    start,
+    limit,
+    toUser: getUserId(),
+    orderColumn: 'apply_datetime',
+    orderDir: 'desc'
+  };
+  return fetch(808065, params);
 }
 
 /**
@@ -241,16 +293,41 @@ export function tkOrder (code, remark) {
 /**
  * 退款审核
  * @param {string} code
- * @param {string} remark
  * @param {string} result 0 不同意，1同意
+ * @param {string} remark
  */
-export function tkReview (code, remark, result) {
+export function tkReview (code, result, remark) {
   return fetch(808062, {
     code,
     remark,
     result,
     updater: getUserId()
   });
+}
+
+/**
+ * 物流发货
+ * @param {string} code
+ * @param {string} logisticsCode
+ * @param {string} logisticsCompany
+ */
+export function sendOrder (code, logisticsCode, logisticsCompany) {
+  return fetch(808054, {
+    code,
+    logisticsCompany,
+    logisticsCode,
+    deliveryDatetime: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    deliverer: getUserId(),
+    updater: getUserId()
+  });
+}
+
+/**
+ * 催发货
+ * @param {string} code
+ */
+export function remindOrder (code) {
+  return fetch(808058, {code});
 }
 
 /**
@@ -285,20 +362,39 @@ export function receiveOrder(code, remark) {
 }
 
 /**
+ * 根据订单编号详情查询评论
+ * @param {string} orderCode
+ */
+export function getOrderRating (orderCode) {
+  if (getOrderRating[orderCode]) {
+    return Promise.resolve(getOrderRating[orderCode]);
+  }
+  return fetch(801029, {orderCode}).then((data) => {
+    getOrderRating[orderCode] = data;
+    return Promise.resolve(data);
+  });
+}
+
+/**
  * 分页查询我的优惠券
  * @param {number} start
  * @param {number} limit
  */
-export function getPageCoupons (start, limit) {
+export function getPageCoupons (start, limit, status) {
   return fetch(801118, {
     start,
     limit,
-    status: 0,
+    status,
     toUser: getUserId()
   });
 }
 
-// 根据业务获取数量
+/**
+ * 根据业务获取数量
+ * @param category
+ * @param entityCode
+ * @param type
+ */
 export function businessNum(category, entityCode, type) {
   return fetch(801037, {
     category,

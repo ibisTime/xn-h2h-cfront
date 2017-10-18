@@ -62,7 +62,7 @@
         this.showFlag = false;
       },
       getPageCoupons() {
-        getPageCoupons(this.start, this.limit).then((data) => {
+        getPageCoupons(this.start, this.limit, 0).then((data) => {
           this.couponList = this.couponList.concat(data.list);
           if (data.totalCount <= this.limit || data.list.length < this.limit) {
             this.hasMore = false;

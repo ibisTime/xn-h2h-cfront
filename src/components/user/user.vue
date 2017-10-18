@@ -36,10 +36,10 @@
     <div class="rests">
       <ul>
         <router-link tag="li" to="/user/pub-mine" class="item-posted">我发布的</router-link>
-        <li class="item-sell">我卖出的</li>
+        <router-link tag="li" to="/user/sell-order" class="item-sell">我卖出的</router-link>
         <li class="item-enrollment">活动报名</li>
-        <li class="item-want">我想要的</li>
-        <li class="item-fotoPlace">我的足迹</li>
+        <router-link tag="li" to="/user/collection" class="item-want">我想要的</router-link>
+        <router-link tag="li" to="/user/history" class="item-fotoPlace">我的足迹</router-link>
         <router-link tag="li" to="/user/coupon" class="item-coupons">优惠券</router-link>
       </ul>
     </div>

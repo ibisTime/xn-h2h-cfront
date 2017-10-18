@@ -10,9 +10,9 @@
             </div>
             <div class="center">
               <span class="unit">¥</span>
-              <span class="price">{{sellPrice}}</span>
-              <span class="text">原价¥{{oriPrice}}</span>
-              <span class="text">运费¥{{freight}}</span>
+              <span class="price">{{sellPrice | formatAmount}}</span>
+              <span class="text">原价¥{{oriPrice | formatAmount}}</span>
+              <span class="text">运费¥{{freight | formatAmount}}</span>
               <span class="text fr">浏览{{readCount}}</span>
             </div>
             <div class="bottom">
@@ -70,8 +70,8 @@
         </scroll>
       </div>
       <footer>
-        <div class="price">金额：<span class="unit">¥</span><span>1999.00</span></div>
-        <div class="btn">联系买家</div>
+        <div class="price">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
+        <div class="btn">联系卖家</div>
         <div class="btn buy" @click="goBuy">马上买</div>
       </footer>
       <full-loading v-show="loadingFlag"></full-loading>
@@ -87,7 +87,7 @@
   import Rating from 'components/rating/rating';
   import {getGoodsDetail, getPageComments, collection, read, cancelCollection} from 'api/biz';
   import {getUserById, getUser} from 'api/user';
-  import {formatImg, formatAmount} from 'common/js/util';
+  import {formatImg, isUnDefined} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
   import User from 'common/bean/user';
 
@@ -117,13 +117,13 @@
         return this.detail && this.detail.name || '';
       },
       sellPrice() {
-        return formatAmount(this.detail && this.detail.price || 0);
+        return this.detail && this.detail.price || 0;
       },
       oriPrice() {
-        return formatAmount(this.detail && this.detail.originalPrice || 0);
+        return this.detail && this.detail.originalPrice || 0;
       },
       freight() {
-        return formatAmount(this.detail && this.detail.yunfei || 0);
+        return this.detail && this.detail.yunfei || 0;
       },
       addr() {
         return this.detail ? `${this.detail.city} | ${this.detail.area}` : '';
@@ -136,6 +136,16 @@
       },
       publisherDesc() {
         return this.publisher ? this.publisher.toString() : '';
+      },
+      totalAmount() {
+        if (this.detail) {
+          let price = +this.detail.price;
+          let yunfei = +this.detail.yunfei;
+          let discount = this.detail.discount;
+          discount = isUnDefined(discount) ? 1 : discount;
+          return price * discount + yunfei;
+        }
+        return 0;
       },
       ...mapGetters([
         'user'
@@ -211,11 +221,13 @@
       collect() {
         collection(this.code).then(() => {
           this.isLike = true;
+          this.$emit('collect', this.detail, true);
         }).catch(() => {});
       },
       cancelCollect() {
         cancelCollection(this.code).then(() => {
           this.isLike = false;
+          this.$emit('collect', this.detail, false);
         }).catch(() => {});
       },
       getSyl(pic) {

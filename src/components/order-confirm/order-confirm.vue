@@ -7,7 +7,7 @@
             <div class="addr"></div>
             <div class="message">还没有收货地址<div class="button"><i class="add-icon"></i>添加</div></div>
           </div>
-          <div v-else class="address">
+          <div v-else class="address" @click="goAddrList">
             <div class="left-icon"></div>
             <div class="inner">
               <div class="top">收货人：{{currentAddr.addressee}}<div class="tel">{{currentAddr.mobile}}</div></div>
@@ -64,7 +64,7 @@
   import FullLoading from 'base/full-loading/full-loading';
   import {getAddressList} from 'api/user';
   import {getGoodsDetail, applyOrder} from 'api/biz';
-  import {formatImg, formatAmount} from 'common/js/util';
+  import {formatImg, formatAmount, isUnDefined} from 'common/js/util';
 
   export default {
     data() {
@@ -161,13 +161,25 @@
       goAdd() {
         this.$router.push('/category/confirm/add');
       },
+      goAddrList() {
+        this.$router.push('/category/confirm/address');
+      },
       getAddressList() {
         if (!this.currentAddr) {
           if (!this.addressList.length) {
             return getAddressList().then((data) => {
               this.setAddressList(data);
               if (data.length) {
-                this.setCurAddr(data[0]);
+                let i = 0;
+                for (; i < data.length; i++) {
+                  if (data[i].isDefault === '1') {
+                    this.setCurAddr(data[i]);
+                    break;
+                  }
+                }
+                if (i === data.length) {
+                  this.setCurAddr(data[0]);
+                }
               }
             });
           }
@@ -178,7 +190,8 @@
       },
       isDiscount() {
         if (this.detail) {
-          let discount = +this.detail.discount;
+          let discount = this.detail.discount;
+          discount = isUnDefined(discount) ? 1 : discount;
           if (discount !== 1) {
             return true;
           }
@@ -379,6 +392,10 @@
 
         .top {
           font-size: $font-size-medium-s;
+          .title {
+            line-height: 1.2;
+          }
+
           .text {
             padding-top: 0.1rem;
             line-height: 1.2;

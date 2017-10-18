@@ -4,18 +4,24 @@
       <div class="addr-scroll-wrapper">
         <scroll :data="addressList" :hasMore="hasMore">
           <ul>
-            <li v-for="(item,index) in addressList" class="border-bottom-1px">
-              <div class="content"
-                   ref="address"
-                   @click="selectItem(item)"
-                   @touchstart.stop.prevent="touchstart(index,$event)"
-                   @touchmove.stop.prevent="touchmove($event)"
-                   @touchend.stop.prevent="touchend($event)">
+            <li v-for="item in addressList" class="border-bottom-1px">
+              <div class="content" @click="selectItem(item)">
                 <div class="info">{{item.addressee}}<span>{{item.mobile}}</span></div>
                 <div class="addr">{{item.province}} {{item.city}} {{item.district}} {{item.detailAddress}}</div>
               </div>
-              <div ref="deleteEle" class="delete" @click="deleteItem(item)">
-                <p>删除</p>
+              <div class="opeator border-top-1px">
+                <div class="default" @click="setDefault(item)">
+                  <i class="icon-chose" :class="choseCls(item)"></i>
+                  <span>默认地址</span>
+                </div>
+                <div class="edit" @click="goEdit(item)">
+                  <i class="icon-edit"></i>
+                  <span>编辑</span>
+                </div>
+                <div class="delete" @click="deleteItem(item)">
+                  <i class="icon-delete"></i>
+                  <span>删除</span>
+                </div>
               </div>
             </li>
           </ul>
@@ -25,11 +31,7 @@
       <div class="no-result-wrapper">
         <no-result v-show="!hasMore && !addressList.length" title="您尚未添加收货地址"></no-result>
       </div>
-      <div v-show="delLoading" class="loading-container">
-        <div class="loading-wrapper">
-          <loading title="删除中..."></loading>
-        </div>
-      </div>
+      <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
       <confirm ref="confirm" text="确定删除地址吗" @confirm="_deleteAddress"></confirm>
       <toast ref="toast" text="删除成功"></toast>
       <router-view></router-view>
@@ -38,28 +40,24 @@
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Confirm from 'base/confirm/confirm';
   import Toast from 'base/toast/toast';
   import NoResult from 'base/no-result/no-result';
-  import {prefixStyle} from 'common/js/dom';
   import {setTitle} from 'common/js/util';
-  import {SET_ADDRESS_LIST} from 'store/mutation-types';
-  import {deleteAddress, getAddressList} from 'api/user';
+  import {SET_ADDRESS_LIST, SET_CURRENT_ADDR} from 'store/mutation-types';
+  import {deleteAddress, getAddressList, setDefaultAddress} from 'api/user';
   import {mapGetters, mapMutations, mapActions} from 'vuex';
-
-  const transform = prefixStyle('transform');
-  const transitionDuration = prefixStyle('transitionDuration');
 
   export default {
     data() {
       return {
         hasMore: true,
-        delLoading: false
+        loadingFlag: false,
+        loadingText: ''
       };
     },
     created() {
-      this.touch = {};
       this.currentItem = null;
       this.getAddress();
     },
@@ -74,94 +72,51 @@
     methods: {
       getAddress() {
         if (this.shouldGetData()) {
-          getAddressList().then((data) => {
+          if (!this.addressList.length) {
+            getAddressList().then((data) => {
+              this.hasMore = false;
+              this.setAddressList(data);
+            }).catch(() => {
+              this.hasMore = false;
+            });
+          } else {
             this.hasMore = false;
-            this.setAddressList(data);
-          });
+          }
         }
       },
       shouldGetData() {
-        if (this.$route.path === '/user/setting/address') {
+        if (this.$route.path === '/user/setting/address' || this.$route.path === '/category/confirm/address') {
           setTitle('地址列表');
           return this.hasMore;
         }
       },
+      setDefault(item) {
+        if (item.isDefault !== '1') {
+          this.loadingText = '设置中...';
+          this.loadingFlag = true;
+          setDefaultAddress(item.code).then(() => {
+            this.loadingFlag = false;
+            this.setDefaultAddress({
+              code: item.code
+            });
+            item.isDefault = '1';
+            this.setCurAddr(item);
+          }).catch(() => {
+            this.loadingFlag = false;
+          });
+        }
+      },
+      goEdit(item) {
+        this.$router.push(`${this.$route.path}/${item.code}`);
+      },
       selectItem(item) {
-        this.$router.push(`/user/setting/address/${item.code}`);
+        this.setCurAddr(item);
       },
       goAdd() {
-        this.$router.push('/user/setting/address/add');
+        this.$router.push(this.$route.path + '/add');
       },
-      touchstart(index, event) {
-        this.touch.initiated = true;
-        // 用来判断是否是一次移动
-        this.touch.moved = false;
-        const touch = event.touches[0];
-        this.touch[index] = this.touch[index] || {};
-        this.touch[index].x1 = touch.pageX;
-        this.touch[index].y1 = touch.pageY;
-        this.touch[index].x2 = touch.pageX;
-        this.touch[index].y2 = touch.pageY;
-        this.touch[index].offset = this.touch[index].offset || 0;
-        this.touch.currentIndex = index;
-      },
-      touchmove(event) {
-        if (!this.touch.initiated) {
-          return;
-        }
-        const touch = event.touches[0];
-        const index = this.touch.currentIndex;
-        this.touch[index].x2 = touch.pageX;
-        this.touch[index].y2 = touch.pageY;
-        const deltaX = touch.pageX - this.touch[index].x1;
-        const deltaY = touch.pageY - this.touch[index].y1;
-        if (Math.abs(deltaY) > Math.abs(deltaX)) {
-          return;
-        }
-        if (!this.touch.moved) {
-          this.touch.moved = true;
-        }
-        let offset = this.touch[index].offset + deltaX;
-        this.$refs.address[index].style[transform] = `translate3d(${offset}px,0,0)`;
-        this.$refs.deleteEle[index].style['zIndex'] = -1;
-      },
-      touchend() {
-        const index = this.touch.currentIndex;
-        let deltaX = this.touch[index].x2 - this.touch[index].x1;
-
-        if (!this.touch.moved) {
-          let deltaY = this.touch[index].y2 - this.touch[index].y1;
-          if (Math.abs(deltaX) < 5 || Math.abs(deltaY)) {
-            this.selectItem(this.addressList[index]);
-          }
-          return;
-        }
-        const currentElem = this.$refs.address[index];
-        let zIndex = -1;
-
-        if (deltaX <= 0) {
-          if (deltaX <= -15) {
-            currentElem.style[transform] = 'translate3d(-61px,0,0)';
-            this.touch[index].offset = -61;
-            zIndex = 0;
-          } else {
-            currentElem.style[transform] = 'translate3d(0,0,0)';
-            this.touch[index].offset = 0;
-          }
-        } else {
-          if (deltaX >= 15) {
-            currentElem.style[transform] = 'translate3d(0,0,0)';
-            this.touch[index].offset = 0;
-          } else {
-            currentElem.style[transform] = 'translate3d(0,0,0)';
-            this.touch[index].offset = 0;
-          }
-        }
-        currentElem.style[transitionDuration] = '300ms';
-        currentElem.addEventListener('transitionend', () => {
-          currentElem.style[transitionDuration] = '0ms';
-        });
-        this.$refs.deleteEle[index].style['zIndex'] = zIndex;
+      choseCls(item) {
+        return item.isDefault === '1' ? 'active' : '';
       },
       deleteItem(item) {
         this.currentItem = item;
@@ -169,29 +124,32 @@
       },
       _deleteAddress() {
         if (this.currentItem) {
-          this.delLoading = true;
+          this.loadingText = '删除中...';
+          this.loadingFlag = true;
           deleteAddress(this.currentItem.code).then(() => {
-            this.delLoading = false;
+            this.loadingFlag = false;
             this.deleteAddress({
               code: this.currentItem.code
             });
           }).catch(() => {
-            this.delLoading = false;
+            this.loadingFlag = false;
           });
         }
       },
       ...mapMutations({
-        setAddressList: SET_ADDRESS_LIST
+        setAddressList: SET_ADDRESS_LIST,
+        setCurAddr: SET_CURRENT_ADDR
       }),
       ...mapActions([
-        'deleteAddress'
+        'deleteAddress',
+        'setDefaultAddress'
       ])
     },
     components: {
       Scroll,
       Toast,
       Confirm,
-      Loading,
+      FullLoading,
       NoResult
     }
   };
@@ -208,12 +166,20 @@
     height: 100%;
     background: $color-background;
 
+    &.slide-enter-active, &.slide-leave-active {
+      transition: all 0.3s;
+    }
+
+    &.slide-enter, &.slide-leave-to {
+      transform: translate3d(100%, 0, 0);
+    }
+
     ul {
       li {
         position: relative;
-        height: 82px;
         @include border-bottom-1px($color-border);
         font-size: $font-size-small;
+        background-color: #fff;
 
         &:last-child {
           @include border-none();
@@ -223,9 +189,8 @@
           display: flex;
           flex-direction: column;
           justify-content: center;
-          height: 100%;
-          padding: 0 15px;
-          background-color: #fff;
+          height: 1.6rem;
+          padding: 0 0.3rem;
 
           .info {
             font-size: $font-size-medium-x;
@@ -244,41 +209,82 @@
           }
         }
 
-        .delete {
-          position: absolute;
-          right: 1px;
-          top: 1px;
-          width: 61px;
-          height: 80px;
+        .opeator {
           display: flex;
           align-items: center;
-          flex-direction: column;
-          justify-content: center;
-          z-index: -1;
-          font-size: $font-size-medium;
-          background: $color-red;
-          color: #fff;
+          height: 0.9rem;
+          font-size: 0;
+          @include border-top-1px($color-border);
 
-          p+p {
-            margin-top: 12px;
+          .default {
+            flex: 1;
+
+            .icon-chose {
+              margin-left: 0.3rem;
+              display: inline-block;
+              vertical-align: middle;
+              width: 0.34rem;
+              height: 0.34rem;
+              background-size: 0.34rem;
+              @include bg-image('un-select');
+
+              &.active {
+                @include bg-image('selected');
+              }
+            }
+
+            span {
+              display: inline-block;
+              vertical-align: middle;
+              padding-left: 0.24rem;
+              font-size: $font-size-small;
+              color: $primary-color;
+            }
+          }
+
+          .edit {
+            padding: 0 0.3rem;
+
+            .icon-edit {
+              display: inline-block;
+              vertical-align: middle;
+              width: 0.38rem;
+              height: 0.38rem;
+              background-size: 0.38rem;
+              background-repeat: no-repeat;
+              background-position: center;
+              @include bg-image('edit');
+            }
+
+            span {
+              display: inline-block;
+              vertical-align: middle;
+              padding-left: 0.1rem;
+              font-size: $font-size-small;
+            }
+          }
+
+          .delete {
+            padding: 0 0.3rem;
+
+            .icon-delete {
+              display: inline-block;
+              vertical-align: middle;
+              width: 0.38rem;
+              height: 0.38rem;
+              background-size: 0.38rem;
+              background-repeat: no-repeat;
+              @include bg-image('delete');
+            }
+
+            span {
+              display: inline-block;
+              vertical-align: middle;
+              padding-left: 0.1rem;
+              font-size: $font-size-small;
+            }
           }
         }
-      }
-    }
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
       }
     }
 

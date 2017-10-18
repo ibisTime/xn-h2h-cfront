@@ -48,7 +48,6 @@
         </scroll>
       </div>
       <full-loading v-show="fetching" :title="fetchText"></full-loading>
-
       <confirm ref="confirm" :text="text" @confirm="receiveOrder"></confirm>
       <confirm ref="alert" :isAlert="isAlert" :text="ratingContent"></confirm>
       <confirm-input ref="confirmInput" :text="inputText" @confirm="handleInputConfirm"></confirm-input>
@@ -232,7 +231,7 @@
       },
       ratingOrder(item) {
         this.currentCode = item.code;
-        this.currentGoodsCode = item.productOrderList[0].code;
+        this.currentGoodsCode = item.productOrderList[0].productCode;
         this.$refs.rating.show();
       },
       _receiveOrder(item) {

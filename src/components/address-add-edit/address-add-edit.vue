@@ -41,11 +41,7 @@
         <div class="form-btn">
           <button :disabled="setting" @click="saveAddress">保存地址</button>
         </div>
-        <div v-show="showLoading" class="loading-container">
-          <div class="loading-wrapper">
-            <loading></loading>
-          </div>
-        </div>
+        <full-loading v-show="showLoading"></full-loading>
         <toast ref="toast" :text="toastText"></toast>
       </div>
     </div>
@@ -57,7 +53,7 @@
   import {mapGetters, mapMutations} from 'vuex';
   import {SET_ADDRESS_LIST, SET_CURRENT_ADDR} from 'store/mutation-types';
   import CityPicker from 'base/city-picker/city-picker';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Toast from 'base/toast/toast';
 
   export default {
@@ -81,7 +77,7 @@
       };
     },
     created() {
-      this.code = this.$route.query.code || '';
+      this.code = this.$route.params.id || '';
       if (this.code) {
         setTitle('修改地址');
         this.getAddress();
@@ -173,6 +169,7 @@
           });
           addressList.splice(index, 1, param);
           this.setAddressList(addressList);
+          this.setCurAddr(param);
           setTimeout(() => {
             this.$router.back();
           }, 1000);
@@ -241,7 +238,7 @@
     },
     components: {
       CityPicker,
-      Loading,
+      FullLoading,
       Toast
     }
   };
@@ -256,22 +253,6 @@
     width: 100%;
     height: 100%;
     background-color: $color-background;
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
-      }
-    }
   }
   .slide-enter-active, .slide-leave-active {
     transition: all 0.3s;

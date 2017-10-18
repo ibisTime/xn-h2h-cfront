@@ -73,11 +73,7 @@
         <!--</div>-->
       </scroll>
       <toast :text="text" ref="toast"></toast>
-      <div v-show="loadingFlag" class="loading-container">
-        <div class="loading-wrapper">
-          <loading :title="title"></loading>
-        </div>
-      </div>
+      <full-loading v-show="loadingFlag"></full-loading>
       <clip-img @choseImage="updateImg"
                 @cancel="handleCancel"
                 ref="clipImg"
@@ -94,7 +90,7 @@
   import Qiniu from 'base/qiniu/qiniu';
   import Scroll from 'base/scroll/scroll';
   import Toast from 'base/toast/toast';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import ClipImg from 'base/clip-img/clip-img';
   import {getUser, changeAvatar} from 'api/user';
   import {getAppId, getQiniuToken} from 'api/general';
@@ -247,7 +243,7 @@
         this._reloadPage();
       },
       getAvatar() {
-        if (!this.user || !this.user.photo) {
+        if (!this.user) {
           return require('./avatar@2x.png');
         }
         return formatImg(this.preview || this.user.photo);
@@ -272,7 +268,7 @@
       Scroll,
       Qiniu,
       Toast,
-      Loading,
+      FullLoading,
       ClipImg
     }
   };
@@ -369,22 +365,6 @@
           color: #fff;
           background-color: $color-cancel-background;
         }
-      }
-    }
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
       }
     }
   }

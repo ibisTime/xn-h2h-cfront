@@ -87,7 +87,7 @@ export function sendCaptcha(mobile, bizType) {
   });
 }
 
-// 列表查寻用户数据字典
+// 列表查寻数据字典
 export function getDictList(parentKey) {
   if (getDictList[parentKey]) {
     return Promise.resolve(getDictList[parentKey]);

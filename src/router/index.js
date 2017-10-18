@@ -87,6 +87,16 @@ const CouponNote = () => import('components/coupon-note/coupon-note');
 const PublishMine = () => import('components/publish-mine/publish-mine');
 // 支付
 const Pay = () => import('components/pay/pay');
+// 我卖出的
+const SellOrders = () => import('components/sell-orders/sell-orders');
+// 我卖出的订单详情
+const SellOrderDetail = () => import('components/sell-order-detail/sell-order-detail');
+// 我想要的
+const Collection = () => import('components/collection/collection');
+// 我的足迹
+const ReadHistory = () => import('components/read-history/read-history');
+// 用户中心
+const UserCenter = () => import('components/user-center/user-center');
 
 export default new Router({
   routes: [
@@ -131,6 +141,10 @@ export default new Router({
               component: Detail
             }
           ]
+        },
+        {
+          path: 'notice',
+          component: Notice
         },
         {
           path: ':code',
@@ -219,6 +233,20 @@ export default new Router({
             {
               path: 'pay',
               component: Pay
+            },
+            {
+              path: 'address',
+              component: AddressList,
+              children: [
+                {
+                  path: 'add',
+                  component: AddressAddEdit
+                },
+                {
+                  path: ':id',
+                  component: AddressAddEdit
+                }
+              ]
             },
             {
               path: ':code',
@@ -315,10 +343,6 @@ export default new Router({
                   component: AddressAddEdit
                 }
               ]
-            },
-            {
-              path: 'notice',
-              component: Notice
             }
           ]
         },
@@ -399,6 +423,46 @@ export default new Router({
               component: Publish
             }
           ]
+        },
+        {
+          path: 'sell-order',
+          component: SellOrders,
+          children: [
+            {
+              path: ':id',
+              component: SellOrderDetail,
+              children: [
+                {
+                  path: ':code',
+                  component: Detail
+                }
+              ]
+            }
+          ]
+        },
+        {
+          path: 'collection',
+          component: Collection,
+          children: [
+            {
+              path: ':code',
+              component: Detail
+            }
+          ]
+        },
+        {
+          path: 'history',
+          component: ReadHistory,
+          children: [
+            {
+              path: ':code',
+              component: Detail
+            }
+          ]
+        },
+        {
+          path: ':userId',
+          component: UserCenter
         }
       ]
     },

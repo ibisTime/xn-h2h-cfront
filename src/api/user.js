@@ -128,6 +128,14 @@ export function editAddress(params) {
   });
 }
 
+/**
+ * 设置默认收件地址
+ * @param {string} code
+ */
+export function setDefaultAddress (code) {
+  return fetch(805163, {code});
+}
+
 // 列表查询地址
 export function getAddressList() {
   return fetch(805165, {

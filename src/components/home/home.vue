@@ -26,11 +26,11 @@
         </router-link>
       </div>
       <div class="notice-wrapper">
-        <div class="notice">
+        <router-link tag="div" to="/home/notice" class="notice">
           <i class="icon-title"></i>
           <div class="content">头条头体哦啊三大发</div>
           <i class="icon-right"></i>
-        </div>
+        </router-link>
       </div>
       <router-link to="/home/trade"tag="div">
         <div class="trade-wrapper">
@@ -62,7 +62,7 @@
   import Toast from 'base/toast/toast';
   import MFooter from 'components/m-footer/m-footer';
   import MallItems from 'components/mall-items/mall-items';
-  import {formatImg} from 'common/js/util';
+  import {formatImg, setTitle} from 'common/js/util';
   import {getPageGoods} from 'api/biz';
   import {getBannerList} from 'api/general';
 
@@ -110,6 +110,7 @@
     methods: {
       shouldGetData() {
         if (this.$route.path === '/home') {
+          setTitle('二手买卖');
           return this.first;
         }
         return false;

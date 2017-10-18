@@ -26,7 +26,7 @@
     created() {
       setTitle('使用说明');
       this.pullUpLoad = null;
-      getUserSystemConfig('aboutUs').then((data) => {
+      getUserSystemConfig('cardsTradition').then((data) => {
         this.loadingFlag = false;
         this.content = data.cvalue;
       }).catch(() => {

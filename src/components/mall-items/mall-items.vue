@@ -21,7 +21,7 @@
 </template>
 <script>
   import {commonMixin} from 'common/js/mixin';
-  import {formatImg} from 'common/js/util';
+  import {formatImg, isUnDefined} from 'common/js/util';
 
   export default {
     mixins: [commonMixin],
@@ -33,7 +33,8 @@
     },
     methods: {
       isDiscount(item) {
-        let discount = +item.discount;
+        let discount = item.discount;
+        discount = isUnDefined(discount) ? 1 : discount;
         if (discount !== 1) {
           return true;
         }
