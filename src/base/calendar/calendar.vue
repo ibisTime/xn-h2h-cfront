@@ -33,7 +33,8 @@
           <!--如果是本月  还需要判断是不是这一天-->
           <span v-else>
           <!--今天  同年同月同日-->
-            <span v-if="dayobject.day.getFullYear() == new Date().getFullYear() && dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active">{{ dayobject.day.getDate() }}<i></i></span>
+            <!-- <span v-if="dayobject.day.getFullYear() == new Date().getFullYear() && dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active">{{ dayobject.day.getDate() }}<i></i></span> -->
+            <span v-if=" dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active">{{ dayobject.day.getDate() }}<i></i></span>
             <span v-else>{{ dayobject.day.getDate() }}</span>
           </span>
         </li>
@@ -41,12 +42,20 @@
       </div>     
     </div>
     <!-- 星期 -->
-    
 </div>
 </template>
 
 <script type="text/ecmascript-6">
+import {formatDate} from 'common/js/util';
 export default {
+  props: {
+    dates: {
+      type: Array,
+      default: function () {
+        return [];
+      }
+    }
+  },
   data() {
     return {
       currentDay: 1,
@@ -98,7 +107,14 @@ export default {
         this.d.setDate(this.d.getDate() + i);
         this.dayobject.day = this.d;
         this.days.push({
-          day: this.dayobject.day
+          day: this.dayobject.day,
+          sign: false
+        });
+        this.dates.forEach((item, index) => {
+          if (formatDate(this.dayobject.day, 'yyyy-MM-dd') === item) {
+            console.log(item, index);
+            this.days[i].sign = true;
+          }
         });
       }
     },
