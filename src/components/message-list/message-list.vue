@@ -5,7 +5,7 @@
         <div class="headPic">
         </div>
         <div class="content">
-          <p>某某某</p>
+          <p>{{item.userName}}</p>
           <span>hello</span>
         </div>
         <div class="time">下午4:40</div>      
@@ -20,17 +20,29 @@
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
+  import {getPageChildren} from 'api/user';
 
   export default {
     data () {
       return {
         messageList: 0,
         hasMore: true,
-        title: '暂无结果'
+        title: '暂无结果',
+        start: 1,
+        limit: 20
       };
     },
-    created() {},
+    created() {
+      this.getUser();
+    },
     methods: {
+      getUser() {
+        getPageChildren(this.start, this.limit).then(() => {
+          this.loadingFlag = false;
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
       goChat(id) {
         this.$router.push(this.$route.path + '/' + id);
       }

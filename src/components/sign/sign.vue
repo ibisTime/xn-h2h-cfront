@@ -1,27 +1,30 @@
 <template>
   <div class="sign-wrapper">
   	<div class="jf-wrapper">
-        <div class="signRule" @click="showRule">签到规则</div>
-        <div class="signIntegral">
-          <div class="integralContent">
-            <h3>{{mark}}</h3>
-            <h4>{{jfOwn}}</h4>
-            <p>{{jfText}}</p>
-          </div>
+      <router-link to="/home/sign/rules" tag="div" class="signRule border-bottom-1px">签到规则</router-link>
+      <div class="signIntegral">
+        <div class="integralContent">
+          <h3>{{mark}}</h3>
+          <h4>{{jfOwn}}</h4>
+          <p>{{jfText}}</p>
         </div>
-        <div class="signTip">连续签到29天可获得额外奖励</div>
       </div>
-      <div class="date-wrapper">
-        <calendar :dates="signDateList"></calendar>
-      </div>
-      <sign-mask ref="mask" :text="text" :isHtml="isHtml"></sign-mask>
+      <div class="signTip">连续签到29天可获得额外奖励</div>
+    </div>
+    <div class="date-wrapper">
+      <calendar :dates="signDateList"></calendar>
+    </div>
+    <router-view></router-view>
+    <sign-mask ref="mask" :text="text" :isHtml="isHtml"></sign-mask>
+    <full-loading v-show="loadingFlag"></full-loading>
   </div>
 </template>
 <script>
   import calendar from 'base/calendar/calendar';
   import SignMask from 'components/sign-mask/sign-mask';
+  import FullLoading from 'base/full-loading/full-loading';
   import {getUserSystemConfig} from 'api/general';
-  import {sign, signNum} from 'api/user';
+  import {sign, signNum, signQuery} from 'api/user';
   import {getAccount} from 'api/account';
   import {formatAmount, formatDate} from 'common/js/util';
 
@@ -36,7 +39,8 @@
         jfOwn: '',
         jfText: '',
         start: 1,
-        signDateList: []
+        signDateList: [],
+        loadingFlag: true
       };
     },
     created() {
@@ -45,17 +49,23 @@
     },
     methods: {
       getInitData() {
-        this.signIn();
+        sign().finally(() => {
+          this.signIn();
+        }).catch(() => {});
         this.getJF();
-        this.getSignDate();
       },
       signIn () {
-        sign().then((data) => {
-          if (data.todaySign === true) {
+        signQuery().then((data) => {
+          this.getSignDate();
+          this.loadingFlag = false;
+          if (data.todaySign) {
             this.mark = '签到成功';
+          } else {
+            this.mark = '签到失败';
           }
         }).catch(() => {
-          this.mark = '签到失败';
+          this.mark = '未查询到';
+          this.loadingFlag = false;
         });
       },
       getJF () {
@@ -82,7 +92,8 @@
     },
     components: {
       calendar,
-      SignMask
+      SignMask,
+      FullLoading
     }
   };
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <div class="trades-wrapper">
+  <div class="trades-wrapper" ref="trades">
     <scroll ref="scroll" :hasMore="hasMore" :data="tradeList">
-      <ul class="trades-items-wrapper">
-        <li  v-for="item in tradeList"  @click="goDetail(item.code)"class="trade-wrapper">
+      <ul class="trades-items-wrapper" ref="tradeList">
+        <li v-for="item in tradeList" @click="goDetail(item.code)" class="trade-wrapper" >
           <div class="trade-top">
             <div class="head-pic" :style="getImgStyl(item.pic)"></div>
             <div class="person-info">
@@ -11,7 +11,7 @@
                 <span>{{item.city}} </span>|<span> 5小时前来过</span>
               </div>
             </div>
-            <div class="clothes">来自{{item.kind}}</div>
+            <div class="clothes">来自{{item.categoryName}}</div>
           </div>
           <div class="photos-wrapper">
             <trade-scroll :data="tradeList"></trade-scroll>
@@ -28,6 +28,7 @@
         </li>
       </ul>
     </scroll>
+    <router-view></router-view>
     <!-- <div v-show="!tradeList && !hasMore" class="no-result-wrapper">
       <no-result title="抱歉，暂无订单"></no-result>
     </div>   -->  
@@ -37,7 +38,7 @@
 <script type="text/ecmascript-6">
   import TradeScroll from 'components/trade-scroll/trade-scroll';
   import Scroll from 'base/scroll/scroll';
-  import {getPageGoods, businessNum} from 'api/biz';
+  import {getPageGoods} from 'api/biz';
   import {formatImg} from 'common/js/util';
   import {getDictList} from 'api/general';
   import {commonMixin} from 'common/js/mixin';
@@ -52,7 +53,6 @@
         start: 1,
         isPublish: 1,
         tradeList: []
-
       };
     },
     created() {
@@ -61,10 +61,6 @@
     methods: {
       getInitData() {
         this.getTradeCircle();
-        this.getMallTypeDict();
-        if (this.getTradeCircle()) {
-          this.businessNum();
-        }
       },
       getTradeCircle () {
         getPageGoods({
@@ -88,11 +84,6 @@
       },
       goDetail(code) {
         this.$router.push(this.$route.path + '/' + code);
-      },
-      getBusinessNum(category, entityCode, type) {
-        businessNum(category, entityCode, type).then((data) => {
-          console.log(data);
-        });
       }
     },
     components: {
@@ -116,7 +107,6 @@
     .trades-items-wrapper{
       position: relative;
       width: 100%;
-      height: 100%;
     .trade-wrapper{
       border-top: 1px solid #eee;
       background: #fff;
@@ -131,7 +121,6 @@
           width: 0.9rem;
           height: 0.9rem;
           margin: 0.3rem 0.24rem 0.2rem 0.3rem;
-          @include bg-image('th');
           background-size: 100% 100%;
           border-radius: 50%;
         }
@@ -139,8 +128,12 @@
         .person-info{
           flex: 2;
           padding-top: 0.45rem;
+          width: 2.5rem;
           .name{
             color: #484848;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;            
           }
 
           .area{
@@ -151,34 +144,38 @@
         }
 
         .clothes{ 
-          margin-right: 0.3rem;
+          // width:0.38rem;
+          margin:0 0.3rem;
           line-height: 1.5rem;
           color: #48b0fb;         
         }
-      }       
-
-      .slider-wrapper {
-        position: relative;
-        height: 2.24rem;
+      } 
+      .photos-wrapper{
         margin-left: 0.3rem;
-        overflow: hidden;
-
-        .slider, .pic-slider {
-          display: inline-block;
-          height: 2.24rem;
-          width: 2.24rem;
-        }
-
-        a {
-          display: inline-block;
-          height: 2.24rem;
-          width: 2.24rem;
-          display: inline-block;
-          background-repeat: no-repeat;
-          background-position: center;
-          background-size: cover;
-        }
       }      
+
+      // .slider-wrapper {
+      //   position: relative;
+      //   height: 2.24rem;
+      //   margin-left: 0.3rem;
+      //   overflow: hidden;
+
+      //   .slider, .pic-slider {
+      //     display: inline-block;
+      //     height: 2.24rem;
+      //     width: 2.24rem;
+      //   }
+
+      //   a {
+      //     display: inline-block;
+      //     height: 2.24rem;
+      //     width: 2.24rem;
+      //     display: inline-block;
+      //     background-repeat: no-repeat;
+      //     background-position: center;
+      //     background-size: cover;
+      //   }
+      // }      
     
       .trade-bottom{
         margin:0.2rem 0.3rem 0;

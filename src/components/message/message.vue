@@ -5,7 +5,7 @@
         <li class="tab_items"
           v-for="(tab, index) in tabs"
           :class="{active:index===selected}"
-          @click="choose(index)">{{tab.tabName}}</li>
+          @click="choose(index)">{{tab.tabName}}({{totalCount}})</li>
       </ul>        
     </div> 
     <div class="content-wrapper">
@@ -22,8 +22,8 @@
     data () {
       return {
         tabs: [
-            {tabName: '我的关注(0)'},
-            {tabName: '我的粉丝(0)'}
+            {tabName: '我的关注'},
+            {tabName: '我的粉丝'}
         ],
         selected: 0
       };

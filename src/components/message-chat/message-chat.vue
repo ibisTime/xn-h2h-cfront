@@ -1,5 +1,5 @@
 <template>
-  <transition>
+  <transition  name="slide">
     <div class="chat-wrapper"   @click='hide'>
       <scroll>
     	   <div class="message-content">

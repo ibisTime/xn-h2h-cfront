@@ -22,39 +22,7 @@
       }
     },
     data() {
-      return {
-        photos: [
-          {
-            key: '498b20a8-88bf-4e45-9ca4-1338b9abd0e4.jpg',
-            ok: false,
-            preview: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg',
-            type: 'image/jpeg'
-            // photo: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg'
-          },
-          {
-            key: '498b20a8-88bf-4e45-9ca4-1338b9abd0e4.jpg',
-            ok: false,
-            preview: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg',
-            type: 'image/jpeg'
-            // photo: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg'
-          },
-          {
-            key: '498b20a8-88bf-4e45-9ca4-1338b9abd0e4.jpg',
-            ok: false,
-            preview: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg',
-            type: 'image/jpeg'
-            // photo: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-23_1506124776097.jpg'
-          },
-          {
-            key: '498b20a8-88bf-4e45-9ca4-1338b9abd0e4.jpg',
-            ok: false,
-            preview: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg',
-            type: 'image/jpeg'
-            // photo: 'http://opf6b9y6y.bkt.clouddn.com/0907修改内容-25_1506124833120.jpg'
-          }
-        ],
-        currentPageIndex: 0
-      };
+      return {};
     },
     mounted() {
       setTimeout(() => {
@@ -80,7 +48,7 @@
         this.scroll = new BScroll(this.$refs.scrollWrapper, {
           scrollX: true,
           scrollY: false,
-          click: true
+          click: false
         });
       },
       getBg(photo) {
@@ -99,11 +67,9 @@
 
   .photo-scroll-wrapper {
     width: 100%;
+    height: 2.24rem;
     overflow: hidden;
-
     .scroll-wrapper {
-      // position: relative;
-      width: 100%;
       white-space: nowrap;
 
       .item {

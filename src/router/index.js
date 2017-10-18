@@ -11,6 +11,8 @@ const Recommend = () => import('components/recommend/recommend');
 const Children = () => import('components/children/children');
 // 签到
 const Sign = () => import('components/sign/sign');
+// 签到规则
+const Rules = () => import('components/sign-rule/sign-rule');
 // 交易圈子
 const TradeCircle = () => import('components/trade-circle/trade-circle');
 
@@ -120,7 +122,13 @@ export default new Router({
         },
         {
           path: 'sign',
-          component: Sign
+          component: Sign,
+          children: [
+            {
+              path: 'rules',
+              component: Rules
+            }
+          ]
         },
         {
           path: 'publish',
