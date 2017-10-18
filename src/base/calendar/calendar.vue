@@ -2,15 +2,15 @@
   <div id="calendar">
     <!-- 年份 月份 -->
     <div class="month">
-        <ul>
-            <!--点击会触发pickpre函数，重新刷新当前日期 @click(vue v-on:click缩写) -->
-            <!-- <li class="arrow" @click="pickPre(currentYear,currentMonth)">❮</li> -->
-            <li class="year-month">
-                <span class="choose-year">{{ currentYear }} 年</span>
-                <span class="choose-month">{{ currentMonth}} 月</span>
-            </li>
-            <!-- <li class="arrow" @click="pickNext(currentYear,currentMonth)">❯</li> -->
-        </ul>
+      <ul>
+        <!--点击会触发pickpre函数，重新刷新当前日期 @click(vue v-on:click缩写) -->
+        <!-- <li class="arrow" @click="pickPre(currentYear,currentMonth)">❮</li> -->
+        <li class="year-month">
+            <span class="choose-year">{{ currentYear }} 年</span>
+            <span class="choose-month">{{ currentMonth}} 月</span>
+        </li>
+        <!-- <li class="arrow" @click="pickNext(currentYear,currentMonth)">❯</li> -->
+      </ul>
     </div>
     <div class="weekPannel">
       <ul class="weekdays">
@@ -26,109 +26,108 @@
       <div class="dayPanel">
         <ul class="days">
         <!-- 核心 v-for循环 每一次循环用<li>标签创建一天 -->
-        <li  v-for="dayobject in days">
+        <li v-for="dayobject in days">
           <!--本月-->
           <!--如果不是本月  改变类名加灰色-->
-          <span v-if="dayobject.day.getMonth()+1 != currentMonth" class="other-month">{{ dayobject.day.getDate() }}</span>
+          <span v-if="isGray(dayobject)" class="other-month">{{ dayobject.day.getDate() }}</span>
           <!--如果是本月  还需要判断是不是这一天-->
           <span v-else>
-          <!--今天  同年同月同日-->
-            <!-- <span v-if="dayobject.day.getFullYear() == new Date().getFullYear() && dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active">{{ dayobject.day.getDate() }}<i></i></span> -->
-            <span v-if=" dayobject.day.getMonth() == new Date().getMonth() && dayobject.day.getDate() == new Date().getDate()" class="active">{{ dayobject.day.getDate() }}<i></i></span>
+            <!--今天  同年同月同日-->
+            <span v-if="dayobject.sign" class="active">{{ dayobject.day.getDate() }}<i></i></span>
             <span v-else>{{ dayobject.day.getDate() }}</span>
           </span>
         </li>
-      </ul>         
-      </div>     
+      </ul>
+      </div>
     </div>
     <!-- 星期 -->
-</div>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
-import {formatDate} from 'common/js/util';
-export default {
-  props: {
-    dates: {
-      type: Array,
-      default: function () {
-        return [];
-      }
-    }
-  },
-  data() {
-    return {
-      currentDay: 1,
-      currentMonth: 1,
-      currentYear: 1970,
-      currentWeek: 1,
-      days: [],
-      dayobject: {},
-      now: '',
-      time: '',
-      str: '',
-      d: ''
-    };
-  },
-  created: function() {  // 在vue初始化时调用
-    this.initData(null);
-  },
-  methods: {
-    initData: function(cur) {
-      if (cur) {
-        this.time = new Date(cur);
-      } else {
-        this.now = new Date();
-        this.d = new Date(this.formatDate(this.now.getFullYear(), this.now.getMonth(), 1));
-        this.d.setDate(42);
-        this.time = new Date(this.formatDate(this.d.getFullYear(), this.d.getMonth() + 1, 1));
-        // console.log(time);
-      }
-      this.currentDay = this.time.getDate();
-      this.currentYear = this.time.getFullYear();
-      this.currentMonth = this.time.getMonth() + 1;
-      this.currentWeek = this.time.getDay(); // 1...6,0
-      if (this.currentWeek === 0) {
-        this.currentWeek = 7;
-      }
-      this.str = this.formatDate(this.currentYear, this.currentMonth, this.currentDay);
-      this.days.length = 0;
-
-      for (let i = this.currentWeek; i > 0; i--) {
-        this.d = new Date(this.str);
-        this.d.setDate(this.d.getDate() - i);
-        this.dayobject.day = this.d;
-        this.days.push({
-          day: this.dayobject.day
-        });
-      }
-      for (let i = 0; i <= 41 - this.currentWeek; i++) {
-        this.d = new Date(this.str);
-        this.d.setDate(this.d.getDate() + i);
-        this.dayobject.day = this.d;
-        this.days.push({
-          day: this.dayobject.day,
-          sign: false
-        });
-        this.dates.forEach((item, index) => {
-          if (formatDate(this.dayobject.day, 'yyyy-MM-dd') === item) {
-            console.log(item, index);
-            this.days[i].sign = true;
-          }
-        });
+  export default {
+    props: {
+      dates: {
+        type: Array,
+        default: function () {
+          return [];
+        }
       }
     },
-    // 返回 类似 2016-01-02 格式的字符串
-    formatDate: function(year, month, day) {
-      var y = year;
-      var m = month;
-      if(m < 10) m = '0' + m;
-      var d = day;
-      if(d < 10) d = '0' + d;
-      return y + '-' + m + '-' + d;
+    data() {
+      return {
+        currentDay: 1,
+        currentMonth: 1,
+        currentYear: 1970,
+        days: []
+      };
+    },
+    created: function() {  // 在vue初始化时调用
+      this.initData();
+    },
+    methods: {
+      initData: function() {
+        let currentWeek = 1;
+        this.d = new Date();
+        let day = this.d.getDate();
+        this.d.setDate(1);
+        this.currentDay = this.d.getDate();
+        this.currentYear = this.d.getFullYear();
+        this.currentMonth = this.d.getMonth() + 1;
+        currentWeek = this.d.getDay(); // 1...6,0
+        if (currentWeek === 0) {
+          currentWeek = 7;
+        }
+        this.str = this.d.getTime();
+
+        for (let i = currentWeek; i > 0; i--) {
+          let d = new Date(this.str);
+          d.setDate(d.getDate() - i);
+          this.days.push({
+            day: d
+          });
+        }
+        for (let i = 0; i <= 41 - currentWeek; i++) {
+          let d = new Date(this.str);
+          d.setDate(d.getDate() + i);
+          this.days.push({
+            day: d,
+            sign: false
+          });
+        }
+        this.currentIndex = day + currentWeek - 1;
+      },
+      isGray(dayobject) {
+        return dayobject.day.getMonth() + 1 !== this.currentMonth;
+      },
+      // 返回 类似 2016-01-02 格式的字符串
+      formatDate: function(year, month, day) {
+        var y = year;
+        var m = month;
+        if(m < 10) m = '0' + m;
+        var d = day;
+        if(d < 10) d = '0' + d;
+        return y + '-' + m + '-' + d;
+      }
+    },
+    watch: {
+      dates(newVal) {
+        for (let i = 0; i <= this.currentIndex && i < this.days.length; i++) {
+          let day = this.days[i].day;
+          let str = this.formatDate(day.getFullYear(), day.getMonth() + 1, day.getDate());
+          for (let j = 0; j < newVal.length; j++) {
+            if (newVal[j] === str) {
+              this.days.splice(i, 1, {
+                day,
+                sign: true
+              });
+              break;
+            }
+          }
+        }
+      }
     }
-  }
-};
+  };
 </script>
 
 <style scoped lang="scss">
@@ -139,10 +138,10 @@ export default {
     margin: 0.3rem;
     text-align: center;
     font-size: $font-size-medium;
-  
+
     .weekPannel{
       padding: 0.28rem;
-      .weekdays{  
+      .weekdays{
       width: 100%;
       height: 0.42rem;
       line-height: 0.42rem;
@@ -173,7 +172,7 @@ export default {
               width: 100%;
               height: 100%;
               text-align: center;
-            }        
+            }
             i{
               position: absolute;
               top: 0;
@@ -184,8 +183,8 @@ export default {
               text-align: center;
               font-style:normal;
               background-repeat: no-repeat;
-              background-size: 0.3rem;             
-              @include bg-image('tick');                           
+              background-size: 0.3rem;
+              @include bg-image('tick');
             }
             .other-month{
               color: #CED1C6;
@@ -200,11 +199,11 @@ export default {
               margin: 0.2rem;
               padding: 0.1rem;
               border: 0.02rem solid #48b0fb;
-              border-radius: 50%;                
+              border-radius: 50%;
             }
-          }          
-        }                     
-      }    
+          }
+        }
+      }
     }
   }
 </style>

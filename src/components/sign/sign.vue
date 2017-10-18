@@ -11,8 +11,8 @@
         </div>
         <div class="signTip">连续签到29天可获得额外奖励</div>
       </div>
-      <div class="date-wrapper">  
-        <calendar lang="zh" :dates="signDateList"></calendar>     
+      <div class="date-wrapper">
+        <calendar :dates="signDateList"></calendar>
       </div>
       <sign-mask ref="mask" :text="text" :isHtml="isHtml"></sign-mask>
   </div>
@@ -25,11 +25,6 @@
   import {getAccount} from 'api/account';
   import {formatAmount, formatDate} from 'common/js/util';
 
-  // var activeClass = [
-  //   {
-  //     cssClass: ['active']
-  //   }
-  // ];
   const LIMIT = 30;
 
   export default {
@@ -105,7 +100,7 @@
 
 	.jf-wrapper{
 		width: 100%;
-    height: 4.2rem;		
+    height: 4.2rem;
 		background-size: 100% 100%;
   	@include bg-image('background');
   	color: #fff;
@@ -114,7 +109,7 @@
   	.signRule{
   		position: absolute;
   		top: 0.4rem;
-  		right: 0.3rem; 
+  		right: 0.3rem;
   	}
 
   	.signIntegral{
@@ -139,7 +134,7 @@
 			h3{
 				margin-top: 0.5rem;
 				font-size: $font-size-medium;
-			}				
+			}
 			h4{
 				margin-top: 0.11rem;
 				font-size: $font-size-medium-x;
@@ -147,7 +142,7 @@
 			p{
 				margin-top: 0.11rem;
 				font-size: $font-size-medium-s;
-			}					    		    				
+			}
   		}
   	}
 
@@ -157,7 +152,7 @@
   	bottom: 0.32rem;
   	text-align: center;
   	width: 100%;
-  	}		
+  	}
 	}
 
   .operate-btn{
@@ -177,8 +172,8 @@
       margin: 0.2rem;
       padding: 0.1rem;
       border: 0.02rem solid #48b0fb;
-      border-radius: 50%;                
+      border-radius: 50%;
     }
 	}
-}  
+}
 </style>
