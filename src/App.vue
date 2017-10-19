@@ -19,9 +19,9 @@
   import {isLogin, setUser, getWxMobAndCapt} from 'common/js/util';
   import {getLocation} from 'common/js/location';
   import {getAppId} from 'api/general';
-  import {wxLogin} from 'api/user';
+  import {wxLogin, saveLoginLog} from 'api/user';
   import {mapMutations, mapGetters} from 'vuex';
-  import {SET_LOCATION, SET_IS_LOCA_ERR} from 'store/mutation-types';
+  import {SET_LOCATION, SET_IS_LOCA_ERR, SET_LOG_FLAG} from 'store/mutation-types';
   import WxBindMobile from 'components/wx-bind-mobile/wx-bind-mobile';
 
   export default {
@@ -33,14 +33,11 @@
     },
     computed: {
       ...mapGetters([
-        'location'
+        'location',
+        'logFLag'
       ])
     },
     created() {
-//      setUser({
-//        token: 'TSYS_USER_WTWTK201710130935341077766',
-//        userId: 'U1111111111111111'
-//      });
       this.getLocation();
       if (!isLogin()) {
         if (/code=([^&]+)&state=/.exec(location.href)) {
@@ -74,6 +71,7 @@
         } else {
           this.loadingFlag = false;
         }
+        saveLoginLog().catch(() => {});
       }
     },
     methods: {
@@ -124,7 +122,8 @@
       },
       ...mapMutations({
         setLocation: SET_LOCATION,
-        setLocaErr: SET_IS_LOCA_ERR
+        setLocaErr: SET_IS_LOCA_ERR,
+        setLogFLag: SET_LOG_FLAG
       })
     },
     components: {

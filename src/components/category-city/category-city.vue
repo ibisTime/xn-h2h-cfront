@@ -141,6 +141,8 @@
         this.cityList = [];
         this.areaList = [];
         if (_cityList.hasOwnProperty('sub')) {
+          this.cityIndex = 0;
+          this.areaIndex = -1;
           this._creatList(_cityList.sub, this.cityList);
           let _areaList = cityData[index].sub[0];
           if (_areaList.hasOwnProperty('sub')) {
@@ -156,7 +158,7 @@
         if (!flag) {
           this.$refs.cityScroll.scrollToElement(this.$refs.city[index], 200, false, true);
         }
-        this.areaIndex = 0;
+        this.areaIndex = -1;
         this.areaList = [];
         if (cityData[this.provIndex].sub[index].hasOwnProperty('sub')) {
           var _areaList = cityData[this.provIndex].sub[index];

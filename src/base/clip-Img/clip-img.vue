@@ -26,7 +26,7 @@
       },
       imgType: {
         type: String,
-        default: ''
+        default: 'image/png'
       }
     },
     data() {
@@ -149,22 +149,28 @@
         if (height > outerHeight) {
           height = outerHeight;
         }
+        this.getImgBase64(rateW, rateH, width, height);
+      },
+      getImgBase64(rateW, rateH, width, height) {
         let base64 = '';
-        if (this.$refs.canvas.getContext) {
-          let self = this;
-          let image = new Image();
-          image.onload = function() {
-            let canvas = document.createElement('canvas');
-            canvas.width = self.cWidth;
-            canvas.height = self.cHeight;
-            let context1 = canvas.getContext('2d');
-            context1.drawImage(this, self.clipX * rateW, self.clipY * rateH, width * rateW, height * rateH, 0, 0, self.cWidth, self.cHeight);
-            base64 = canvas.toDataURL(self.imgType);
-            self.hide();
-            self.$emit('choseImage', base64);
-          };
-          image.src = this.imgUrl;
-        }
+        let self = this;
+        let image = new Image();
+        image.onload = function() {
+          let canvas = document.createElement('canvas');
+          canvas.width = self.cWidth;
+          canvas.height = self.cHeight;
+          let context1 = canvas.getContext('2d');
+          context1.drawImage(this, self.clipX * rateW, self.clipY * rateH, width * rateW, height * rateH, 0, 0, self.cWidth, self.cHeight);
+          base64 = canvas.toDataURL(self.imgType);
+          self.hide();
+          self.$emit('choseImage', base64);
+        };
+        image.onerror = function() {
+          var timeStamp = +new Date();
+          self.getImgBase64(self.imgUrl + '?' + timeStamp);
+        };
+        image.setAttribute('crossOrigin', 'anonymous');
+        image.src = this.imgUrl;
       }
     }
   };

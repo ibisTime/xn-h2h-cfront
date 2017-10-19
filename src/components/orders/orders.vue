@@ -35,7 +35,7 @@
               <div class="clearfix btns">
                 <span class="status fl">{{item.status | formatStatus}}</span>
                 <span class="btn fr" v-show="showPayBtn(item.status)" @click.stop="payOrder(item)">立即支付</span>
-                <span class="btn cancel fr" v-show="showCancelBtn(item.status)" @click="_cancelOrder(item)">取消订单</span>
+                <span class="btn cancel fr" v-show="showCancelBtn(item.status)" @click.stop="_cancelOrder(item)">取消订单</span>
                 <span class="btn cancel fr" v-show="showTkBtn(item.status)" @click.stop="_tkOrder(item)">申请退款</span>
                 <span class="btn fr" v-show="showReceiveBtn(item.status)" @click.stop="_receiveOrder(item)">确认收货</span>
                 <span class="btn fr" v-show="showRatingBtn(item.status)" @click.stop="ratingOrder(item)">立即评价</span>

@@ -1,81 +1,87 @@
 <template>
   <transition name="slide">
     <div class="goods-detail-wrapper">
-      <div class="scroll-wrapper">
-        <scroll :data="messages" :hasMore="hasMore" ref="scroll">
-          <header>
-            <div class="top">
-              <div class="name">{{name}}</div>
-              <div class="icon-like" :class="likeCls" @click="collection"></div>
-            </div>
-            <div class="center">
-              <span class="unit">¥</span>
-              <span class="price">{{sellPrice | formatAmount}}</span>
-              <span class="text">原价¥{{oriPrice | formatAmount}}</span>
-              <span class="text">运费¥{{freight | formatAmount}}</span>
-              <span class="text fr">浏览{{readCount}}</span>
-            </div>
-            <div class="bottom">
-              <div class="inner">
-                <i class="icon icon-addr"></i>
-                <span>{{addr}}</span>
-                <i class="icon icon-right"></i>
+      <div v-if="!none" class="goods-content">
+        <div class="scroll-wrapper">
+          <scroll :data="messages" :hasMore="hasMore" ref="scroll">
+            <header>
+              <div class="top">
+                <div class="name">{{name}}</div>
+                <div class="icon-like" :class="likeCls" @click="collection"></div>
               </div>
-            </div>
-          </header>
-          <div class="description">
-            <div class="text-content" :class="textCls">{{description}}</div>
-            <div class="up-down" v-if="showAll" @click="showDesc">展开<i class="icon down"></i></div>
-            <div class="pic-wrapper">
-              <div class="normal-pic">
-                <img @load="imgLoad" v-for="item in noramlPic" :src="item | formatImg"/>
+              <div class="center">
+                <span class="unit">¥</span>
+                <span class="price">{{sellPrice | formatAmount}}</span>
+                <span class="text">原价¥{{oriPrice | formatAmount}}</span>
+                <span class="text">运费¥{{freight | formatAmount}}</span>
+                <span class="text fr">浏览{{readCount}}</span>
               </div>
-              <div class="special-pic">
-                <div class="spec-item" v-for="item in specialPic">
-                  <div class="inner" :style="getSyl(item)"></div>
+              <div class="bottom">
+                <div class="inner" @click="showMap">
+                  <i class="icon icon-addr"></i>
+                  <span>{{addr}}</span>
+                  <i class="icon icon-right"></i>
+                </div>
+              </div>
+            </header>
+            <div class="description">
+              <div class="text-content" :class="textCls">{{description}}</div>
+              <div class="up-down" v-if="showAll" @click="showDesc">展开<i class="icon down"></i></div>
+              <div class="pic-wrapper">
+                <div class="normal-pic">
+                  <img @load="imgLoad" v-for="item in noramlPic" :src="item | formatImg"/>
+                </div>
+                <div class="special-pic">
+                  <div class="spec-item" v-for="item in specialPic">
+                    <div class="inner" :style="getSyl(item)"></div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="card" v-if="publisher" @click="goUserCenter">
-            <div class="img"><img :src="publisher.photo | formatImg"/></div>
-            <div class="content">
-              <div class="name">{{publisher.nickname}}</div>
-              <div class="info">{{publisherDesc}}</div>
+            <div class="card" v-if="publisher" @click="goUserCenter">
+              <div class="img"><img :src="publisher.photo | formatImg"/></div>
+              <div class="content">
+                <div class="name">{{publisher.nickname}}</div>
+                <div class="info">{{publisherDesc}}</div>
+              </div>
+              <div class="icon-right"></div>
             </div>
-            <div class="icon-right"></div>
-          </div>
-          <div class="message">
-            <div class="title">互动（{{totalMesCount}}）</div>
-            <div v-if="!messages.length" class="no-result">
-              <div class="img"></div>
-              <div class="text">更多宝贝细节，帮大家问问卖家</div>
-              <div class="button"><button @click="showRating">我要留言</button></div>
-            </div>
-            <ul v-else class="ratings">
-              <li class="mine">
-                <div class="img"><img :src="this.user && this.user.photo"></div>
-                <div class="rating">说点什么吧，看对眼就上</div>
+            <div class="message">
+              <div class="title">互动（{{totalMesCount}}）</div>
+              <div v-if="!messages.length" class="no-result">
+                <div class="img"></div>
+                <div class="text">更多宝贝细节，帮大家问问卖家</div>
                 <div class="button"><button @click="showRating">我要留言</button></div>
-              </li>
-              <li class="info border-bottom-1px" v-for="item in messages">
-                <div class="img"><img v-lazy="formatImg(item.photo)"></div>
-                <div class="text">
-                  <div class="name">{{item.nickname}}</div>
-                  <div class="msg">{{item.content}}</div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </scroll>
+              </div>
+              <ul v-else class="ratings">
+                <li class="mine">
+                  <div class="img"><img :src="this.user && this.user.photo"></div>
+                  <div class="rating">说点什么吧，看对眼就上</div>
+                  <div class="button"><button @click="showRating">我要留言</button></div>
+                </li>
+                <li class="info border-bottom-1px" v-for="item in messages">
+                  <div class="img"><img v-lazy="formatImg(item.photo)"></div>
+                  <div class="text">
+                    <div class="name">{{item.nickname}}</div>
+                    <div class="msg">{{item.content}}</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </scroll>
+        </div>
+        <footer>
+          <div class="price">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
+          <div class="btn">联系卖家</div>
+          <div class="btn buy" @click="goBuy">马上买</div>
+        </footer>
+        <full-loading v-show="loadingFlag"></full-loading>
+        <rating ref="rating" :parentCode="$route.params.code" :user="user" @ratingSuc="ratingSuc"></rating>
+        <show-map :lat="lat" :lng="lng" ref="map"></show-map>
       </div>
-      <footer>
-        <div class="price">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
-        <div class="btn">联系卖家</div>
-        <div class="btn buy" @click="goBuy">马上买</div>
-      </footer>
-      <full-loading v-show="loadingFlag"></full-loading>
-      <rating ref="rating" :parentCode="$route.params.code" :user="user" @ratingSuc="ratingSuc"></rating>
+      <div v-else class="no-result-wrapper">
+        <no-result title="抱歉，商品已被删除"></no-result>
+      </div>
     </div>
   </transition>
 </template>
@@ -83,11 +89,14 @@
   import {mapGetters, mapMutations} from 'vuex';
   import {SET_USER_STATE} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
+  import NoResult from 'base/no-result/no-result';
   import FullLoading from 'base/full-loading/full-loading';
+  import ShowMap from 'base/show-map/show-map';
   import Rating from 'components/rating/rating';
   import {getGoodsDetail, getPageComments, collection, read, cancelCollection} from 'api/biz';
   import {getUserById, getUser} from 'api/user';
-  import {formatImg, isUnDefined} from 'common/js/util';
+  import {formatImg, isUnDefined, getShareImg, setTitle} from 'common/js/util';
+  import {initShare} from 'common/js/weixin';
   import {commonMixin} from 'common/js/mixin';
   import User from 'common/bean/user';
 
@@ -109,7 +118,8 @@
         publisher: null,
         start: 1,
         limit: 10,
-        totalMesCount: 0
+        totalMesCount: 0,
+        none: false
       };
     },
     computed: {
@@ -142,10 +152,16 @@
           let price = +this.detail.price;
           let yunfei = +this.detail.yunfei;
           let discount = this.detail.discount;
-          discount = isUnDefined(discount) ? 1 : discount;
-          return price * discount + yunfei;
+          discount = isUnDefined(discount) ? 10 : +discount * 10;
+          return (price + yunfei) * discount / 10;
         }
         return 0;
+      },
+      lat() {
+        return this.detail && +this.detail.latitude || 0;
+      },
+      lng() {
+        return this.detail && +this.detail.longitude || 0;
       },
       ...mapGetters([
         'user'
@@ -153,6 +169,7 @@
     },
     created() {
       this.code = this.$route.params.code;
+      setTitle('商品详情');
       Promise.all([
         this.getDetail(),
         this.getUser()
@@ -167,22 +184,33 @@
     methods: {
       getDetail() {
         return getGoodsDetail(this.code).then((data) => {
-          this.getUserById(data.storeCode);
-          this.detail = data;
-          this.isLike = data.isCollect === '1';
-          this.description = data.description;
-          this.showAll = this.description.length >= 200;
-          this.isShow = this.description.length < 200;
-          let pics = this.detail.pic.split('||');
-          let len = pics.length;
-          let sIdx = 4;
-          if (len <= 4) {
-            sIdx = len;
-          } else if (len % 2) {
-            sIdx = 3;
+          if (data.code) {
+            this.getUserById(data.storeCode);
+            initShare({
+              title: data.name,
+              desc: data.description,
+              link: location.href,
+              imgUrl: getShareImg(data.pic)
+            });
+            setTitle(data.name);
+            this.detail = data;
+            this.isLike = data.isCollect === '1';
+            this.description = data.description;
+            this.showAll = this.description.length >= 200;
+            this.isShow = this.description.length < 200;
+            let pics = this.detail.pic.split('||');
+            let len = pics.length;
+            let sIdx = 4;
+            if (len <= 4) {
+              sIdx = len;
+            } else if (len % 2) {
+              sIdx = 3;
+            }
+            this.noramlPic = pics.slice(0, sIdx);
+            this.specialPic = pics.slice(sIdx);
+          } else {
+            this.none = true;
           }
-          this.noramlPic = pics.slice(0, sIdx);
-          this.specialPic = pics.slice(sIdx);
         });
       },
       getPageComments() {
@@ -210,6 +238,9 @@
             this.$refs.scroll && this.$refs.scroll.refresh();
           }, 20);
         });
+      },
+      showMap() {
+        this.$refs.map.show();
       },
       collection() {
         if (this.isLike) {
@@ -253,6 +284,7 @@
       },
       ratingSuc(item) {
         this.messages.unshift(item);
+        this.totalMesCount++;
       },
       goBuy() {
         this.$router.push('/category/confirm?code=' + this.code);
@@ -267,7 +299,9 @@
     components: {
       Scroll,
       Rating,
-      FullLoading
+      ShowMap,
+      FullLoading,
+      NoResult
     }
   };
 </script>
@@ -297,6 +331,14 @@
       left: 0;
       bottom: 1rem;
       width: 100%;
+    }
+
+    .no-result-wrapper {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
     }
 
     header {
@@ -675,7 +717,6 @@
       background: #fff;
 
       .price {
-        /*white-space: nowrap;*/
         font-size: $font-size-medium-s;
 
         span {

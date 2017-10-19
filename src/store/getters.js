@@ -21,3 +21,7 @@ export const currentAddr = state => state.currentAddr;
 export const orderList = state => state.orderList;
 
 export const currentOrder = state => state.currentOrder;
+
+export const publishGoods = state => state.publishGoods;
+
+export const logFLag = state => state.logFLag;

@@ -5,6 +5,9 @@ const mutations = {
   [types.SET_PUBLISH_CATEGORY](state, cate) {
     state.publishCategory = cate;
   },
+  [types.SET_PUBLISH_GOODS](state, goods) {
+    state.publishGoods = goods;
+  },
   [types.SET_SEARCH_HISTORY](state, history) {
     state.searchHistory = history;
   },
@@ -67,6 +70,9 @@ const mutations = {
   },
   [types.SET_CURRENT_ORDER](state, order) {
     state.currentOrder = order;
+  },
+  [types.SET_LOG_FLAG](state, flag) {
+    state.logFLag = flag;
   }
 };
 

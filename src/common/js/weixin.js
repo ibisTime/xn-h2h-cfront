@@ -17,6 +17,7 @@ let globalConfig = {};
  */
 export function initShare(config, suc, err) {
   getInitWXSDKConfig().then((data) => {
+    console.log('xx');
     suc && suc(data);
     if (!/(\?|&)userReferee/.test(config.link)) {
       let result = /\?([^#]*)$/.exec(config.link);

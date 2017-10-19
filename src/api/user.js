@@ -1,13 +1,19 @@
 import fetch from 'common/js/fetch';
 import {getUserId} from 'common/js/util';
 
-// 微信登录
+/**
+ * 微信登录
+ * @param {string} code
+ * @param {string} userReferee
+ * @param {string} mobile
+ * @param {string} smsCaptcha
+ */
 export function wxLogin(code, userReferee, mobile, smsCaptcha) {
   let params = {
     code,
-    isNeedMobile: 0,
     kind: 'C',
     type: 'wx_h5',
+    isNeedMobile: '1',
     mobile,
     smsCaptcha
   };
@@ -18,21 +24,30 @@ export function wxLogin(code, userReferee, mobile, smsCaptcha) {
   return fetch(805170, params);
 }
 
-// 获取用户详情
+/**
+ * 获取用户详情
+ */
 export function getUser() {
   return fetch(805121, {
     userId: getUserId()
   });
 }
 
-// 获取用户详情
+/**
+ * 获取用户详情
+ * @param {string} userId
+ */
 export function getUserById(userId) {
   return fetch(805121, {
     userId
   });
 }
 
-// 分页获取用户
+/**
+ * 分页获取用户
+ * @param {string} start
+ * @param {string} limit
+ */
 export function getPageChildren(start, limit) {
   return fetch(805120, {
     userReferee: getUserId(),
@@ -41,7 +56,12 @@ export function getPageChildren(start, limit) {
   });
 }
 
-// 绑定手机号
+/**
+ * 绑定手机号
+ * @param {string} mobile
+ * @param {string} smsCaptcha
+ * @param {string} isSendSms
+ */
 export function bindMobile(mobile, smsCaptcha, isSendSms = '0') {
   return fetch(805060, {
     mobile,
@@ -51,7 +71,11 @@ export function bindMobile(mobile, smsCaptcha, isSendSms = '0') {
   });
 }
 
-// 修改手机号
+/**
+ * 修改手机号
+ * @param {string} newMobile
+ * @param {string} smsCaptcha
+ */
 export function changeMobile(newMobile, smsCaptcha) {
   return fetch(805061, {
     newMobile,
@@ -60,7 +84,11 @@ export function changeMobile(newMobile, smsCaptcha) {
   });
 }
 
-// 设置支付密码
+/**
+ * 设置支付密码
+ * @param {string} tradePwd
+ * @param {string} smsCaptcha
+ */
 export function setTradePwd(tradePwd, smsCaptcha) {
   return fetch(805066, {
     tradePwd,
@@ -69,7 +97,10 @@ export function setTradePwd(tradePwd, smsCaptcha) {
   });
 }
 
-// 修改昵称
+/**
+ * 修改昵称
+ * @param {string} nickname
+ */
 export function changeNickname(nickname) {
   return fetch(805082, {
     nickname,
@@ -77,7 +108,10 @@ export function changeNickname(nickname) {
   });
 }
 
-// 修改用户头像
+/**
+ * 修改用户头像
+ * @param {string} photo
+ */
 export function changeAvatar(photo) {
   return fetch(805080, {
     photo,
@@ -85,7 +119,10 @@ export function changeAvatar(photo) {
   });
 }
 
-// 修改用户生日
+/**
+ * 修改用户生日
+ * @param {string} birthday
+ */
 export function changeBirthday (birthday) {
   return fetch(805096, {
     birthday,
@@ -93,7 +130,10 @@ export function changeBirthday (birthday) {
   });
 }
 
-// 修改用户性别
+/**
+ * 修改用户性别
+ * @param {string} gender
+ */
 export function changeGender (gender) {
   return fetch(805097, {
     gender,
@@ -112,7 +152,10 @@ export function addAddress(params) {
   });
 }
 
-// 删除收件地址
+/**
+ * 删除收件地址
+ * @param {string} code
+ */
 export function deleteAddress(code) {
   return fetch(805161, {code});
 }
@@ -136,19 +179,27 @@ export function setDefaultAddress (code) {
   return fetch(805163, {code});
 }
 
-// 列表查询地址
+/**
+ * 列表查询地址
+ */
 export function getAddressList() {
   return fetch(805165, {
     userId: getUserId()
   });
 }
 
-// 详情查询地址
+/**
+ * 详情查询地址
+ * @param {string} code
+ */
 export function getAddress(code) {
   return fetch(805166, {code});
 }
 
-// 签到查询
+/**
+ * 签到查询
+ * @param {string} location
+ */
 export function signQuery(location) {
   return fetch(805148, {
     location,
@@ -156,20 +207,37 @@ export function signQuery(location) {
   });
 }
 
-// 签到
+/**
+ * 签到
+ * @param {string} location
+ */
 export function sign(location) {
   return fetch(805140, {
     location,
     userId: getUserId()
   });
 }
-// 签到天数
+
+/**
+ * 签到天数
+ * @param {string} start
+ * @param {string} limit
+ */
 export function signNum(start, limit) {
   return fetch(805145, {
     start,
     limit,
     orderDir: 'desc',
     orderColumn: 'signDatetime',
+    userId: getUserId()
+  });
+}
+
+/**
+ * 保存登录日志
+ */
+export function saveLoginLog () {
+  return fetch(805350, {
     userId: getUserId()
   });
 }

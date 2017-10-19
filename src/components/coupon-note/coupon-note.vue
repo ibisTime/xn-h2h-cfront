@@ -1,11 +1,9 @@
 <template>
   <transition name="slide">
     <div class="about-wrapper">
-      <scroll ref="scroll" :hasMore="loadingFlag" class="about-content">
-        <div>
-          <div ref="description" class="rich-text-description">
-            <div v-html="content"></div>
-          </div>
+      <scroll ref="scroll" :hasMore="loadingFlag">
+        <div ref="description" class="rich-text-description">
+          <div v-html="content"></div>
         </div>
       </scroll>
     </div>
@@ -76,24 +74,19 @@
     height: 100%;
     background: #fff;
 
-    .about-content {
-      height: 100%;
-      overflow: hidden;
-
-      .rich-text-description {
-        a {
-          line-height: 1;
-          color: $color-text;
-          text-decoration: underline;
-        }
+    .rich-text-description {
+      a {
+        line-height: 1;
+        color: $color-text;
+        text-decoration: underline;
       }
+    }
 
-      .other-info {
-        padding-top: 0.6rem;
+    .other-info {
+      padding-top: 0.6rem;
 
-        p {
-          line-height: 1;
-        }
+      p {
+        line-height: 1;
       }
     }
   }

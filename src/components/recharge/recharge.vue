@@ -102,7 +102,8 @@
           this.setting = true;
           recharge({
             amount: +this.amount * 1000,
-            openId: this.user.h5OpenId
+            openId: this.user.h5OpenId,
+            activityCode: this.$route.query.code || ''
           }).then((data) => {
             this.weixinPay(data);
           }).catch(() => {

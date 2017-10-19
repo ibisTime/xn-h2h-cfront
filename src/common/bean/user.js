@@ -8,7 +8,7 @@ const GENDER = {
 export default class User {
   constructor({ userId, birthday, gender, level, mobile,
                 nickname, photo, totalFansNum, totalFollowNum,
-                tradepwdFlag, loginLog, h5OpenId }) {
+                tradepwdFlag, loginLog, h5OpenId, introduce }) {
     this.userId = userId;
     this.birthday = birthday;
     this.gender = gender;
@@ -21,32 +21,58 @@ export default class User {
     this.tradepwdFlag = tradepwdFlag;
     this.loginLog = loginLog;
     this.h5OpenId = h5OpenId;
+    this.introduce = introduce;
   }
   setAvatar(photo) {
     this.photo = formatAvatar(photo);
+  }
+  getDescription() {
+    let infos = this.getInfos();
+    infos.gender = infos.gender ? infos.gender + '生' : '';
+    return infos.age + infos.constellation + infos.gender + this.introduce;
+  }
+  getLoginTime() {
+    let logTime = '';
+    if (this.loginLog) {
+      logTime = calcSpace(formatDate(this.loginLog.loginDatetime, 'yyyy-MM-dd-hh-mm'));
+    }
+    return logTime;
+  }
+  getInfos() {
+    let age = '';
+    let constellation = '';
+    let gender = '';
+    if (this.birthday) {
+      let arr = this.birthday.split('-');
+      let birth = +arr[0];
+      if (birth < 2000) {
+        age = Math.floor((birth - 1900) / 10) + '0后';
+      } else {
+        age = Math.floor((birth - 2000) / 10) + '0后';
+      }
+      constellation = getCostellation(+arr[1], +arr[2]);
+    }
+    if (this.gender) {
+      gender = GENDER[this.gender];
+    }
+    return {
+      age,
+      constellation,
+      gender
+    };
   }
   toString() {
     let age = '';
     let constellation = '';
     let gender = '';
-    let logTime = '';
-    if (this.birthday) {
-      let arr = this.birthday.split('-');
-      let birth = +arr[0];
-      if (birth < 2000) {
-        age = Math.floor((birth - 1900) / 10) + '0后 ';
-      } else {
-        age = Math.floor((birth - 2000) / 10) + '0后 ';
-      }
-      constellation = getCostellation(+arr[1], +arr[2]);
+    let infos = this.getInfos();
+    if (infos.age) {
+      age = infos.age + ' ' + infos.constellation + ' ';
     }
-    if (this.gender) {
-      gender = GENDER[this.gender] + ' ';
+    if (infos.gender) {
+      gender = infos.gender + ' ';
     }
-    if (this.loginLog) {
-      logTime = calcSpace(formatDate(this.loginLog.loginDatetime, 'yyyy-MM-dd-hh-mm'));
-    }
-    return age + constellation + gender + logTime;
+    return age + constellation + gender + this.getLoginTime();
   }
 }
 
@@ -92,7 +118,7 @@ function getCostellation (month, day) {
     default:
       constellation = '';
   }
-  return constellation + ' ';
+  return constellation;
 }
 
 /**

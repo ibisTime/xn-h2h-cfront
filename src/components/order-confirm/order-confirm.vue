@@ -94,7 +94,8 @@
       },
       goodsPrice() {
         if (this.detail) {
-          let discount = +this.detail.discount * 10;
+          let discount = this.detail.discount;
+          discount = isUnDefined(discount) ? 10 : +discount * 10;
           let price = this.detail.price;
           let result = discount * price / 10;
           return formatAmount(result);
@@ -102,15 +103,23 @@
         return '0.00';
       },
       yunfei() {
-        return formatAmount(this.detail && this.detail.yunfei || 0);
+        if (this.detail) {
+          let discount = this.detail.discount;
+          discount = isUnDefined(discount) ? 10 : +discount * 10;
+          let yunfei = this.detail.yunfei;
+          let result = discount * yunfei / 10;
+          return formatAmount(result);
+        }
+        return '0.00';
       },
       totalPrice() {
         if (this.detail) {
           let p1 = +this.detail.price;
           let p2 = +this.detail.yunfei;
-          let discount = +this.detail.discount * 10;
-          p1 = p1 * discount / 10;
-          return formatAmount(p1 + p2);
+          let discount = this.detail.discount;
+          discount = isUnDefined(discount) ? 10 : +discount * 10;
+          let result = (p1 + p2) * discount / 10;
+          return formatAmount(result);
         }
         return 0.00;
       },

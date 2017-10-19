@@ -114,7 +114,7 @@ export function getPageSysNotices(start, limit) {
     start,
     limit,
     pushType: 41,
-    toKind: 1,
+    toKind: 'C',
     channelType: 4,
     status: 1,
     fromSystemCode: SYSTEM_CODE

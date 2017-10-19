@@ -89,7 +89,7 @@ export function formatAvatar(img, suffix = '?imageMogr2/auto-orient') {
 // 获得分享图片
 export function getShareImg(imgs) {
   if (!imgs) {
-    let sharImg = require('../image/app.jpg');
+    let sharImg = require('../image/app.png');
     if (/data:image/.test(sharImg) || /http(?:s)?/.test(sharImg)) {
       return sharImg;
     }

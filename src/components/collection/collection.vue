@@ -4,12 +4,16 @@
       <scroll :data="list" :hasMore="hasMore" @pullingUp="getPageCollection">
         <mall-items :data="list"></mall-items>
       </scroll>
+      <div v-show="!hasMore && !list.length" class="no-result-wrapper">
+        <no-result title="抱歉，暂无收藏的商品"></no-result>
+      </div>
       <router-view @collect="handleUpdate"></router-view>
     </div>
   </transition>
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
+  import NoResult from 'base/no-result/no-result';
   import {setTitle} from 'common/js/util';
   import {getPageCollection} from 'api/biz';
   import MallItems from 'components/mall-items/mall-items';
@@ -78,6 +82,7 @@
     },
     components: {
       Scroll,
+      NoResult,
       MallItems
     }
   };
@@ -93,6 +98,14 @@
     height: 100%;
     z-index: 101;
     background: $color-background;
+
+    .no-result-wrapper {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
 
     &.slide-enter-active, &.slide-leave-active {
       transition: all 0.3s;

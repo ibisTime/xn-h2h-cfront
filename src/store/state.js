@@ -2,6 +2,7 @@ import {loadSearch} from 'common/js/cache';
 
 const state = {
   publishCategory: null,
+  publishGoods: null,
   searchHistory: loadSearch(),
   location: null,
   isLocaErr: false,
@@ -12,7 +13,8 @@ const state = {
   addressList: [],
   currentAddr: null,
   orderList: {},
-  currentOrder: null
+  currentOrder: null,
+  logFLag: false
 };
 
 export default state;

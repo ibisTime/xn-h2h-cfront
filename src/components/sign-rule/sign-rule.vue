@@ -1,39 +1,73 @@
 <template>
   <transition name="slide">
     <div class="rule-wrapper">
-      <div class="rule-title border-bottom-1px"> 签到规则</div>
-      <div class="rule-content" v-html='text'></div>
+      <scroll ref="scroll" :hasMore="loadingFlag">
+        <div ref="description" class="rich-text-description">
+          <div v-html="text"></div>
+        </div>
+      </scroll>
     </div>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
+  import Scroll from 'base/scroll/scroll';
+  import {setTitle} from 'common/js/util';
   import {getUserSystemConfig} from 'api/general';
 
   export default {
     data () {
       return {
-        text: ''
+        text: '',
+        loadingFlag: true
       };
     },
     created() {
+      setTitle('签到规则');
       this.showRule();
     },
     methods: {
       showRule () {
         getUserSystemConfig('cardsTradition').then((data) => {
+          this.loadingFlag = false;
           this.text = data.cvalue;
         }).catch(() => {
-          this.text = '暂无';
+          this.loadingFlag = false;
         });
+      },
+      _refreshScroll() {
+        setTimeout(() => {
+          this.$refs.scroll.refresh();
+          let imgs = this.$refs.description.getElementsByTagName('img');
+          for (let i = 0; i < imgs.length; i++) {
+            let _img = imgs[i];
+            if (_img.complete) {
+              setTimeout(() => {
+                this.$refs.scroll.refresh();
+              }, 20);
+              continue;
+            }
+            _img.onload = () => {
+              setTimeout(() => {
+                this.$refs.scroll.refresh();
+              }, 20);
+            };
+          }
+        }, 20);
       }
+    },
+    watch: {
+      text() {
+        this._refreshScroll();
+      }
+    },
+    components: {
+      Scroll
     }
   };
 </script>
 
 <style lang="scss" rel="stylesheet/scss" scoped>
-  @import "~common/scss/mixin";
-
   .rule-wrapper {
     position: fixed;
     left: 0;
@@ -48,15 +82,6 @@
 
     &.slide-enter, &.slide-leave-to {
       left: 100%;
-    }
-
-    .rule-title{
-      width: 100%;
-      height: 1rem;
-      line-height: 1rem;
-      text-align: center; 
-      @include border-bottom-1px(#eee);
-      font-size: 0.32rem;
     }
 
     .rule-content{

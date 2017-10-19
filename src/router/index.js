@@ -15,6 +15,8 @@ const Sign = () => import('components/sign/sign');
 const Rules = () => import('components/sign-rule/sign-rule');
 // 交易圈子
 const TradeCircle = () => import('components/trade-circle/trade-circle');
+// 充值活动
+const ChargeActivity = () => import('components/charge-activity/charge-activity');
 
 // 分类
 const Cate = () => import('components/category/category');
@@ -153,6 +155,16 @@ export default new Router({
         {
           path: 'notice',
           component: Notice
+        },
+        {
+          path: 'charge',
+          component: ChargeActivity,
+          children: [
+            {
+              path: 'charge',
+              component: Recharge
+            }
+          ]
         },
         {
           path: ':code',
@@ -397,6 +409,10 @@ export default new Router({
           component: Orders,
           children: [
             {
+              path: 'pay',
+              component: Pay
+            },
+            {
               path: ':id',
               component: OrderDetail,
               children: [
@@ -428,7 +444,17 @@ export default new Router({
           children: [
             {
               path: 'publish',
-              component: Publish
+              component: Publish,
+              children: [
+                {
+                  path: 'category',
+                  component: PublishCategories
+                }
+              ]
+            },
+            {
+              path: ':code',
+              component: Detail
             }
           ]
         },

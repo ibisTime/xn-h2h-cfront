@@ -50,6 +50,12 @@
       }
     },
     methods: {
+      updateData(sellPrice, isFree, freight, oriPrice) {
+        this.sellPrice = sellPrice;
+        this.isFree = isFree;
+        this.freight = freight;
+        this.oriPrice = oriPrice;
+      },
       show() {
         this.showFlag = true;
       },

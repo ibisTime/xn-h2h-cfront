@@ -1,7 +1,7 @@
 <template>
   <div class="recommend-wrapper">
-    <m-header title="邀请好友" actText="推荐历史" :border="border" @action="goHistory"></m-header>
     <div class="content">
+      <div class="history" @click="goHistory">推荐历史</div>
       <div class="main">
         <button @click="showTJ">点击邀请好友</button>
         <div class="title">活动规则</div>
@@ -23,12 +23,46 @@
   import MHeader from 'components/m-header/m-header';
   import GoHome from 'components/go-home/go-home';
   import ShareMask from 'components/share-mask/share-mask';
+  import {initShare} from 'common/js/weixin';
+  import {setTitle, getShareImg} from 'common/js/util';
 
   export default {
     created() {
-      this.border = false;
+      this.isWxConfiging = false;
+      this.wxData = null;
+      this.initData();
+    },
+    updated() {
+      this.initData();
     },
     methods: {
+      initData() {
+        if (this.$route.path === '/home/recommend') {
+          setTitle('我的推荐');
+          // 当前页面,并且微信sdk未初始化
+          if(!this.isWxConfiging && !this.wxData) {
+            this.initShare();
+          }
+        } else {
+          this.isWxConfiging = false;
+          this.wxData = null;
+        }
+      },
+      initShare() {
+        this.isWxConfiging = true;
+        initShare({
+          title: '我淘网',
+          desc: '二手买卖',
+          link: location.href,
+          imgUrl: getShareImg()
+        }, (data) => {
+          this.isWxConfiging = false;
+          this.wxData = data;
+        }, () => {
+          this.isWxConfiging = false;
+          this.wxData = null;
+        });
+      },
       showTJ() {
         this.$refs.mask.show();
       },
@@ -55,13 +89,19 @@
     height: 100%;
 
     .content {
-      position: absolute;
-      top: 0.88rem;
-      left: 0;
+      height: 100%;
       width: 100%;
-      bottom: 0;
       background-size: 100% 100%;
       @include bg-image('bg');
+
+      .history {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 0.3rem;
+        font-size: $font-size-medium-xx;
+        color: #fff;
+      }
 
       .main {
         position: absolute;

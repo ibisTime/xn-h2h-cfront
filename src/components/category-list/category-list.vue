@@ -9,7 +9,7 @@
       </header>
       <div class="filter-wrapper">
         <div class="item area" :class="areaCls" @click="areaClick"><span>{{address}}</span><i class="down-icon icon"></i></div>
-        <div class="item pr3" @click="priceClick">{{smallName}}</div>
+        <div class="item pr3" @click="smallClick">{{smallName}}</div>
         <div class="item price-item">价格<div class="up-down">
           <i class="up-icon icon" @click="upClick" :class="upCls"></i>
           <i class="icon down-icon" @click="downClick" :class="downCls"></i>
@@ -18,8 +18,9 @@
       </div>
       <div class="split"></div>
       <div class="content-wrapper">
-        <scroll>
-          <mall-items></mall-items>
+        <scroll :hasMore="hasMore" :data="goodsList">
+          <mall-items :data="goodsList"></mall-items>
+          <no-result v-show="!goodsList.length && !hasMore" title="抱歉，暂无商品"></no-result>
         </scroll>
       </div>
       <category-city ref="cityPicker"
@@ -29,14 +30,16 @@
                      :outAreaIndex="areaIndex"
                      @cityChose="cityChose"></category-city>
       <category-small ref="smallCategory"
+                      @hide="handleSmallHide"
                       @confirm="handleConfirm"
-                      :outSmallCode="smallCode"></category-small>
+                      :outSmallCode="smallCode"
+                      :outBigCode="bigCode"></category-small>
       <category-filter ref="filterCategory"
-                      @confirm="handleFilter"
-                      :outMinPrice="minPrice"
-                      :outMaxPrice="maxPrice"
-                      :outPriceIndex="priceIndex"
-                      :outIsFree="isFree"
+                       @confirm="handleFilter"
+                       :outMinPrice="minPrice"
+                       :outMaxPrice="maxPrice"
+                       :outPriceIndex="priceIndex"
+                       :outIsFree="isFree"
                        :outIsNew="isNew"></category-filter>
       <router-view></router-view>
     </div>
@@ -44,10 +47,14 @@
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
+  import NoResult from 'base/no-result/no-result';
   import MallItems from 'components/mall-items/mall-items';
   import CategoryCity from 'components/category-city/category-city';
   import CategorySmall from 'components/category-small/category-small';
   import CategoryFilter from 'components/category-filter/category-filter';
+  import {getPageGoods} from 'api/biz';
+  import {initShare} from 'common/js/weixin';
+  import {setTitle, getShareImg} from 'common/js/util';
 
   const UP = 'UP';
   const DOWN = 'DOWN';
@@ -66,11 +73,26 @@
         minPrice: '',
         maxPrice: '',
         priceIndex: -1,
+        bigCode: this.$route.query.code || '',
         smallCode: '',
         smallName: '全部',
+        smallActive: false,
         isFree: false,
-        isNew: false
+        isNew: false,
+        start: 1,
+        limit: 10,
+        hasMore: true,
+        goodsList: []
       };
+    },
+    created() {
+      this.first = true;
+      this.isWxConfiging = false;
+      this.wxData = null;
+      this.getInitData();
+    },
+    updated() {
+      this.getInitData();
     },
     computed: {
       areaCls() {
@@ -90,8 +112,74 @@
       }
     },
     methods: {
+      shouldGetData() {
+        if (this.$route.path === '/category/list') {
+          setTitle('商品列表');
+          // 当前页面,并且微信sdk未初始化
+          if(!this.isWxConfiging && !this.wxData) {
+            this.getInitWXSDKConfig();
+          }
+          return this.first;
+        }
+        return false;
+      },
+      getInitData() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          this.getPageGoods();
+        }
+      },
+      getInitWXSDKConfig() {
+        this.isWxConfiging = true;
+        initShare({
+          title: '我淘网',
+          desc: '二手买卖',
+          link: location.href,
+          imgUrl: getShareImg()
+        }, (data) => {
+          this.isWxConfiging = false;
+          this.wxData = data;
+        }, () => {
+          this.isWxConfiging = false;
+          this.wxData = null;
+        });
+      },
+      getPageGoods() {
+        let param = {
+          start: this.start,
+          limit: this.limit,
+          province: this.province,
+          city: this.city,
+          area: this.area,
+          type: this.smallCode,
+          category: this.bigCode,
+          isNew: this.isNew ? '1' : '',
+          yunfei: this.isFree ? 0 : '',
+          minPrice: this.minPrice,
+          maxPrice: this.maxPrice
+        };
+        if (this.direction) {
+          param.orderColumn = 'price';
+          param.orderDir = this.direction === UP ? 'asc' : 'desc';
+        }
+        if (this.$route.query.act) {
+          param.isJoin = 1;
+        }
+        if (this.start === 1) {
+          this.hasMore = true;
+          this.goodsList = [];
+        }
+        getPageGoods(param).then((data) => {
+          this.goodsList = this.goodsList.concat(data.list);
+          if (this.limit > data.list.length || this.limit >= data.totalCount) {
+            this.hasMore = false;
+          }
+          this.start++;
+        });
+      },
       areaClick() {
         this.areaActive = !this.areaActive;
+        this.$refs.smallCategory.hide();
         if (this.areaActive) {
           this.$refs.cityPicker.show();
           this.$refs.cityPicker.initScroll();
@@ -99,25 +187,38 @@
           this.$refs.cityPicker.hide();
         }
       },
-      priceClick() {
-        this.areaActive = false;
+      smallClick() {
+        this.smallActive = !this.smallActive;
         this.$refs.cityPicker.hide();
-        this.$refs.smallCategory.show();
+        if (this.smallActive) {
+          this.$refs.smallCategory.show();
+          this.$refs.smallCategory.initData();
+        } else {
+          this.$refs.smallCategory.hide();
+        }
       },
       upClick() {
         this.direction = this.direction === UP ? '' : UP;
-        this.areaActive = false;
+        this.$refs.cityPicker.hide();
+        this.$refs.smallCategory.hide();
+        this.resetQuery();
       },
       downClick() {
         this.direction = this.direction === DOWN ? '' : DOWN;
-        this.areaActive = false;
+        this.$refs.cityPicker.hide();
+        this.$refs.smallCategory.hide();
+        this.resetQuery();
       },
       filterClick() {
         this.$refs.cityPicker.hide();
         this.$refs.filterCategory.show();
+        this.$refs.smallCategory.hide();
       },
       handleHide() {
         this.areaActive = false;
+      },
+      handleSmallHide() {
+        this.smallActive = false;
       },
       cityChose(prov, city, area, provIdx, cityIdx, areaIdx) {
         this.province = prov;
@@ -126,10 +227,13 @@
         this.cityIndex = cityIdx;
         this.area = area;
         this.areaIndex = areaIdx;
+        this.resetQuery();
       },
-      handleConfirm(smallCode, smallName) {
+      handleConfirm(bigCode, smallCode, smallName) {
+        this.bigCode = bigCode;
         this.smallCode = smallCode;
         this.smallName = smallName;
+        this.resetQuery();
       },
       handleFilter(min, max, priceIndex, isFree, isNew) {
         this.minPrice = min;
@@ -137,6 +241,11 @@
         this.priceIndex = priceIndex;
         this.isFree = isFree;
         this.isNew = isNew;
+        this.resetQuery();
+      },
+      resetQuery() {
+        this.start = 1;
+        this.getPageGoods();
       },
       back() {
         this.$router.back();
@@ -147,6 +256,7 @@
     },
     components: {
       Scroll,
+      NoResult,
       MallItems,
       CategoryCity,
       CategorySmall,
@@ -316,6 +426,14 @@
 
     .split {
       height: 0.2rem;
+    }
+
+    .content-wrapper {
+      position: absolute;
+      top: 1.88rem;
+      bottom: 0;
+      left: 0;
+      width: 100%;
     }
 
     &.slide-enter-active, &.slide-leave-active {

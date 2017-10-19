@@ -4,7 +4,7 @@
       <m-header :border="border" title="发布" actText="取消" :showBack="showBack" @action="close"></m-header>
       <div class="main">
         <div class="photos-wrapper">
-          <photo-scroll @updatePhotos="updatePhotos" :photos="photos"></photo-scroll>
+          <photo-scroll @updatePhotos="updatePhotos" :token="token" :photos="photos"></photo-scroll>
         </div>
         <div class="split"></div>
         <div class="desc-wrapper">
@@ -35,22 +35,24 @@
       </div>
       <price-mask ref="priceMask" @confirm="updatePrice"></price-mask>
       <toast ref="toast" :text="text"></toast>
+      <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
       <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
   import {mapMutations, mapGetters} from 'vuex';
-  import {SET_PUBLISH_CATEGORY} from 'store/mutation-types';
+  import {SET_PUBLISH_CATEGORY, SET_PUBLISH_GOODS} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
   import SwitchOption from 'base/switch-option/switch-option';
-  import Loading from 'base/loading/loading';
   import Toast from 'base/toast/toast';
+  import FullLoading from 'base/full-loading/full-loading';
   import MHeader from 'components/m-header/m-header';
   import PhotoScroll from 'components/photo-scroll/photo-scroll';
   import PriceMask from 'components/price-mask/price-mask';
-  import {isUnDefined} from 'common/js/util';
-  import {publish} from 'api/biz';
+  import {isUnDefined, formatImg} from 'common/js/util';
+  import {publish, getGoodsDetail, editGoods} from 'api/biz';
+  import {getQiniuToken} from 'api/general';
 
   export default {
     data() {
@@ -65,14 +67,26 @@
         isFree: false,
         isPublish: false,
         text: '',
-        loadingFlag: true
+        loadingFlag: true,
+        loadingText: '正在载入...',
+        token: ''
       };
     },
     created() {
-      this.activityCode = this.$route.query.code || '';
+      this.activityCode = this.$route.query.act || '';
+      this.code = this.$route.query.code || '';
       this.showBack = false;
       this.border = true;
-      this.setCategory(null);
+      if (this.code) {
+        this.getData();
+      } else {
+        this.getQiniuToken().then(() => {
+          this.loadingFlag = false;
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+        this.setCategory(null);
+      }
     },
     computed: {
       newCls() {
@@ -98,11 +112,68 @@
       },
       ...mapGetters([
         'publishCategory',
+        'publishGoods',
         'location',
         'isLocaErr'
       ])
     },
     methods: {
+      getData() {
+        if (!this.publishGoods) {
+          Promise.all([
+            this.getGoodsDetail(),
+            this.getQiniuToken()
+          ]).then(() => {
+            this.loadingFlag = false;
+          }).catch(() => {
+            this.loadingFlag = false;
+          });
+        } else {
+          this.getQiniuToken().then(() => {
+            this.loadingFlag = false;
+          }).catch(() => {
+            this.loadingFlag = false;
+          });
+          this.initData();
+        }
+      },
+      initData() {
+        this.setCategory({
+          parentCode: this.publishGoods.category,
+          code: this.publishGoods.type,
+          name: this.publishGoods.typeName
+        });
+        this.photos = this.publishGoods.pic.split('||').map((key) => {
+          return {
+            key,
+            ok: true,
+            preview: formatImg(key),
+            type: this.getImgType(key)
+          };
+        });
+        this.name = this.publishGoods.name;
+        this.description = this.publishGoods.description;
+        this.isNew = this.publishGoods.isNew === '1';
+        this.sellPrice = +this.publishGoods.price / 1000;
+        this.oriPrice = +this.publishGoods.originalPrice / 1000;
+        this.freight = +this.publishGoods.yunfei / 1000;
+        this.isFree = this.publishGoods.yunfei === 0;
+        this.isPublish = this.publishGoods.isPublish === '1';
+        setTimeout(() => {
+          this.$refs.priceMask.updateData(this.sellPrice, this.isFree, this.freight, this.oriPrice);
+        }, 20);
+      },
+      getQiniuToken() {
+        return getQiniuToken().then((data) => {
+          this.token = data.uploadToken;
+        });
+      },
+      getGoodsDetail() {
+        return getGoodsDetail(this.code).then((data) => {
+          this.setPublishGoods(data);
+          this.initData();
+        });
+      },
       choseNew() {
         this.isNew = !this.isNew;
       },
@@ -161,35 +232,83 @@
           originalPrice: this.oriPrice * 1000,
           price: this.sellPrice * 1000,
           yunfei: this.freight * 1000,
-          type: this.publishCategory.code,
-          activityCode: this.activityCode
+          type: this.publishCategory.code
         };
       },
       publish() {
-        if (this.valid) {
-          publish(this.prepareParams()).then(() => {
-            this.loadingFlag = false;
-            this.text = '发布成功';
-            this.$refs.toast.show();
-            setTimeout(() => {
-              this.$router.push('/category');
-            }, 1000);
-          }).catch(() => {
-            this.loadingFlag = false;
-          });
+        if (this.valid()) {
+          let param = this.prepareParams();
+          if (!this.code) {
+            this.loadingText = '发布中...';
+            this.loadingFlag = true;
+            param.activityCode = this.activityCode;
+            publish(param).then(() => {
+              this.loadingFlag = false;
+              this.text = '发布成功';
+              this.$refs.toast.show();
+              setTimeout(() => {
+                this.$router.push('/category');
+              }, 1000);
+            }).catch(() => {
+              this.loadingFlag = false;
+            });
+          } else {
+            this.loadingText = '修改中...';
+            this.loadingFlag = true;
+            editGoods(this.code, param).then(() => {
+              this.loadingFlag = false;
+              this.text = '修改成功';
+              this.$refs.toast.show();
+              let item = this.publishGoods;
+              this.$emit('updateProduct', {
+                ...item,
+                ...param
+              });
+              setTimeout(() => {
+                this.$router.back();
+              }, 1000);
+            }).catch(() => {
+              this.loadingFlag = false;
+            });
+          }
         }
       },
       close() {
         this.$router.back();
       },
+      getImgType(key) {
+        let type = 'image/png';
+        let idx = key.lastIndexOf('.');
+        if (~idx) {
+          let str = key.substr(idx + 1);
+          switch (str) {
+            case 'jpg':
+              type = 'image/jpeg';
+              break;
+            case 'png':
+              type = 'image/png';
+              break;
+            case 'jpeg':
+              type = 'image/jpeg';
+              break;
+            case 'gif':
+              type = 'image/gif';
+              break;
+            default:
+              type = 'image/png';
+          }
+        }
+        return type;
+      },
       ...mapMutations({
-        setCategory: SET_PUBLISH_CATEGORY
+        setCategory: SET_PUBLISH_CATEGORY,
+        setPublishGoods: SET_PUBLISH_GOODS
       })
     },
     components: {
       MHeader,
       Scroll,
-      Loading,
+      FullLoading,
       Toast,
       PriceMask,
       PhotoScroll,

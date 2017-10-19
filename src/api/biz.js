@@ -22,7 +22,20 @@ export function publish (params) {
 export function getPageGoods (params) {
   return fetch(808025, {
     status: 3,
+    isJoin: 0,
     ...params
+  });
+}
+
+/**
+ * 分页查询附近商品
+ * @param {start, limit, longitude, latitude} params
+ */
+export function getPageNearbyGoods (params) {
+  return fetch(808020, {
+    ...params,
+    isJoin: 0,
+    status: 3
   });
 }
 
@@ -39,12 +52,21 @@ export function getGoodsDetail (code) {
 
 /**
  * 列表查询商品分类
+ * @param {string} parentCode
  */
 export function getCategories (parentCode) {
   return fetch(808007, {
     status: 1,
     parentCode
   });
+}
+
+/**
+ * 详情查询分类
+ * @param {string} code
+ */
+export function getCategory (code) {
+  return fetch(808006, { code });
 }
 
 /**
@@ -117,8 +139,8 @@ export function cancelPraise (entityCode) {
 
 /**
  * 分页查询收藏
- * @param {string} start
- * @param {string} limit
+ * @param {number} start
+ * @param {number} limit
  * @param {number} type
  */
 function xn808950 (start, limit, type) {
@@ -132,8 +154,8 @@ function xn808950 (start, limit, type) {
 
 /**
  * 分页查询收藏
- * @param {string} start
- * @param {string} limit
+ * @param {number} start
+ * @param {number} limit
  */
 export function getPageCollection (start, limit) {
   return xn808950(start, limit, 1);
@@ -141,8 +163,8 @@ export function getPageCollection (start, limit) {
 
 /**
  * 分页查询我的浏览足迹
- * @param {string} start
- * @param {string} limit
+ * @param {number} start
+ * @param {number} limit
  */
 export function getPageReads (start, limit) {
   return xn808950(start, limit, 3);
@@ -151,8 +173,8 @@ export function getPageReads (start, limit) {
 /**
  * 评论分页查询
  * @param {string} entityCode
- * @param {string} start
- * @param {string} limit
+ * @param {number} start
+ * @param {number} limit
  */
 export function getPageComments (entityCode, start, limit) {
   return fetch(801025, {
@@ -218,8 +240,8 @@ export function payOrder (code, payType, couponCode) {
 
 /**
  * 分页查询订单
- * @param {string} start
- * @param {string} limit
+ * @param {number} start
+ * @param {number} limit
  * @param {string} status
  * */
 export function getPageOrders(start, limit, status) {
@@ -240,8 +262,8 @@ export function getPageOrders(start, limit, status) {
 
 /**
  * 分页查询我卖出的订单
- * @param {string} start
- * @param {string} limit
+ * @param {number} start
+ * @param {number} limit
  */
 export function getPageSellOrders (start, limit) {
   let params = {
@@ -390,15 +412,73 @@ export function getPageCoupons (start, limit, status) {
 }
 
 /**
- * 根据业务获取数量
- * @param category
- * @param entityCode
- * @param type
+ * 分页查询我发布的商品
+ * @param {number} start
+ * @param {number} limit
+ * @param {array} statusList
  */
-export function businessNum(category, entityCode, type) {
-  return fetch(801037, {
-    category,
-    entityCode,
-    type
+export function getPageMineGoods (start, limit, statusList) {
+  return fetch(808021, {
+    start,
+    limit,
+    statusList,
+    orderColumn: 'update_datetime',
+    orderDir: 'desc',
+    userId: getUserId()
+  });
+}
+
+/**
+ * 上架商品
+ * @param code
+ */
+export function upGoods (code) {
+  return fetch(808013, {
+    code,
+    orderNo: 0,
+    location: 0,
+    updater: getUserId()
+  });
+}
+
+/**
+ * 下架商品
+ * @param code
+ */
+export function downGoods (code) {
+  return fetch(808014, {
+    code,
+    updater: getUserId()
+  });
+}
+
+/**
+ * 删除商品
+ * @param code
+ */
+export function deleteGoods (code) {
+  return fetch(808011, { code });
+}
+
+/**
+ * 产品修改
+ * @param {string} code
+ * @param {area,city,province,latitude,longitude,
+ * description,isNew,isPublish,name,originalPrice,pic,price,yunfei} params
+ */
+export function editGoods (code, params) {
+  return fetch(808012, {
+    code,
+    updater: getUserId(),
+    ...params
+  });
+}
+
+export function getPageChargeActivity (start, limit) {
+  return fetch(801050, {
+    start,
+    limit,
+    type: 4,
+    status: 1
   });
 }

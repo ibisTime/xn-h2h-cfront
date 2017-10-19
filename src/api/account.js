@@ -17,7 +17,7 @@ export function getAccountInfo(accountNumber) {
 
 /**
  * 账户余额微信充值
- * @param params: {amount, openId}
+ * @param params: {amount, openId, activityCode}
  */
 export function recharge(params) {
   return fetch(802710, {

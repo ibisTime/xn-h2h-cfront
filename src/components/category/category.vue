@@ -29,6 +29,8 @@
   import MallItems from 'components/mall-items/mall-items';
   import {getPageGoods, getCategories} from 'api/biz';
   import {commonMixin} from 'common/js/mixin';
+  import {initShare} from 'common/js/weixin';
+  import {setTitle, getShareImg} from 'common/js/util';
 
   export default {
     mixins: [commonMixin],
@@ -44,6 +46,8 @@
     },
     created() {
       this.first = true;
+      this.isWxConfiging = false;
+      this.wxData = null;
       this.getInitData();
     },
     updated() {
@@ -60,6 +64,11 @@
     methods: {
       shouldGetData() {
         if (/category$/.test(this.$route.path)) {
+          setTitle('分类');
+          // 当前页面,并且微信sdk未初始化
+          if(!this.isWxConfiging && !this.wxData) {
+            this.getInitWXSDKConfig();
+          }
           return this.first;
         }
         return false;
@@ -72,6 +81,21 @@
             this.getCategories()
           ]).catch(() => {});
         }
+      },
+      getInitWXSDKConfig() {
+        this.isWxConfiging = true;
+        initShare({
+          title: '我淘网',
+          desc: '二手买卖',
+          link: location.href,
+          imgUrl: getShareImg()
+        }, (data) => {
+          this.isWxConfiging = false;
+          this.wxData = data;
+        }, () => {
+          this.isWxConfiging = false;
+          this.wxData = null;
+        });
       },
       getPageGoods() {
         return getPageGoods({

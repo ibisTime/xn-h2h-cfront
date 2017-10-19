@@ -43,7 +43,6 @@
   import Qiniu from 'base/qiniu/qiniu';
   import Toast from 'base/toast/toast';
   import Loading from 'base/loading/loading';
-  import {getQiniuToken} from 'api/general';
   import {getImgData, formatImg} from 'common/js/util';
   import PhotoEdit from 'components/photo-edit/photo-edit';
 
@@ -54,11 +53,14 @@
       photos: {
         type: Array,
         default: []
+      },
+      token: {
+        type: String,
+        default: ''
       }
     },
     data() {
       return {
-        token: '',
         currentItem: null,
         text: ''
       };
@@ -66,7 +68,9 @@
     created() {
       this.multiple = true;
       this.uploadUrl = 'http://up-z0.qiniu.com';
-      this.getQiniuToken().then(() => {
+    },
+    mounted() {
+      this.$nextTick(() => {
         this._initScroll();
       });
     },
@@ -85,11 +89,6 @@
       }
     },
     methods: {
-      getQiniuToken() {
-        return getQiniuToken().then((data) => {
-          this.token = data.uploadToken;
-        });
-      },
       _setScrollWidth() {
         let width = 0;
         let cates = this.$refs.photoItem;

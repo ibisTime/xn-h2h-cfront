@@ -192,8 +192,8 @@
           width: 100%;
           line-height: 0.8rem;
           border-radius: 0.12rem;
-          font-size: $font-size-medium-x;
-          background: #9ba9b5;
+          font-size: $font-size-medium-xx;
+          background: $primary-color;
           color: #fff;
 
           &[disabled] {

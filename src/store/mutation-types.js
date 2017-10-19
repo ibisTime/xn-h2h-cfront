@@ -1,5 +1,7 @@
 // 设置发布商品页面当前选择的分类
 export const SET_PUBLISH_CATEGORY = 'SET_PUBLISH_CATEGORY';
+// 设置当前需要编辑的商品
+export const SET_PUBLISH_GOODS = 'SET_PUBLISH_GOODS';
 // 设置搜索历史
 export const SET_SEARCH_HISTORY = 'SET_SEARCH_HISTORY';
 // 设置定位信息
@@ -34,3 +36,5 @@ export const SET_CURRENT_ADDR = 'SET_CURRENT_ADDR';
 export const SET_ORDER_LIST = 'SET_ORDER_LIST';
 // 设置当前选择的订单
 export const SET_CURRENT_ORDER = 'SET_CURRENT_ORDER';
+// 设置是否已经更新过登录日志了
+export const SET_LOG_FLAG = 'SET_LOG_FLAG';

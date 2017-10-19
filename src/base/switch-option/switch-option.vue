@@ -21,6 +21,11 @@
       };
     },
     watch: {
+      value: function (newValue) {
+        if (newValue !== this.checked) {
+          this.checked = newValue;
+        }
+      },
       checked: function (newValue) {
         this.$emit('update:value', newValue);
       }

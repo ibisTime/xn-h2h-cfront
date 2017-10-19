@@ -62,16 +62,12 @@
               <h2>关于我们</h2>
               <i class="arrow"></i>
             </router-link>
-            <router-link to="/user/setting/notice" class="setting-item border-bottom-1px" tag="div">
-              <h2>系统消息</h2>
-              <i class="arrow"></i>
-            </router-link>
           </div>
         </div>
-        <!--<div class="set-btns">-->
-        <!--<button @click="logout">退出登录</button>-->
-        <!--</div>-->
       </scroll>
+      <div class="set-btns">
+        <button @click="logout">退出登录</button>
+      </div>
       <toast :text="text" ref="toast"></toast>
       <full-loading v-show="loadingFlag"></full-loading>
       <clip-img @choseImage="updateImg"
@@ -348,23 +344,22 @@
           }
         }
       }
+    }
+    .set-btns {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 0.24rem 0.36rem;
 
-      .set-btns {
-        position: absolute;
-        bottom: 0;
-        left: 0;
+      button {
         width: 100%;
-        padding: 0.24rem 0.36rem;
-
-        button {
-          width: 100%;
-          border-radius: 0.16rem;
-          height: 0.8rem;
-          line-height: 0.8rem;
-          font-size: $font-size-medium;
-          color: #fff;
-          background-color: $color-cancel-background;
-        }
+        border-radius: 0.16rem;
+        height: 0.8rem;
+        line-height: 0.8rem;
+        font-size: $font-size-medium;
+        color: #fff;
+        background-color: $color-cancel-background;
       }
     }
   }

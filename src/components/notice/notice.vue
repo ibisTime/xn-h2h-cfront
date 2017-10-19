@@ -49,6 +49,7 @@
               this.hasMore = false;
             }
             this.notices = this.notices.concat(data.list);
+            this.start++;
           });
         }
       }
@@ -81,6 +82,7 @@
 
     .list-content {
       padding-left: 0.36rem;
+      background-color: #fff;
 
       .item {
         display: flex;
@@ -88,7 +90,6 @@
         padding: 0.5rem 0.36rem;
         padding-left: 0;
         @include border-bottom-1px($color-border);
-        background-color: #fff;
 
         .img {
           width: 0.64rem;
