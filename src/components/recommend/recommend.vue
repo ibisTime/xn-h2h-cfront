@@ -4,13 +4,9 @@
       <div class="history" @click="goHistory">推荐历史</div>
       <div class="main">
         <button @click="showTJ">点击邀请好友</button>
-        <div class="title">活动规则</div>
-        <div class="info">
-          <ul>
-            <li>首次邀请5位</li>
-            <li>首次邀请5位首次邀请5位首次邀请5位</li>
-            <li>首次邀请5位首次邀请5位首次邀请5位首次邀请5位首次邀请5位</li>
-          </ul>
+        <div v-show="content">
+          <div class="title">活动规则</div>
+          <div class="info">{{content}}</div>
         </div>
       </div>
     </div>
@@ -25,9 +21,16 @@
   import ShareMask from 'components/share-mask/share-mask';
   import {initShare} from 'common/js/weixin';
   import {setTitle, getShareImg} from 'common/js/util';
+  import {getPageInviteActivity} from 'api/biz';
 
   export default {
+    data() {
+      return {
+        content: ''
+      };
+    },
     created() {
+      this.first = true;
       this.isWxConfiging = false;
       this.wxData = null;
       this.initData();
@@ -39,9 +42,20 @@
       initData() {
         if (this.$route.path === '/home/recommend') {
           setTitle('我的推荐');
-          // 当前页面,并且微信sdk未初始化
-          if(!this.isWxConfiging && !this.wxData) {
-            this.initShare();
+          if (this.first) {
+            this.first = false;
+            getPageInviteActivity(1, 1).then((data) => {
+              if (data.list.length) {
+                this.content = data.list[0].description;
+                this.code = data.list[0].code;
+                this.initShare();
+              }
+            });
+          } else {
+            // 当前页面,并且微信sdk未初始化
+            if(!this.isWxConfiging && !this.wxData) {
+              this.initShare();
+            }
           }
         } else {
           this.isWxConfiging = false;
@@ -53,7 +67,7 @@
         initShare({
           title: '我淘网',
           desc: '二手买卖',
-          link: location.href,
+          link: location.href + '?activityCode=' + this.code,
           imgUrl: getShareImg()
         }, (data) => {
           this.isWxConfiging = false;

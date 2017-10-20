@@ -73,6 +73,12 @@ const mutations = {
   },
   [types.SET_LOG_FLAG](state, flag) {
     state.logFLag = flag;
+  },
+  [types.SET_WATCHING_USER](state, user) {
+    state.watchingUser = new User(user);
+  },
+  [types.SET_CURRENT_ACTIVITY](state, activity) {
+    state.currentActivity = activity;
   }
 };
 

@@ -87,7 +87,7 @@
 </template>
 <script>
   import {mapGetters, mapMutations} from 'vuex';
-  import {SET_USER_STATE} from 'store/mutation-types';
+  import {SET_USER_STATE, SET_WATCHING_USER} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
   import NoResult from 'base/no-result/no-result';
   import FullLoading from 'base/full-loading/full-loading';
@@ -233,6 +233,7 @@
       },
       getUserById(userId) {
         getUserById(userId).then((data) => {
+          this.setWatchingUser(data);
           this.publisher = new User(data);
           setTimeout(() => {
             this.$refs.scroll && this.$refs.scroll.refresh();
@@ -293,7 +294,8 @@
         this.$router.push('/user/' + this.publisher.userId);
       },
       ...mapMutations({
-        setUser: SET_USER_STATE
+        setUser: SET_USER_STATE,
+        setWatchingUser: SET_WATCHING_USER
       })
     },
     components: {

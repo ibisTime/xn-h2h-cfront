@@ -10,12 +10,15 @@
         </div>
       </div>
       <div class="content">
-        <scroll :data="currentList" :hasMore="hasMore">
+        <scroll :data="currentList" :hasMore="hasMore" @pullingUp="getPageGoods">
           <mall-edit-items :data="currentList"
                            @edit="editGoods"
                            @delete="deleteGoods"
                            @up="upGoods"
                            @down="downGoods"></mall-edit-items>
+          <div v-show="!hasMore && !currentList.length" class="no-result-wrapper">
+            <no-result title="抱歉，暂无商品"></no-result>
+          </div>
         </scroll>
       </div>
       <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
@@ -27,6 +30,7 @@
 <script>
   import Scroll from 'base/scroll/scroll';
   import Confirm from 'base/confirm/confirm';
+  import NoResult from 'base/no-result/no-result';
   import FullLoading from 'base/full-loading/full-loading';
   import MallEditItems from 'components/mall-edit-items/mall-edit-items';
   import {setTitle} from 'common/js/util';
@@ -34,7 +38,7 @@
   import {SET_PUBLISH_GOODS} from 'store/mutation-types';
   import {mapMutations} from 'vuex';
 
-  const IDX2STATUS = [[3], [4, 5]];
+  const IDX2STATUS = [[3], [4, 5, 6]];
   const DELETE = 'DELETE';
   const UP = 'UP';
   const DOWN = 'DOWN';
@@ -153,7 +157,7 @@
           let item = this.currentList.splice(index, 1);
           if (this.goodsObj[0]) {
             item.status = 3;
-            this.goodsObj.data.unshift(item);
+            this.goodsObj[0].data.unshift(item);
           }
         }).catch(() => {
           this.loadingFlag = false;
@@ -175,8 +179,8 @@
           });
           let item = this.currentList.splice(index, 1);
           if (this.goodsObj[1]) {
-            item.status = 4;
-            this.goodsObj.data.unshift(item);
+            item.status = 5;
+            this.goodsObj[1].data.unshift(item);
           }
         }).catch(() => {
           this.loadingFlag = false;
@@ -208,6 +212,7 @@
     components: {
       Scroll,
       Confirm,
+      NoResult,
       FullLoading,
       MallEditItems
     }
@@ -224,6 +229,13 @@
     width: 100%;
     height: 100%;
     background: $color-background;
+
+    .no-result-wrapper {
+      position: absolute;
+      top: 50%;
+      transform: translate(0, -50%);
+      width: 100%;
+    }
 
     .top-category {
       display: flex;

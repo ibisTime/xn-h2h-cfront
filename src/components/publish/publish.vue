@@ -65,7 +65,7 @@
         oriPrice: '',
         freight: '',
         isFree: false,
-        isPublish: false,
+        isPublish: true,
         text: '',
         loadingFlag: true,
         loadingText: '正在载入...',

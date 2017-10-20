@@ -8,7 +8,7 @@ const GENDER = {
 export default class User {
   constructor({ userId, birthday, gender, level, mobile,
                 nickname, photo, totalFansNum, totalFollowNum,
-                tradepwdFlag, loginLog, h5OpenId, introduce }) {
+                tradepwdFlag, loginDatetime, h5OpenId, introduce, createDatetime }) {
     this.userId = userId;
     this.birthday = birthday;
     this.gender = gender;
@@ -19,9 +19,11 @@ export default class User {
     this.totalFansNum = totalFansNum;
     this.totalFollowNum = totalFollowNum;
     this.tradepwdFlag = tradepwdFlag;
-    this.loginLog = loginLog;
+    this.loginDatetime = loginDatetime;
     this.h5OpenId = h5OpenId;
     this.introduce = introduce;
+    this.createDatetime = createDatetime;
+    this.totalDays = calcTotalDays(createDatetime);
   }
   setAvatar(photo) {
     this.photo = formatAvatar(photo);
@@ -29,12 +31,16 @@ export default class User {
   getDescription() {
     let infos = this.getInfos();
     infos.gender = infos.gender ? infos.gender + '生' : '';
-    return infos.age + infos.constellation + infos.gender + this.introduce;
+    let str = infos.age + infos.constellation + infos.gender;
+    if (str) {
+      str += '，';
+    }
+    return str + '加入我淘网' + this.totalDays + '天。' + (this.introduce || '');
   }
   getLoginTime() {
     let logTime = '';
-    if (this.loginLog) {
-      logTime = calcSpace(formatDate(this.loginLog.loginDatetime, 'yyyy-MM-dd-hh-mm'));
+    if (this.loginDatetime) {
+      logTime = calcSpace(formatDate(this.loginDatetime, 'yyyy-MM-dd-hh-mm'));
     }
     return logTime;
   }
@@ -153,4 +159,10 @@ function calcSpace (beforeTime) {
   let beforeMinute = before[4];
   let diffMinute = nowMinute - beforeMinute;
   return diffMinute <= 5 ? '刚刚来过' : diffMinute + '分钟前来过';
+}
+
+function calcTotalDays (createDatetime) {
+  let start = new Date(createDatetime).getTime();
+  let now = new Date().getTime();
+  return Math.ceil((now - start) / 86400000);
 }

@@ -32,36 +32,36 @@
               <span v-else>绑定手机号</span>
               <i class="arrow"></i>
             </div>
-            <router-link to="/user/setting/set-tradepwd" tag="div" class="setting-item border-bottom-1px">
+            <div @click="goTrade" class="setting-item border-bottom-1px">
               <h2>支付密码</h2>
               <span v-if="user && user.tradepwdFlag">修改密码</span>
               <span v-else>设置密码</span>
               <i class="arrow"></i>
-            </router-link>
-            <router-link to="/user/setting/set-birthday" tag="div" class="setting-item border-bottom-1px">
+            </div>
+            <div @click="goBirthday" class="setting-item border-bottom-1px">
               <h2>生日</h2>
               <span v-if="user && user.birthday">{{user.birthday | formatDate('MM月dd日')}}</span>
               <span v-else>设置生日</span>
               <i class="arrow"></i>
-            </router-link>
-            <router-link to="/user/setting/gender" tag="div" class="setting-item border-bottom-1px">
+            </div>
+            <div @click="goGender" class="setting-item border-bottom-1px">
               <h2>性别</h2>
               <span v-if="user && user.gender">{{getGender()}}</span>
               <span v-else>设置性别</span>
               <i class="arrow"></i>
-            </router-link>
-            <router-link to="/user/setting/address" tag="div" class="setting-item border-bottom-1px">
+            </div>
+            <div @click="goAddress" class="setting-item border-bottom-1px">
               <h2>收货地址</h2>
               <i class="arrow"></i>
-            </router-link>
-            <router-link to="/user/setting/bankcard" tag="div" class="setting-item border-bottom-1px">
+            </div>
+            <div @click="goBankCard" class="setting-item border-bottom-1px">
               <h2>我的银行卡</h2>
               <i class="arrow"></i>
-            </router-link>
-            <router-link to="/user/setting/aboutus" class="setting-item border-bottom-1px" tag="div">
+            </div>
+            <div @click="goAboutus" class="setting-item border-bottom-1px">
               <h2>关于我们</h2>
               <i class="arrow"></i>
-            </router-link>
+            </div>
           </div>
         </div>
       </scroll>
@@ -132,7 +132,7 @@
     },
     methods: {
       shouldGetData() {
-        if (this.$route.path === '/user/setting') {
+        if (/\/user\/[^/]+\/setting$/.test(this.$route.path)) {
           setTitle('设置');
           return !this.token;
         }
@@ -224,14 +224,32 @@
           this.loadingFlag = false;
         });
       },
+      goTrade() {
+        this.$router.push(this.$route.path + '/set-tradepwd');
+      },
       goNick() {
-        this.$router.push('/user/setting/nickname');
+        this.$router.push(this.$route.path + '/nickname');
+      },
+      goBirthday() {
+        this.$router.push(this.$route.path + '/set-birthday');
+      },
+      goGender() {
+        this.$router.push(this.$route.path + '/gender');
+      },
+      goAddress() {
+        this.$router.push(this.$route.path + '/address');
+      },
+      goBankCard() {
+        this.$router.push(this.$route.path + '/bankcard');
+      },
+      goAboutus() {
+        this.$router.push(this.$route.path + '/aboutus');
       },
       goMobile() {
         if (this.user && this.user.mobile) {
-          this.$router.push('/user/setting/change-mobile');
+          this.$router.push(this.$route.path + '/change-mobile');
         } else {
-          this.$router.push('/user/setting/bind-mobile');
+          this.$router.push(this.$route.path + '/bind-mobile');
         }
       },
       logout() {

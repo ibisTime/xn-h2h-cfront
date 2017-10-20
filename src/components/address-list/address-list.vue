@@ -85,7 +85,7 @@
         }
       },
       shouldGetData() {
-        if (this.$route.path === '/user/setting/address' || this.$route.path === '/category/confirm/address') {
+        if (/\/user\/[^/]+\/setting\/address/.test(this.$route.path) || this.$route.path === '/category/confirm/address') {
           setTitle('地址列表');
           return this.hasMore;
         }

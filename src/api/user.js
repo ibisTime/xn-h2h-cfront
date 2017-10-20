@@ -8,7 +8,7 @@ import {getUserId} from 'common/js/util';
  * @param {string} mobile
  * @param {string} smsCaptcha
  */
-export function wxLogin(code, userReferee, mobile, smsCaptcha) {
+export function wxLogin(code, userReferee, activityCode, mobile, smsCaptcha) {
   let params = {
     code,
     kind: 'C',
@@ -20,6 +20,9 @@ export function wxLogin(code, userReferee, mobile, smsCaptcha) {
   if (userReferee) {
     params.userReferee = userReferee;
     params.userRefereeKind = 0;
+  }
+  if (activityCode) {
+    params.activityCode = activityCode;
   }
   return fetch(805170, params);
 }
@@ -239,5 +242,64 @@ export function signNum(start, limit) {
 export function saveLoginLog () {
   return fetch(805350, {
     userId: getUserId()
+  });
+}
+
+/**
+ * 关注用户
+ * @param {string} toUser
+ */
+export function followUser (toUser) {
+  return fetch(805110, {
+    toUser,
+    userId: getUserId()
+  });
+}
+
+/**
+ * 取消关注用户
+ * @param {string} toUser
+ */
+export function unFollowUser (toUser) {
+  return fetch(805111, {
+    toUser,
+    userId: getUserId()
+  });
+}
+
+/**
+ * 是否关注
+ * @param {string} toUser
+ */
+export function isFollowUser (toUser) {
+  return fetch(805116, {
+    toUser,
+    userId: getUserId()
+  });
+}
+
+/**
+ * 分页查询关注
+ * @param {string} start
+ * @param {string} limit
+ */
+export function getPageFollowUsers (start, limit) {
+  return fetch(805115, {
+    start,
+    limit,
+    userId: getUserId()
+  });
+}
+
+/**
+ * 分页查询粉丝
+ * @param {string} start
+ * @param {string} limit
+ */
+export function getPageFans (start, limit) {
+  return fetch(805115, {
+    start,
+    limit,
+    toUser: getUserId()
   });
 }

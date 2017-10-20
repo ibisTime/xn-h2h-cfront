@@ -19,6 +19,7 @@
         </div>
       </div>
       <div class="bottom">
+        <label v-if="item.status==='6'">系统强制下架</label>
         <span class="btn cancel" v-show="showDelete(item)" @click.stop="deleteGoods(item)">删除</span>
         <span class="btn" v-show="showEdit(item)" @click.stop="edit(item)">编辑</span>
         <span class="btn" v-show="showUp(item)" @click.stop="upGoods(item)">上架</span>
@@ -67,13 +68,13 @@
         return formatImg(pic);
       },
       showEdit(item) {
-        return item.status === '4';
+        return item.status === '5';
       },
       showDelete(item) {
-        return item.status === '4' || item.status === '5';
+        return item.status === '4' || item.status === '6';
       },
       showUp(item) {
-        return item.status === '4';
+        return item.status === '5';
       },
       showDown(item) {
         return item.status === '3';
@@ -200,7 +201,14 @@
 
       .bottom {
         height: 1rem;
+        line-height: 1rem;
         padding: 0 0.3rem;
+        font-size: 0;
+
+        label {
+          font-size: $font-size-medium-s;
+          color: $color-red;
+        }
 
         .btn {
           display: inline-block;

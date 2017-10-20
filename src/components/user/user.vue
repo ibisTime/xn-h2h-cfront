@@ -1,18 +1,17 @@
 <template>
   <div class="user-wrapper">
     <div class="top-wrapper">
-      <router-link tag="div" to="/user/setting" class="personal">
-        <div class="head-bg">
+      <div class="personal">
+        <div @click="goCenter" class="head-bg">
           <img :src="user && user.photo"/>
         </div>
         <div class="person-info">
           <div class="name">{{userName}}</div>
-          <div class="info">
+          <router-link to="/user/relation" tag="div" class="info">
             <span>关注：{{totalFollowNum}} </span><span class="split">|</span><span> 粉丝：{{totalFansNum}}</span>
-          </div>
+          </router-link>
         </div>
-        <div class="more-w"></div>
-      </router-link>
+      </div>
       <div class="money-info">
         <router-link to="/user/account" tag="div" class="remained">余额:<span>{{cnyAmount}}</span></router-link>
         <router-link to="/user/jf-flow" tag="div" class="integral">积分:<span>{{jfAmount}}</span></router-link>
@@ -37,7 +36,7 @@
       <ul>
         <router-link tag="li" to="/user/pub-mine" class="item-posted">我发布的</router-link>
         <router-link tag="li" to="/user/sell-order" class="item-sell">我卖出的</router-link>
-        <li class="item-enrollment">活动报名</li>
+        <router-link tag="li" to="/user/activity" class="item-enrollment">活动报名</router-link>
         <router-link tag="li" to="/user/collection" class="item-want">我想要的</router-link>
         <router-link tag="li" to="/user/history" class="item-fotoPlace">我的足迹</router-link>
         <router-link tag="li" to="/user/coupon" class="item-coupons">优惠券</router-link>
@@ -120,6 +119,9 @@
         }
         return false;
       },
+      goCenter() {
+        this.$router.push('/user/' + this.user.userId);
+      },
       goPublish() {
         this.$router.push('/user/publish');
       },
@@ -142,27 +144,27 @@
   @import "~common/scss/mixin";
   @import "~common/scss/variable";
 
-  .user-wrapper{
+  .user-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     bottom: 1rem;
 
-    .top-wrapper{
+    .top-wrapper {
       width: 100%;
       background-size: 100% 100%;
       @include bg-image('background');
       color: #fff;
       font-size: $font-size-medium-x;
 
-      .personal{
+      .personal {
         display: flex;
-        padding: 0.7rem 0.3rem;
+        padding: 0.64rem 0.3rem;
         align-items: center;
         width:100%;
 
-        .head-bg{
+        .head-bg {
           width: 1.32rem;
           height: 1.32rem;
           border: 0.04rem solid #fff;
@@ -176,16 +178,18 @@
           }
         }
 
-        .person-info{
+        .person-info {
           flex: 1;
           padding-left: 0.3rem;
 
-          .name{
+          .name {
+            padding-top: 0.24rem;
             font-size: $font-size-large-s;
           }
 
-          .info{
-            margin-top: 0.24rem;
+          .info {
+            padding-top: 0.24rem;
+            padding-bottom: 0.24rem;
             font-size: $font-size-medium;
 
             .split {
@@ -193,16 +197,6 @@
             }
           }
         }
-
-        .more-w{
-          width: 0.3rem;
-          height: 1.28rem;
-          @include bg-image('moreW');
-          background-size: 0.2rem;
-          background-position: center;
-          background-repeat: no-repeat;
-        }
-
       }
 
       .money-info{

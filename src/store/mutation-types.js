@@ -38,3 +38,7 @@ export const SET_ORDER_LIST = 'SET_ORDER_LIST';
 export const SET_CURRENT_ORDER = 'SET_CURRENT_ORDER';
 // 设置是否已经更新过登录日志了
 export const SET_LOG_FLAG = 'SET_LOG_FLAG';
+// 设置当前用户中心正在查看的用户
+export const SET_WATCHING_USER = 'SET_WATCHING_USER';
+// 设置当前正在查看的活动
+export const SET_CURRENT_ACTIVITY = 'SET_CURRENT_ACTIVITY';

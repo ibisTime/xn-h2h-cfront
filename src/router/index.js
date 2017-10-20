@@ -101,6 +101,12 @@ const Collection = () => import('components/collection/collection');
 const ReadHistory = () => import('components/read-history/read-history');
 // 用户中心
 const UserCenter = () => import('components/user-center/user-center');
+// 活动中心
+const Activity = () => import('components/activity/activity');
+// 活动详情
+const ActivityDetail = () => import('components/activity-detail/activity-detail');
+// 关注和粉丝
+const Relationship = () => import('components/relationship/relationship');
 
 export default new Router({
   routes: [
@@ -299,74 +305,6 @@ export default new Router({
           ]
         },
         {
-          path: 'setting',
-          component: Setting,
-          children: [
-            {
-              path: 'aboutus',
-              component: Aboutus
-            },
-            {
-              path: 'nickname',
-              component: Nickname
-            },
-            {
-              path: 'bind-mobile',
-              component: BindMobile
-            },
-            {
-              path: 'change-mobile',
-              component: ChangeMobile
-            },
-            {
-              path: 'set-tradepwd',
-              component: TradePwd,
-              children: [
-                {
-                  path: 'bind-mobile',
-                  component: BindMobile
-                }
-              ]
-            },
-            {
-              path: 'set-birthday',
-              component: SetBirthday
-            },
-            {
-              path: 'gender',
-              component: EditGender
-            },
-            {
-              path: 'bankcard',
-              component: BankCard,
-              children: [
-                {
-                  path: 'add',
-                  component: BankCardAddEdit
-                },
-                {
-                  path: ':id',
-                  component: BankCardAddEdit
-                }
-              ]
-            },
-            {
-              path: 'address',
-              component: AddressList,
-              children: [
-                {
-                  path: 'add',
-                  component: AddressAddEdit
-                },
-                {
-                  path: ':id',
-                  component: AddressAddEdit
-                }
-              ]
-            }
-          ]
-        },
-        {
           path: 'account',
           component: Account,
           children: [
@@ -495,8 +433,108 @@ export default new Router({
           ]
         },
         {
+          path: 'activity',
+          component: Activity,
+          children: [
+            {
+              path: ':id',
+              component: ActivityDetail,
+              children: [
+                {
+                  path: 'publish',
+                  component: Publish,
+                  children: [
+                    {
+                      path: 'category',
+                      component: PublishCategories
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          path: 'relation',
+          component: Relationship
+        },
+        {
           path: ':userId',
-          component: UserCenter
+          component: UserCenter,
+          children: [
+            {
+              path: 'setting',
+              component: Setting,
+              children: [
+                {
+                  path: 'aboutus',
+                  component: Aboutus
+                },
+                {
+                  path: 'nickname',
+                  component: Nickname
+                },
+                {
+                  path: 'bind-mobile',
+                  component: BindMobile
+                },
+                {
+                  path: 'change-mobile',
+                  component: ChangeMobile
+                },
+                {
+                  path: 'set-tradepwd',
+                  component: TradePwd,
+                  children: [
+                    {
+                      path: 'bind-mobile',
+                      component: BindMobile
+                    }
+                  ]
+                },
+                {
+                  path: 'set-birthday',
+                  component: SetBirthday
+                },
+                {
+                  path: 'gender',
+                  component: EditGender
+                },
+                {
+                  path: 'bankcard',
+                  component: BankCard,
+                  children: [
+                    {
+                      path: 'add',
+                      component: BankCardAddEdit
+                    },
+                    {
+                      path: ':id',
+                      component: BankCardAddEdit
+                    }
+                  ]
+                },
+                {
+                  path: 'address',
+                  component: AddressList,
+                  children: [
+                    {
+                      path: 'add',
+                      component: AddressAddEdit
+                    },
+                    {
+                      path: ':id',
+                      component: AddressAddEdit
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              path: ':code',
+              component: Detail
+            }
+          ]
         }
       ]
     },

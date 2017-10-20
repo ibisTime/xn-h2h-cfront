@@ -417,14 +417,16 @@ export function getPageCoupons (start, limit, status) {
  * @param {number} limit
  * @param {array} statusList
  */
-export function getPageMineGoods (start, limit, statusList) {
+export function getPageMineGoods (start, limit, statusList,
+                                  userId = getUserId(),
+                                  orderColumn = 'update_datetime', orderDir = 'desc') {
   return fetch(808021, {
     start,
     limit,
     statusList,
-    orderColumn: 'update_datetime',
-    orderDir: 'desc',
-    userId: getUserId()
+    userId,
+    orderColumn,
+    orderDir
   });
 }
 
@@ -474,6 +476,11 @@ export function editGoods (code, params) {
   });
 }
 
+/**
+ * 分页查询充值活动
+ * @param {string} start
+ * @param {string} limit
+ */
 export function getPageChargeActivity (start, limit) {
   return fetch(801050, {
     start,
@@ -481,4 +488,43 @@ export function getPageChargeActivity (start, limit) {
     type: 4,
     status: 1
   });
+}
+
+/**
+ * 分页查询邀请好友活动
+ * @param {string} start
+ * @param {string} limit
+ */
+export function getPageInviteActivity (start, limit) {
+  return fetch(801050, {
+    start,
+    limit,
+    type: 3,
+    status: 1
+  });
+}
+
+/**
+ * 分页查询宣传类活动
+ * @param start
+ * @param limit
+ */
+export function getPageDiscountActivity (start, limit) {
+  return fetch(801070, {
+    start,
+    limit,
+    status: 1
+  });
+}
+
+export function getDiscountActivity (code) {
+  return fetch(801071, { code });
+}
+
+/**
+ * 统计用户发布了多少商品
+ * @param {string} userId
+ */
+export function getPublishGoodsCount (userId) {
+  return fetch(808018, { userId });
 }

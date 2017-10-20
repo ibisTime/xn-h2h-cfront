@@ -1,27 +1,195 @@
 <template>
   <transition name="slide">
     <div class="user-center-wrapper">
-      <div class="top-background"></div>
-      <div class="top-wrapper">
-        <div class="user-message">
-          <span></span>
-          <div>
-            <p class="name">群群</p>
-            <p class="time">4小时前来过</p>            
+      <scroll :data="goodsList" :hasMore="hasMore" @pullingUp="getPageGoods">
+        <div class="top-wrapper">
+          <div class="top"></div>
+          <div class="user-info">
+            <div class="top-info border-bottom-1px">
+              <div class="img"><img :src="imgUrl | formatAvatar"/></div>
+              <div class="right-info">
+                <div class="nickname">{{nickname}}</div>
+                <div class="time">{{loginTime}}</div>
+              </div>
+            </div>
+            <div class="bottom-info">
+              <div class="description">{{description}}</div>
+              <div class="btns">
+                <span v-if="!this.isMine" class="btn" @click="handleClick">{{btnText}}</span>
+                <span v-else class="btn" @click="goSetting">编辑</span>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="user-introduce">
-          <p>女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生女生</p>
-          <a href="javascript:;"></a>
+        <div class="goods-info"><i class="icon icon-left"></i>累计发布宝贝{{totalProduct}}个，在架{{totalOnProduct}}个<i class="icon icon-right"></i></div>
+        <div class="goods-list">
+          <div v-for="item in goodsList" class="item" @click="goDetail(item)">
+            <div class="inner">
+              <div class="img"><img v-lazy="formatImg(item.pic)" alt=""></div>
+              <div class="item-info">
+                <div class="name">{{item.name}}</div>
+                <div class="prices"><span class="unit">¥</span><span class="price">{{item.price | formatAmount}}</span><span class="label type">{{item.typeName}}</span></div>
+                <div class="addr">{{item.city}} | {{item.area}}</div>
+                <i v-if="item.status!=='3'" class="status-icon" :class="getIconCls(item.status)"></i>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="sum-count"></div>
-      <div class="goods-list"></div>
+      </scroll>
+      <router-view></router-view>
     </div>
   </transition>
 </template>
 <script>
-  export default {};
+  import {mapGetters, mapMutations} from 'vuex';
+  import {SET_USER_STATE} from 'store/mutation-types';
+  import Scroll from 'base/scroll/scroll';
+  import {getPageMineGoods, getPublishGoodsCount} from 'api/biz';
+  import {getUser, getUserById, isFollowUser, followUser, unFollowUser} from 'api/user';
+  import {setTitle, getUserId, formatImg} from 'common/js/util';
+  import {commonMixin} from 'common/js/mixin';
+  import User from 'common/bean/user';
+
+  export default {
+    mixins: [commonMixin],
+    data() {
+      return {
+        goodsList: [],
+        start: 1,
+        limit: 10,
+        hasMore: true,
+        userInfo: null,
+        isMine: false,
+        totalProduct: 0,
+        totalOnProduct: 0,
+        isFollow: false
+      };
+    },
+    computed: {
+      imgUrl() {
+        return this.userInfo && this.userInfo.photo || '';
+      },
+      nickname() {
+        return this.userInfo && this.userInfo.nickname || '';
+      },
+      loginTime() {
+        return this.userInfo && this.userInfo.getLoginTime() || '';
+      },
+      description() {
+        return this.userInfo && this.userInfo.getDescription() || '';
+      },
+      btnText() {
+        return this.isFollow ? '取消关注' : '+ 关注';
+      },
+      ...mapGetters([
+        'user',
+        'watchingUser'
+      ])
+    },
+    created() {
+      this.first = true;
+      let userId = getUserId();
+      this.userId = this.$route.params.userId;
+      this.isMine = userId === this.userId;
+      this.getInitData();
+    },
+    updated() {
+      this.getInitData();
+    },
+    methods: {
+      shouldGetData() {
+        if (/\/user\/[^/]+$/.test(this.$route.path)) {
+          setTitle('用户中心');
+          return this.first;
+        }
+        return false;
+      },
+      getInitData() {
+        if (this.shouldGetData()) {
+          this.first = false;
+          this.getUser();
+          this.getPageGoods();
+          this.getPublishGoodsCount();
+        }
+      },
+      getUser() {
+        if (this.isMine) {
+          if (!this.user) {
+            getUser().then((data) => {
+              this.setUser(data);
+              this.userInfo = new User(data);
+            }).catch(() => {});
+          } else {
+            this.userInfo = this.user;
+          }
+        } else {
+          isFollowUser(this.userId).then((data) => {
+            this.isFollow = data;
+          });
+          if (!this.watchingUser) {
+            getUserById(this.userId).then((data) => {
+              this.userInfo = new User(data);
+            });
+          } else {
+            this.userInfo = this.watchingUser;
+          }
+        }
+      },
+      getPageGoods() {
+        getPageMineGoods(this.start, this.limit, [3, 4, 5, 6], this.userId, 'status').then((data) => {
+          this.goodsList = this.goodsList.concat(data.list);
+          if (data.totalCount <= this.limit || data.list.length < this.limit) {
+            this.hasMore = false;
+          }
+          this.start++;
+        });
+      },
+      getPublishGoodsCount() {
+        getPublishGoodsCount(this.userId).then((data) => {
+          this.totalOnProduct = data.totalOnProduct;
+          this.totalProduct = data.totalProduct;
+        });
+      },
+      formatImg(pic) {
+        return formatImg(pic);
+      },
+      getIconCls(status) {
+        return status === '4' ? 'sell-icon' : 'down-icon';
+      },
+      goSetting() {
+        this.$router.push(this.$route.path + '/setting');
+      },
+      goDetail(item) {
+        this.$router.push(this.$route.path + '/' + item.code);
+      },
+      handleClick() {
+        if (!this.fetching) {
+          this.fetching = true;
+          if (this.isFollow) {
+            unFollowUser(this.userId).then(() => {
+              this.isFollow = false;
+              this.fetching = false;
+            }).catch(() => {
+              this.fetching = false;
+            });
+          } else {
+            followUser(this.userId).then(() => {
+              this.isFollow = true;
+              this.fetching = false;
+            }).catch(() => {
+              this.fetching = false;
+            });
+          }
+        }
+      },
+      ...mapMutations({
+        setUser: SET_USER_STATE
+      })
+    },
+    components: {
+      Scroll
+    }
+  };
 </script>
 <style lang="scss" scoped>
   @import "~common/scss/variable";
@@ -36,80 +204,241 @@
     z-index: 101;
     background: $color-background;
 
+    .top-wrapper {
+      padding: 0.3rem;
+      padding-top: 0.5rem;
+
+      .top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2rem;
+        z-index: -1;
+        background-color: rgb(94,135,244);
+        background-image: linear-gradient(top, rgb(94,135,244), $primary-color);
+      }
+
+      .user-info {
+        padding: 0.3rem;
+        padding-bottom: 0.2rem;
+        background-color: #fff;
+
+        .top-info {
+          display: flex;
+          align-items: center;
+          padding-left: 0.1rem;
+          padding-bottom: 0.36rem;
+          @include border-bottom-1px($color-border);
+
+          .img {
+            width: 1.36rem;
+            height: 1.36rem;
+            flex: 0 0 1.36rem;
+            border-radius: 50%;
+            overflow: hidden;
+
+            img {
+              width: 100%;
+              height: 100%;
+            }
+          }
+
+          .right-info {
+            padding-left: 0.3rem;
+
+            .nickname {
+              font-size: $font-size-large-xx;
+            }
+
+            .time {
+              margin-top: 0.27rem;
+              font-size: $font-size-medium;
+              color: $color-text-l;
+            }
+          }
+        }
+
+        .bottom-info {
+          padding-top: 0.3rem;
+          padding-left: 0.1rem;
+
+          .description {
+            line-height: 0.39rem;
+            font-size: $font-size-medium-x;
+          }
+
+          .btns {
+            padding-top: 0.28rem;
+            padding-bottom: 0.1rem;
+            text-align: right;
+            font-size: 0;
+
+            .btn {
+              display: inline-block;
+              padding: 0.13rem 0.3rem;
+              border: 1px solid $primary-color;
+              border-radius: 0.05rem;
+              font-size: $font-size-medium;
+              color: $primary-color;
+            }
+          }
+        }
+      }
+    }
+
+    .goods-info {
+      margin-bottom: 0.2rem;
+      height: 1rem;
+      line-height: 1rem;
+      text-align: center;
+      font-size: $font-size-medium-x;
+      background: #fff;
+
+      .icon {
+        display: inline-block;
+        height: 100%;
+        width: 0.14rem;
+        background-repeat: no-repeat;
+        background-size: 0.14rem;
+        vertical-align: middle;
+
+        &.icon-left {
+          margin-right: 0.12rem;
+          background-position: right 0.2rem;
+          @include bg-image('left');
+        }
+
+        &.icon-right {
+          margin-left: 0.12rem;
+          background-position: left 0.62rem;
+          @include bg-image('right');
+        }
+      }
+    }
+
+    .goods-list {
+      font-size: 0;
+
+      .item {
+        display: inline-block;
+        width: 50%;
+        padding-bottom: 0.2rem;
+        vertical-align: top;
+
+        &:nth-child(2n+1) {
+          padding-right: 0.1rem;
+        }
+
+        &:nth-child(2n) {
+          padding-left: 0.1rem;
+        }
+
+        .inner {
+          .img {
+            position: relative;
+            height: 0;
+            padding-top: 100%;
+
+            img {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+            }
+          }
+
+          .item-info {
+            position: relative;
+            padding: 0.2rem;
+            padding-bottom: 0.16rem;
+            background-color: #fff;
+
+            .name {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              font-size: $font-size-medium;
+            }
+
+            .prices {
+              padding-top: 0.22rem;
+              padding-bottom: 0.26rem;
+              font-size: 0;
+
+              .unit {
+                font-size: $font-size-small-s;
+                color: $color-red;
+                vertical-align: bottom;
+              }
+
+              .price {
+                font-size: $font-size-large-ss;
+                color: $color-red;
+                vertical-align: middle;
+              }
+
+              .label {
+                display: inline-block;
+                vertical-align: middle;
+                padding: 0.04rem 0.1rem;
+                margin-left: 0.14rem;
+                font-size: $font-size-small-s;
+              }
+
+              .type {
+                color: $primary-color;
+                border: 1px solid $primary-color;
+              }
+
+              .new {
+                color: $color-red;
+                border: 1px solid $color-red;
+              }
+            }
+            .addr {
+              padding-left: 0.3rem;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              font-size: $font-size-small-s;
+              color: $color-text-l;
+              background-position: left center;
+              background-repeat: no-repeat;
+              background-size: 0.2rem;
+              @include bg-image('addr')
+            }
+
+            .status-icon {
+              position: absolute;
+              top: 0.1rem;
+              right: 0.2rem;
+              width: 1rem;
+              height: 1rem;
+              background-size: contain;
+              background-repeat: no-repeat;
+              background-position: center;
+
+              &.sell-icon {
+                @include bg-image('sell');
+              }
+
+              &.down-icon {
+                @include bg-image('down');
+              }
+            }
+          }
+        }
+      }
+    }
+
     &.slide-enter-active, &.slide-leave-active {
       transition: all 0.3s;
     }
 
     &.slide-enter, &.slide-leave-to {
       transform: translate3d(100%, 0, 0);
-    }
-
-    .top-background{
-      background: #558BFD;
-      width: 100%;
-      height: 2.7rem;
-    }
-
-    .top-wrapper{
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 92%;
-      height: 4.2rem;
-      margin: 1rem 0.3rem 0.2rem 0.3rem;
-      background: #fff;
-
-      .user-message{
-        display: flex;
-        padding: 0.3rem 0 0.26rem 0;
-        margin: 0 0.3rem;
-        @include border-bottom-1px(#eee);
-
-        span{
-          display: inline-block;
-          width: 1.36rem;
-          height: 1.36rem;
-          margin-left: 0.1rem;
-          @include bg-image('mine')
-          background-size: 100%;
-        }
-
-        div{
-          margin: 0.15rem 0 0 0.3rem;
-        }
-
-        .name{
-          font-size: $font-size-large-xx;
-          color: $color-text;
-        }
-        .time{
-          margin-top: 0.27rem;
-          font-size: $font-size-medium;
-          color: $color-text-l;
-        }
-      }
-
-      .user-introduce{
-        position: relative;
-        padding: 0.3rem 0.3rem 0.4rem 0.4rem;
-
-        p{
-          display: inline-block;
-          width: 100%;
-          height: 100;
-          font-size: $font-size-medium-x;
-          color: $color-text;
-        }
-
-        a{
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          width: 1.6rem;
-          height: 0.54rem;
-          margin: 0.35rem 0.3rem 0.4rem 0.3rem;
-        }
-      }
     }
   }
 </style>

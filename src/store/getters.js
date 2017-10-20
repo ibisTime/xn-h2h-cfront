@@ -25,3 +25,7 @@ export const currentOrder = state => state.currentOrder;
 export const publishGoods = state => state.publishGoods;
 
 export const logFLag = state => state.logFLag;
+
+export const watchingUser = state => state.watchingUser;
+
+export const currentActivity = state => state.currentActivity;

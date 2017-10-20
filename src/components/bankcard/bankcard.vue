@@ -75,7 +75,7 @@
     },
     methods: {
       shouldGetData() {
-        if (this.$route.path === '/user/setting/bankcard') {
+        if (/\/user\/[^/]+\/setting\/bankcard/.test(this.$route.path)) {
           setTitle('银行卡列表');
           return !this.bankcardList;
         }
@@ -103,10 +103,10 @@
         }
       },
       selectItem(item) {
-        this.$router.push(`/user/setting/bankcard/${item.code}`);
+        this.$router.push(this.$route.path + '/' + item.code);
       },
       goAdd() {
-        this.$router.push('/user/setting/bankcard/add');
+        this.$router.push(this.$route.path + '/add');
       },
       touchstart(index, event) {
         this.touch.initiated = true;

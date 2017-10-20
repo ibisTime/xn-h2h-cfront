@@ -122,12 +122,12 @@
               margin-left: 0.2rem;
             }
 
-            &:nth-child(2n) {
+            &:nth-child(2n + 1) {
               color: $primary-color;
               border: 1px solid $primary-color;
             }
 
-            &:nth-child(2n + 1) {
+            &:nth-child(2n) {
               color: $second-color;
               border: 1px solid $second-color;
             }

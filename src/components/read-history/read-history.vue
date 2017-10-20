@@ -7,6 +7,7 @@
       <div v-show="!hasMore && !list.length" class="no-result-wrapper">
         <no-result title="抱歉，暂无浏览过的商品"></no-result>
       </div>
+      <router-view></router-view>
     </div>
   </transition>
 </template>

@@ -43,10 +43,14 @@
         if (/code=([^&]+)&state=/.exec(location.href)) {
           let code = RegExp.$1;
           let userReferee = '';
-          if (/\?userReferee=([^&]+)/.test(location.hash)) {
+          let activityCode = '';
+          if (/(?:\?|&)userReferee=([^&$]+)/.test(location.hash)) {
             userReferee = RegExp.$1;
           }
-          this.wxLogin(code, userReferee);
+          if (/(?:\?|&)activityCode=([^&$]+)/.test(location.hash)) {
+            activityCode = RegExp.$1;
+          }
+          this.wxLogin(code, userReferee, activityCode);
         } else {
           this.getAppId();
         }
@@ -86,7 +90,7 @@
           });
         }
       },
-      wxLogin(code, userReferee) {
+      wxLogin(code, userReferee, activityCode) {
         let mobAndCapt = getWxMobAndCapt();
         let mobile;
         let smsCaptcha;
@@ -94,7 +98,7 @@
           mobile = mobAndCapt.mobile;
           smsCaptcha = mobAndCapt.captcha;
         }
-        wxLogin(code, userReferee, mobile, smsCaptcha).then((data) => {
+        wxLogin(code, userReferee, activityCode, mobile, smsCaptcha).then((data) => {
           if (data.isNeedMobile === '1') {
             this.text = '微信登录需要先绑定手机号';
             this.$refs.toast.show();

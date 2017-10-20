@@ -14,7 +14,9 @@ const state = {
   currentAddr: null,
   orderList: {},
   currentOrder: null,
-  logFLag: false
+  logFLag: false,
+  watchingUser: null,
+  currentActivity: null
 };
 
 export default state;
