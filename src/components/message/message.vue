@@ -1,13 +1,13 @@
 <template>
   <div class="message-wrapper">
-    <div class="message-title">
+  <!--   <div class="message-title">
       <ul class="clearfix">
         <li class="tab_items"
           v-for="(tab, index) in tabs"
           :class="{active:index===selected}"
           @click="choose(index)">{{tab.tabName}}({{totalCount}})</li>
       </ul>        
-    </div> 
+    </div>  -->
     <div class="content-wrapper">
     <message-list></message-list>
     </div>       

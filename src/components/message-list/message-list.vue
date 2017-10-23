@@ -1,11 +1,11 @@
 <template>           
   <div class="list-wrapper" >
     <scroll>
-      <div class="list-item" @click ="goChat('111')" >
+      <div class="list-item" @click ="goChat('U201710131354390878485')" >
         <div class="headPic">
         </div>
         <div class="content">
-          <p>{{item.userName}}</p>
+          <p>名字</p>
           <span>hello</span>
         </div>
         <div class="time">下午4:40</div>      
@@ -20,7 +20,7 @@
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
-  import {getPageChildren} from 'api/user';
+  // import {getPageUser} from 'api/user';
 
   export default {
     data () {
@@ -33,16 +33,16 @@
       };
     },
     created() {
-      this.getUser();
+      // this.getUser();
     },
     methods: {
-      getUser() {
-        getPageChildren(this.start, this.limit).then(() => {
-          this.loadingFlag = false;
-        }).catch(() => {
-          this.loadingFlag = false;
-        });
-      },
+      // getUser() {
+      //   getPageUser(this.start, this.limit).then(() => {
+      //     this.loadingFlag = false;
+      //   }).catch(() => {
+      //     this.loadingFlag = false;
+      //   });
+      // },
       goChat(id) {
         this.$router.push(this.$route.path + '/' + id);
       }
@@ -58,7 +58,6 @@
 
 .list-wrapper {
    width: 100%;
-   margin-top: 0.2rem;
    
   .list-item{
     display: flex;

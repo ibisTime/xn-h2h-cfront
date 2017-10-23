@@ -1,43 +1,34 @@
 <template>
   <div class="emoji"  v-show="showFlag">
-    <scroll ref="scroll" :data="emojis" :pullUpLoad="pullUpLoad"> 
-      <ul class="emoji-container">
-        <li 
-          v-for="(emojiGroup, index) in emojis" 
-          style="padding: 0" 
-          :key="index"
-          v-if="index === activeIndex">
+    <scroll ref="scroll" :pullUpLoad="pullUpLoad"> 
+      <ul class="emoji-container" @click.stop>
+        <li style="padding: 0">
           <a 
             href="javascript:;" 
-            v-for="(emoji, index) in emojiGroup"  
-            :key="index" @click="selectItem(emoji)">
-             <span 
-                class="emoji-item"
-                :title="emoji"
-                :class="'sprite-' + getPureName(emoji)"></span>
+            v-for="(emoji, index) in emojiData"  
+            :key="index" @click="selectItem(emoji[0])">
+             <img :src="emoji[1]">
           </a>
         </li>
       </ul>
     </scroll> 
-    <ul class="emoji-controller">
+    <!-- <ul class="emoji-controller">
       <li 
         v-for="(pannel,index) in pannels" 
         @click.stop="changeActive(index)"
         :class="{'active': index === activeIndex}">{{ pannel }}</li>
-    </ul>
+    </ul> -->
   </div>
 </template>
 <script>
 import Scroll from 'base/scroll/scroll';
-import data from './emoji-data.js';
 
 export default {
   name: 'emoji',
   data () {
     return {
       showFlag: false,
-      emojiData: data,
-      pannels: ['表情', '自然', '物品', '地点', '符号'],
+      emojiData: webim.Emotions,
       activeIndex: 0
     };
   },
@@ -57,18 +48,8 @@ export default {
     changeActive (index) {
       this.activeIndex = index;
     },
-    getPureName (name) {
-      return name.replace(/:/g, '');
-    },
     selectItem (emoji) {
       this.$emit('select', emoji);
-    }
-  },
-  computed: {
-    emojis () {
-      return this.pannels.map(item => {
-        return Object.keys(this.emojiData[item]);
-      });
     }
   },
   components: {
