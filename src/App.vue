@@ -108,7 +108,7 @@
             if (this.$route.path === '/user/recommend') {
               location.replace(`${location.origin}/?#/home`);
             } else {
-              location.replace(`${location.origin}?#${this.$route.fullPath}`);
+              location.replace(`${location.origin}/?#${this.$route.fullPath}`);
             }
           }
         }).catch(() => {});
