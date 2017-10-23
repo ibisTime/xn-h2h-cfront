@@ -27,6 +27,12 @@ export function wxLogin(code, userReferee, activityCode, mobile, smsCaptcha) {
   return fetch(805170, params);
 }
 
+export function getTencentParamsAPi() {
+  return fetch(805953, {
+    userId: getUserId()
+  });
+}
+
 /**
  * 获取用户详情
  */
