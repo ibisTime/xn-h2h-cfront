@@ -1,5 +1,6 @@
 import fetch from 'common/js/fetch';
 import {getUserId} from 'common/js/util';
+import {setCookie} from 'common/js/cookie';
 
 /**
  * 微信登录
@@ -27,9 +28,17 @@ export function wxLogin(code, userReferee, activityCode, mobile, smsCaptcha) {
   return fetch(805170, params);
 }
 
+/**
+ * 获取腾讯云IM签名、账号
+ */
 export function getTencentParamsAPi() {
   return fetch(805953, {
     userId: getUserId()
+  }).then((data) => {
+    setCookie('__sig__', data.sig);
+    setCookie('__accountType__', data.accountType);
+    setCookie('__txAppCode__', data.txAppCode);
+    return Promise.resolve(data);
   });
 }
 
@@ -307,5 +316,16 @@ export function getPageFans (start, limit) {
     start,
     limit,
     toUser: getUserId()
+  });
+}
+
+/**
+ * 修改用户的个人简介
+ * @param {string} introduce
+ */
+export function editIntroduce (introduce) {
+  return fetch(805098, {
+    introduce,
+    userId: getUserId()
   });
 }

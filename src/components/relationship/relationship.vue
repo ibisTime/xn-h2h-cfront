@@ -23,7 +23,7 @@
           <div class="no-result-text">{{title}}</div>
         </div>
       </div>
-      <router-view></router-view>
+      <router-view @updateFollow="handleUpdate"></router-view>
     </div>
   </transition>
 </template>
@@ -142,6 +142,21 @@
       },
       itemCls(index) {
         return this.currentIndex === index ? 'active' : '';
+      },
+      handleUpdate(isFollow, info) {
+        if (this.relationList[0]) {
+          if (isFollow) {
+            this.relationList[0].data.unshift(info);
+          } else {
+            let index = this.relationList[0].data.findIndex((item) => {
+              return item.userId === info.userId;
+            });
+            this.relationList[0].data.splice(index, 1);
+          }
+          if (this.currentIndex === 0) {
+            this.currentList = this.relationList[0].data;
+          }
+        }
       },
       goCenter(user) {
         this.$router.push(this.$route.path + '/' + user.userId);

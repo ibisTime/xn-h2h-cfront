@@ -23,6 +23,7 @@
                   <i class="icon icon-right"></i>
                 </div>
               </div>
+              <div class="status-icon" :class="statusCls" v-show="statusShow"></div>
             </header>
             <div class="description">
               <div class="text-content" :class="textCls">{{description}}</div>
@@ -72,8 +73,9 @@
         </div>
         <footer>
           <div class="price">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
-          <div class="btn">联系卖家</div>
-          <div class="btn buy" @click="goBuy">马上买</div>
+          <div v-show="showSell" class="btn">联系卖家</div>
+          <div v-show="showShare" class="btn buy" @click="shareGoods">分享宝贝</div>
+          <div class="btn buy" @click="goBuy" v-show="showBuy">马上买</div>
         </footer>
         <full-loading v-show="loadingFlag"></full-loading>
         <rating ref="rating" :parentCode="$route.params.code" :user="user" @ratingSuc="ratingSuc"></rating>
@@ -82,6 +84,7 @@
       <div v-else class="no-result-wrapper">
         <no-result title="抱歉，商品已被删除"></no-result>
       </div>
+      <share-mask ref="mask"></share-mask>
     </div>
   </transition>
 </template>
@@ -92,10 +95,11 @@
   import NoResult from 'base/no-result/no-result';
   import FullLoading from 'base/full-loading/full-loading';
   import ShowMap from 'base/show-map/show-map';
+  import ShareMask from 'components/share-mask/share-mask';
   import Rating from 'components/rating/rating';
   import {getGoodsDetail, getPageComments, collection, read, cancelCollection} from 'api/biz';
   import {getUserById, getUser} from 'api/user';
-  import {formatImg, isUnDefined, getShareImg, setTitle} from 'common/js/util';
+  import {formatImg, isUnDefined, getShareImg, setTitle, getUserId} from 'common/js/util';
   import {initShare} from 'common/js/weixin';
   import {commonMixin} from 'common/js/mixin';
   import User from 'common/bean/user';
@@ -113,13 +117,16 @@
         isShow: false,
         showAll: false,
         description: '',
-        readCount: 0,
         hasMore: true,
         publisher: null,
         start: 1,
         limit: 10,
         totalMesCount: 0,
-        none: false
+        none: false,
+        showSell: true,
+        statusShow: false,
+        showBuy: true,
+        showShare: false
       };
     },
     computed: {
@@ -137,6 +144,19 @@
       },
       addr() {
         return this.detail ? `${this.detail.city} | ${this.detail.area}` : '';
+      },
+      readCount() {
+        return this.detail ? this.detail.totalScanNum : 0;
+      },
+      statusCls() {
+        if (this.detail) {
+          if (this.detail.status === '4') {
+            return 'sell';
+          } else if (this.detail.status === '5' || this.detail.status === '6') {
+            return 'down';
+          }
+        }
+        return '';
       },
       likeCls() {
         return this.isLike ? 'active' : '';
@@ -193,6 +213,17 @@
               imgUrl: getShareImg(data.pic)
             });
             setTitle(data.name);
+            if (data.storeCode === getUserId()) {
+              this.showSell = false;
+              this.showBuy = false;
+              if (data.status === '3') {
+                this.showShare = true;
+              }
+            }
+            if (data.status === '4' || data.status === '5' || data.status === '6') {
+              this.statusShow = true;
+              this.showBuy = false;
+            }
             this.detail = data;
             this.isLike = data.isCollect === '1';
             this.description = data.description;
@@ -284,9 +315,13 @@
       showRating() {
         this.$refs.rating.show();
       },
+      shareGoods() {
+        this.$refs.mask.show();
+      },
       ratingSuc(item) {
         this.messages.unshift(item);
         this.totalMesCount++;
+        this.$emit('rating', this.code);
       },
       goBuy() {
         this.$router.push('/category/confirm?code=' + this.code);
@@ -304,7 +339,8 @@
       Rating,
       ShowMap,
       FullLoading,
-      NoResult
+      NoResult,
+      ShareMask
     }
   };
 </script>
@@ -345,6 +381,7 @@
     }
 
     header {
+      position: relative;
       padding: 0.3rem;
       padding-bottom: 0.32rem;
       background: #fff;
@@ -397,6 +434,7 @@
         .fr {
           float: right;
           margin-top: 0.2rem;
+          padding-right: 0;
         }
       }
 
@@ -442,6 +480,25 @@
             font-size: $font-size-small-s;
             color: $color-text-l;
           }
+        }
+      }
+
+      .status-icon {
+        position: absolute;
+        right: 0.1rem;
+        bottom: 0.1rem;
+        width: 1rem;
+        height: 1rem;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+
+        &.sell {
+          @include bg-image('sell');
+        }
+
+        &.down {
+          @include bg-image('down-goods');
         }
       }
     }

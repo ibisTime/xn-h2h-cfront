@@ -35,11 +35,7 @@
           <button :disabled="setting" @click="_setTradePwd">设置</button>
         </div>
 
-        <div v-show="!this.user" class="loading-container">
-          <div class="loading-wrapper">
-            <loading></loading>
-          </div>
-        </div>
+        <full-loading v-show="!this.user"></full-loading>
         <confirm ref="confirm" :isAlert="isAlert" text="设置支付密码需要先绑定手机号" @confirm="goBindMobile"></confirm>
         <toast ref="toast" text="修改成功"></toast>
         <router-view></router-view>
@@ -53,7 +49,7 @@
   import {getUser, setTradePwd} from 'api/user';
   import {sendCaptcha} from 'api/general';
   import {captValid, setTitle, tradeValid, rePwdValid} from 'common/js/util';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Confirm from 'base/confirm/confirm';
   import Toast from 'base/toast/toast';
 
@@ -213,7 +209,7 @@
       }
     },
     components: {
-      Loading,
+      FullLoading,
       Confirm,
       Toast
     }
@@ -229,22 +225,6 @@
     width: 100%;
     height: 100%;
     background: $color-background;
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
-      }
-    }
   }
   .slide-enter-active, .slide-leave-active {
     transition: all 0.3s;

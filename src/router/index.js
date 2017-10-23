@@ -59,6 +59,8 @@ const TradePwd = () => import('components/trade-pwd/trade-pwd');
 const SetBirthday = () => import('components/set-birthday/set-birthday');
 // 修改性别
 const EditGender = () => import('components/edit-gender/edit-gender');
+// 修改个人简介
+const Introduce = () => import('components/introduce/introduce');
 // 银行卡列表
 const BankCard = () => import('components/bankcard/bankcard');
 // 新增、修改银行卡
@@ -539,6 +541,10 @@ export default new Router({
                       component: AddressAddEdit
                     }
                   ]
+                },
+                {
+                  path: 'introduce',
+                  component: Introduce
                 }
               ]
             },

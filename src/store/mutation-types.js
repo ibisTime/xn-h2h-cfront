@@ -22,10 +22,16 @@ export const SET_USER_TRADE_PWD_FLAG = 'SET_USER_TRADE_PWD_FLAG';
 export const SET_USER_BIRTHDAY = 'SET_USER_BIRTHDAY';
 // 设置用户的头像
 export const SET_USER_AVATAR = 'SET_USER_AVATAR';
+// 设置用户的简介
+export const SET_USER_INTRODUCE = 'SET_USER_INTRODUCE';
 // 设置人民币账户
 export const SET_CNY_ACCOUNT = 'SET_CNY_ACCOUNT';
 // 设置积分账户
 export const SET_JF_ACCOUNT = 'SET_JF_ACCOUNT';
+// 增加用户的关注数
+export const ADD_USER_FOLLOW_NUM = 'ADD_USER_FOLLOW_NUM';
+// 减少用户的关注数
+export const DEL_USER_FOLLOW_NUM = 'DEL_USER_FOLLOW_NUM';
 // 设置银行卡列表
 export const SET_BANKCARD_LIST = 'SET_BANKCARD_LIST';
 // 设置地址列表

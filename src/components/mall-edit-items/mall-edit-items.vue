@@ -17,6 +17,7 @@
           </div>
           <div class="addr">{{item.city}} | {{item.area}}</div>
         </div>
+        <div class="status-sell" v-show="item.status==='4'"></div>
       </div>
       <div class="bottom">
         <label v-if="item.status==='6'">系统强制下架</label>
@@ -71,7 +72,7 @@
         return item.status === '5';
       },
       showDelete(item) {
-        return item.status === '4' || item.status === '6';
+        return item.status === '4' || item.status === '6' || item.status === '5';
       },
       showUp(item) {
         return item.status === '5';
@@ -98,6 +99,18 @@
         display: flex;
         padding: 0.3rem;
         @include border-bottom-1px($color-border);
+
+        .status-sell {
+          position: absolute;
+          right: 0.1rem;
+          bottom: 0.1rem;
+          width: 1rem;
+          height: 1rem;
+          background-repeat: no-repeat;
+          background-size: contain;
+          background-position: center;
+          @include bg-image('sell');
+        }
       }
 
       &:last-child {

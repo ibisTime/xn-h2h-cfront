@@ -48,11 +48,7 @@
           <p>3、T+{{toAccount}}到账</p>
           <p>4、提现手续费率{{rate}}</p>
         </div>
-        <div v-show="!bankcardList || !cnyAccount || !rate" class="loading-container">
-          <div class="loading-wrapper">
-            <loading title=""></loading>
-          </div>
-        </div>
+        <full-loading v-show="!bankcardList || !cnyAccount || !rate"></full-loading>
         <confirm ref="confirm" :isAlert="isAlert" text="未设置银行卡" @confirm="goAddBankCard"></confirm>
         <toast ref="toast" text="提现成功"></toast>
       </div>
@@ -67,7 +63,7 @@
   import {getPageAccountSysConfig} from 'api/general';
   import {amountValid, tradeValid, formatAmount, setTitle} from 'common/js/util';
   import Toast from 'base/toast/toast';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Confirm from 'base/confirm/confirm';
 
   export default {
@@ -253,7 +249,7 @@
     },
     components: {
       Toast,
-      Loading,
+      FullLoading,
       Confirm
     }
   };

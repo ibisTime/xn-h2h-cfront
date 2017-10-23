@@ -17,11 +17,7 @@
         <div class="form-btn">
           <button :disabled="setting" @click="_changeBirthday">保存</button>
         </div>
-        <div v-show="!user" class="loading-container">
-          <div class="loading-wrapper">
-            <loading></loading>
-          </div>
-        </div>
+        <full-loading v-show="!user"></full-loading>
         <toast ref="toast" text="修改成功"></toast>
       </div>
     </div>
@@ -33,7 +29,7 @@
   import {changeBirthday, getUser} from 'api/user';
   import {setTitle, emptyValid, formatDate} from 'common/js/util';
   import Toast from 'base/toast/toast';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import DatePicker from 'base/date-picker/date-picker';
 
   export default {
@@ -111,7 +107,7 @@
     },
     components: {
       Toast,
-      Loading,
+      FullLoading,
       DatePicker
     }
   };
@@ -126,22 +122,6 @@
     width: 100%;
     height: 100%;
     background: $color-background;
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
-      }
-    }
   }
 
   .slide-enter-active, .slide-leave-active {

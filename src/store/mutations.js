@@ -50,11 +50,28 @@ const mutations = {
     user.setAvatar(avatar);
     state.user = user;
   },
+  [types.SET_USER_INTRODUCE](state, introduce) {
+    let user = state.user || new User();
+    user.introduce = introduce;
+    state.user = user;
+  },
   [types.SET_CNY_ACCOUNT](state, account) {
     state.cnyAccount = account;
   },
   [types.SET_JF_ACCOUNT](state, account) {
     state.jfAccount = account;
+  },
+  [types.ADD_USER_FOLLOW_NUM](state) {
+    let user = state.user || new User();
+    user.totalFollowNum = user.totalFollowNum || 0;
+    user.totalFollowNum++;
+    state.user = user;
+  },
+  [types.DEL_USER_FOLLOW_NUM](state) {
+    let user = state.user || new User();
+    user.totalFollowNum = user.totalFollowNum || 1;
+    user.totalFollowNum--;
+    state.user = user;
   },
   [types.SET_BANKCARD_LIST](state, list) {
     state.bankcardList = list;

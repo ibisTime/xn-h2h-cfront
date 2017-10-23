@@ -154,9 +154,9 @@
           let index = this.currentList.findIndex((product) => {
             return product.code === this.currentItem.code;
           });
-          let item = this.currentList.splice(index, 1);
+          let item = this.currentList.splice(index, 1)[0];
           if (this.goodsObj[0]) {
-            item.status = 3;
+            item.status = '3';
             this.goodsObj[0].data.unshift(item);
           }
         }).catch(() => {
@@ -177,9 +177,9 @@
           let index = this.currentList.findIndex((product) => {
             return product.code === this.currentItem.code;
           });
-          let item = this.currentList.splice(index, 1);
+          let item = this.currentList.splice(index, 1)[0];
           if (this.goodsObj[1]) {
-            item.status = 5;
+            item.status = '5';
             this.goodsObj[1].data.unshift(item);
           }
         }).catch(() => {

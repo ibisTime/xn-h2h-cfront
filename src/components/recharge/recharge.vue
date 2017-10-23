@@ -13,11 +13,7 @@
         <div class="form-btn">
           <button :disabled="setting" @click="_recharge">确认充值</button>
         </div>
-        <div v-show="!user || !cnyAccount || setting" class="loading-container">
-          <div class="loading-wrapper">
-            <loading></loading>
-          </div>
-        </div>
+        <full-loading v-show="!user || !cnyAccount || setting"></full-loading>
         <toast ref="toast" :text="text"></toast>
       </div>
     </div>
@@ -31,7 +27,7 @@
   import {amountValid, setTitle} from 'common/js/util';
   import {initPay} from 'common/js/weixin';
   import Toast from 'base/toast/toast';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
 
   export default {
     data() {
@@ -123,7 +119,7 @@
     },
     components: {
       Toast,
-      Loading
+      FullLoading
     }
   };
 </script>

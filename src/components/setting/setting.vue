@@ -50,6 +50,11 @@
               <span v-else>设置性别</span>
               <i class="arrow"></i>
             </div>
+            <div @click="goIntroduce" class="setting-item border-bottom-1px">
+              <h2>个人简介</h2>
+              <span v-if="user && user.introduce">{{user.introduce}}</span>
+              <i class="arrow"></i>
+            </div>
             <div @click="goAddress" class="setting-item border-bottom-1px">
               <h2>收货地址</h2>
               <i class="arrow"></i>
@@ -235,6 +240,9 @@
       },
       goGender() {
         this.$router.push(this.$route.path + '/gender');
+      },
+      goIntroduce() {
+        this.$router.push(this.$route.path + '/introduce');
       },
       goAddress() {
         this.$router.push(this.$route.path + '/address');

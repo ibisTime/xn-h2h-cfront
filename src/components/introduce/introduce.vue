@@ -2,16 +2,14 @@
   <transition name="slide">
     <div class="nickname-wrapper">
       <div class="form-wrapper">
-        <div class="form-item">
-          <div class="item-label">新昵称</div>
+        <div class="form-item is-textarea">
           <div class="item-input-wrapper">
-            <input v-focus type="text" class="item-input" v-model="nickname" @change="_nicknameValid" placeholder="请输入新昵称(最多6位)">
-            <span v-show="nickErr" class="error-tip">{{nickErr}}</span>
+            <textarea v-model="introduce" @input="_introduceValid" rows="4" class="item-input" placeholder="请输入个人简介"></textarea>
+            <span v-show="introduceErr" class="error-tip">{{introduceErr}}</span>
           </div>
         </div>
-
         <div class="form-btn">
-          <button :disabled="setting" @click="_changeNickname">保存</button>
+          <button :disabled="setting" @click="_changeIntroduce">保存</button>
         </div>
         <full-loading v-show="!user"></full-loading>
         <toast ref="toast" text="修改成功"></toast>
@@ -21,9 +19,9 @@
 </template>
 <script>
   import {mapGetters, mapMutations} from 'vuex';
-  import {SET_USER_STATE, SET_USER_NICKNAME} from 'store/mutation-types';
-  import {changeNickname, getUser} from 'api/user';
-  import {nicknameValid, setTitle} from 'common/js/util';
+  import {SET_USER_STATE, SET_USER_INTRODUCE} from 'store/mutation-types';
+  import {editIntroduce, getUser} from 'api/user';
+  import {subbranchValid, setTitle} from 'common/js/util';
   import Toast from 'base/toast/toast';
   import FullLoading from 'base/full-loading/full-loading';
   import {directiveMixin} from 'common/js/mixin';
@@ -33,12 +31,12 @@
     data() {
       return {
         setting: false,
-        nickname: '',
-        nickErr: ''
+        introduce: '',
+        introduceErr: ''
       };
     },
     created() {
-      setTitle('修改昵称');
+      setTitle('修改简介');
       this._getUser();
     },
     computed: {
@@ -50,20 +48,20 @@
       _getUser() {
         if (!this.user) {
           getUser().then((data) => {
-            this.nickname = data.nickname || '';
+            this.introduce = data.introduce || '';
             this.setUser(data);
           }).catch(() => {});
         } else {
-          this.nickname = this.user.nickname || '';
+          this.introduce = this.user.introduce || '';
         }
       },
-      _changeNickname() {
+      _changeIntroduce() {
         if (this._valid()) {
           this.setting = true;
-          changeNickname(this.nickname)
+          editIntroduce(this.introduce)
             .then(() => {
               this.$refs.toast.show();
-              this.setNickname(this.nickname);
+              this.setIntroduce(this.introduce);
               setTimeout(() => {
                 this.$router.back();
               }, 1000);
@@ -73,16 +71,16 @@
         }
       },
       _valid() {
-        return this._nicknameValid();
+        return this._introduceValid();
       },
-      _nicknameValid() {
-        let result = nicknameValid(this.nickname);
-        this.nickErr = result.msg;
+      _introduceValid() {
+        let result = subbranchValid(this.introduce);
+        this.introduceErr = result.msg;
         return !result.err;
       },
       ...mapMutations({
         setUser: SET_USER_STATE,
-        setNickname: SET_USER_NICKNAME
+        setIntroduce: SET_USER_INTRODUCE
       })
     },
     components: {
@@ -101,6 +99,10 @@
     width: 100%;
     height: 100%;
     background: $color-background;
+
+    .item-input-wrapper {
+      height: auto !important;
+    }
 
     &.slide-enter-active, &.slide-leave-active {
       transition: all 0.3s;

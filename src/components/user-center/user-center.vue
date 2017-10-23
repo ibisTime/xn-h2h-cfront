@@ -42,7 +42,7 @@
 </template>
 <script>
   import {mapGetters, mapMutations} from 'vuex';
-  import {SET_USER_STATE} from 'store/mutation-types';
+  import {SET_USER_STATE, ADD_USER_FOLLOW_NUM, DEL_USER_FOLLOW_NUM} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
   import {getPageMineGoods, getPublishGoodsCount} from 'api/biz';
   import {getUser, getUserById, isFollowUser, followUser, unFollowUser} from 'api/user';
@@ -169,6 +169,8 @@
             unFollowUser(this.userId).then(() => {
               this.isFollow = false;
               this.fetching = false;
+              this.delFollowNum();
+              this.$emit('updateFollow', false, this.userInfo);
             }).catch(() => {
               this.fetching = false;
             });
@@ -176,6 +178,8 @@
             followUser(this.userId).then(() => {
               this.isFollow = true;
               this.fetching = false;
+              this.addFollowNum();
+              this.$emit('updateFollow', true, this.userInfo);
             }).catch(() => {
               this.fetching = false;
             });
@@ -183,7 +187,9 @@
         }
       },
       ...mapMutations({
-        setUser: SET_USER_STATE
+        setUser: SET_USER_STATE,
+        addFollowNum: ADD_USER_FOLLOW_NUM,
+        delFollowNum: DEL_USER_FOLLOW_NUM
       })
     },
     components: {
