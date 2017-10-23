@@ -98,7 +98,7 @@
     },
     methods: {
       shouldGetData() {
-        if (/\/user\/[^/]+$/.test(this.$route.path)) {
+        if (/\/user\/[^/]+$/.test(this.$route.path) || /\/user\/relation\/[^/]+$/.test(this.$route.path)) {
           setTitle('用户中心');
           return this.first;
         }
@@ -136,7 +136,7 @@
         }
       },
       getPageGoods() {
-        getPageMineGoods(this.start, this.limit, [3, 4, 5, 6], this.userId, 'status').then((data) => {
+        getPageMineGoods(this.start, this.limit, [3, 4, 5, 6], this.userId, 'status', 'asc').then((data) => {
           this.goodsList = this.goodsList.concat(data.list);
           if (data.totalCount <= this.limit || data.list.length < this.limit) {
             this.hasMore = false;

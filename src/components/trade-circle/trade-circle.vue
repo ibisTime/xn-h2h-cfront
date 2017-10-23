@@ -1,6 +1,6 @@
 <template>
   <div class="trades-wrapper" ref="trades">
-    <scroll ref="scroll" :hasMore="hasMore" :data="tradeList">
+    <scroll ref="scroll" :hasMore="hasMore" @pullingUp="getTradeCircle" :data="tradeList">
       <ul class="trades-items-wrapper" ref="tradeList">
         <li v-for="item in tradeList" @click="goDetail(item.code)" class="trade-wrapper" >
           <div class="trade-top">
@@ -8,30 +8,29 @@
             <div class="person-info">
               <div class="name">{{item.name}}</div>
               <div class="area">
-                <span>{{item.city}} </span>|<span> 5小时前来过</span>
+                <span>{{item.city}} </span>|<span> {{spaceTime(item)}}</span>
               </div>
             </div>
             <div class="clothes">来自{{item.categoryName}}</div>
           </div>
           <div class="photos-wrapper">
             <trade-scroll :data="tradeList"></trade-scroll>
-          </div>          
+          </div>
           <div class="trade-bottom">
             <div class="description">{{item.description}}</div>
             <div class="goods-price">￥<span>{{item.price | formatAmount}}</span></div>
             <ul class="operate-icon">
-              <li class="want">111</li>
-              <li class="message">111</li>
-              <!-- <li class="more"></li> -->
+              <li class="want">{{item.totalInteract}}</li>
+              <li class="message">{{item.totalComment}}</li>
             </ul>
           </div>
         </li>
+        <div v-show="!tradeList.length && !hasMore" class="no-result-wrapper">
+          <no-result title="抱歉，暂无内容"></no-result>
+        </div>
       </ul>
     </scroll>
     <router-view></router-view>
-    <!-- <div v-show="!tradeList && !hasMore" class="no-result-wrapper">
-      <no-result title="抱歉，暂无订单"></no-result>
-    </div>   -->  
   </div>
 </template>
 
@@ -39,8 +38,7 @@
   import TradeScroll from 'components/trade-scroll/trade-scroll';
   import Scroll from 'base/scroll/scroll';
   import {getPageGoods} from 'api/biz';
-  import {formatImg} from 'common/js/util';
-  import {getDictList} from 'api/general';
+  import {formatImg, calcSpace, formatDate} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
 
   const LIMIT = 20;
@@ -68,19 +66,19 @@
           limit: LIMIT,
           isPublish: this.isPublish
         }).then((data) => {
-          this.hasMore = false;
-          data.list.forEach((item, index) => {
-            this.tradeList.push(item);
-          });
+          this.tradeList = this.tradeList.concat(data.list);
+          if (data.list.length < LIMIT || data.totalCount <= LIMIT) {
+            this.hasMore = false;
+          }
         });
+      },
+      spaceTime(item) {
+        return calcSpace(formatDate(item.loginLog, 'yyyy-MM-dd-hh-mm'));
       },
       getImgStyl(pic) {
         return {
           backgroundImage: `url(${formatImg(pic)})`
         };
-      },
-      getMallTypeDict() {
-        return getDictList('mall_type');
       },
       goDetail(code) {
         this.$router.push(this.$route.path + '/' + code);
@@ -124,7 +122,7 @@
           background-size: 100% 100%;
           border-radius: 50%;
         }
-        
+
         .person-info{
           flex: 2;
           padding-top: 0.45rem;
@@ -133,26 +131,26 @@
             color: #484848;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis;            
+            text-overflow: ellipsis;
           }
 
           .area{
             margin-top: 0.1rem;
             color: #999899;
-            font-size: $font-size-small;            
+            font-size: $font-size-small;
           }
         }
 
-        .clothes{ 
+        .clothes{
           // width:0.38rem;
           margin:0 0.3rem;
           line-height: 1.5rem;
-          color: #48b0fb;         
+          color: #48b0fb;
         }
-      } 
+      }
       .photos-wrapper{
         margin-left: 0.3rem;
-      }      
+      }
 
       // .slider-wrapper {
       //   position: relative;
@@ -175,8 +173,8 @@
       //     background-position: center;
       //     background-size: cover;
       //   }
-      // }      
-    
+      // }
+
       .trade-bottom{
         margin:0.2rem 0.3rem 0;
         color: #484848;
@@ -205,8 +203,8 @@
             float: left;
             width: 1.3rem;
             height: 0.45rem;
-            line-height: 0.45rem;  
-            background-size: 0.3rem;           
+            line-height: 0.45rem;
+            background-size: 0.3rem;
             background-repeat: no-repeat;
             background-position: 0 50%;
             margin-top: 0.3rem;
@@ -215,22 +213,22 @@
             color: #999899;
             &:last-child{
               width: 0.8rem;
-            }          
+            }
           }
           .want{
             @include bg-image('want');
           }
           .message{
             @include bg-image('message');
-          }          
+          }
           .more{
             @include bg-image('more');
-          }          
+          }
         }
 
       }
 
-    }     
+    }
     }
   }
 </style>

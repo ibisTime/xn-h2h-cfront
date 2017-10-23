@@ -18,7 +18,7 @@
       </div>
       <div class="split"></div>
       <div class="content-wrapper">
-        <scroll :hasMore="hasMore" :data="goodsList">
+        <scroll :hasMore="hasMore" @pullingUp="getPageGoods" :data="goodsList">
           <mall-items :data="goodsList"></mall-items>
           <no-result v-show="!goodsList.length && !hasMore" title="抱歉，暂无商品"></no-result>
         </scroll>

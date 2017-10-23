@@ -1,6 +1,6 @@
 <template>
   <div class="cate-wrapper">
-    <scroll ref="scroll" :data="goods" :hasMore="hasMore">
+    <scroll ref="scroll" :data="goods" @pullingUp="getPageGoods" :hasMore="hasMore">
       <div class="header">
         <router-link class="search" to="/category/search" tag="div">
           <i class="search-icon"></i><span>鞋子</span>
@@ -106,6 +106,7 @@
           if (data.totalCount <= this.limit || data.list < this.limit) {
             this.hasMore = false;
           }
+          this.start++;
         });
       },
       getCategories() {

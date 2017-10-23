@@ -3,24 +3,24 @@
     <div class="follows-fans-wrapper">
       <div class="top-category border-bottom-1px">
         <div @click="selectItem(0)" class="item" :class="itemCls(0)">
-          <div class="inner">我的关注(0)</div>
+          <div class="inner">我的关注({{totalFollowNum}})</div>
         </div>
         <div @click="selectItem(1)" class="item" :class="itemCls(1)">
-          <div class="inner">我的粉丝(0)</div>
+          <div class="inner">我的粉丝({{totalFansNum}})</div>
         </div>
       </div>
       <div class="content">
         <scroll :data="currentList" :hasMore="hasMore" @pullingUp="getRelations">
-          <div v-for="item in currentList" class="item border-bottom-1px">
-            <div class="img"><img :src="item.photo"/></div>
+          <div v-for="item in currentList" @click="goCenter(item)" class="item border-bottom-1px">
+            <div class="img"><img :src="item.photo | formatAvatar"/></div>
             <div class="info">
               <div class="name">{{item.nickname}}</div>
-              <div class="desc">{{item.getDescription()}}</div>
             </div>
           </div>
         </scroll>
         <div v-show="!hasMore && !currentList.length" class="no-result-wrapper">
-          <no-result :title="title"></no-result>
+          <div class="no-result-icon"></div>
+          <div class="no-result-text">{{title}}</div>
         </div>
       </div>
       <router-view></router-view>
@@ -28,13 +28,16 @@
   </transition>
 </template>
 <script>
+  import {mapGetters, mapMutations} from 'vuex';
+  import {SET_USER_STATE} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
   import NoResult from 'base/no-result/no-result';
   import {setTitle} from 'common/js/util';
-  import {getPageFollowUsers, getPageFans} from 'api/user';
-  import User from 'common/bean/user';
+  import {commonMixin} from 'common/js/mixin';
+  import {getPageFollowUsers, getPageFans, getUser} from 'api/user';
 
   export default {
+    mixins: [commonMixin],
     data() {
       return {
         relationList: {},
@@ -45,6 +48,8 @@
     },
     created() {
       this.first = true;
+      let type = this.$route.query.type || 0;
+      this.currentIndex = +type;
       this.getInitData();
     },
     updated() {
@@ -53,7 +58,16 @@
     computed: {
       title() {
         return this.currentIndex === 0 ? '还没有任何关注哦' : '还没有任何粉丝哦';
-      }
+      },
+      totalFollowNum() {
+        return this.user && this.user.totalFollowNum || 0;
+      },
+      totalFansNum() {
+        return this.user && this.user.totalFansNum || 0;
+      },
+      ...mapGetters([
+        'user'
+      ])
     },
     methods: {
       shouldGetData() {
@@ -73,6 +87,11 @@
             data: []
           };
           this.getRelations();
+          if (!this.user) {
+            getUser().then((data) => {
+              this.setUser(data);
+            });
+          }
         }
       },
       getRelations() {
@@ -96,10 +115,7 @@
       },
       getPageFans(item) {
         getPageFans(item.start, item.limit).then((data) => {
-          let list = data.list.map((user) => {
-            return new User(user);
-          });
-          item.data = item.data.concat(list);
+          item.data = item.data.concat(data.list);
           if (data.list.length < item.limit || data.totalCount <= item.limit) {
             item.hasMore = false;
           }
@@ -126,7 +142,13 @@
       },
       itemCls(index) {
         return this.currentIndex === index ? 'active' : '';
-      }
+      },
+      goCenter(user) {
+        this.$router.push(this.$route.path + '/' + user.userId);
+      },
+      ...mapMutations({
+        'setUser': SET_USER_STATE
+      })
     },
     components: {
       Scroll,
@@ -235,8 +257,25 @@
 
     .no-result-wrapper {
       position: absolute;
-      top: 50%;
-      transform: translate(0, -50%);
+      top: 1.2rem;
+      left: 0;
+      width: 100%;
+      text-align: center;
+
+      .no-result-icon {
+        width: 3rem;
+        height: 3rem;
+        margin: 0 auto;
+        @include bg-image('no-result');
+        background-size: 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      .no-result-text {
+        margin-top: 0.2rem;
+        font-size: $font-size-medium;
+        color: $color-text-d;
+      }
     }
 
     &.slide-enter-active, &.slide-leave-active {

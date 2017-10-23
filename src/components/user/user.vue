@@ -7,9 +7,9 @@
         </div>
         <div class="person-info">
           <div class="name">{{userName}}</div>
-          <router-link to="/user/relation" tag="div" class="info">
-            <span>关注：{{totalFollowNum}} </span><span class="split">|</span><span> 粉丝：{{totalFansNum}}</span>
-          </router-link>
+          <div class="info">
+            <router-link tag="span" to="/user/relation" class="title">关注：{{totalFollowNum}} </router-link><span class="split">|</span><router-link to="/user/relation?type=1" tag="span" class="title"> 粉丝：{{totalFansNum}}</router-link>
+          </div>
         </div>
       </div>
       <div class="money-info">
@@ -188,12 +188,15 @@
           }
 
           .info {
-            padding-top: 0.24rem;
-            padding-bottom: 0.24rem;
             font-size: $font-size-medium;
 
-            .split {
-              padding: 0 0.2rem;
+            .title {
+              padding: 0.24rem 0.2rem;
+              display: inline-block;
+
+              &:first-child {
+                padding-left: 0;
+              }
             }
           }
         }

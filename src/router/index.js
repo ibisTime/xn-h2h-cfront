@@ -456,7 +456,19 @@ export default new Router({
         },
         {
           path: 'relation',
-          component: Relationship
+          component: Relationship,
+          children: [
+            {
+              path: ':userId',
+              component: UserCenter,
+              children: [
+                {
+                  path: ':code',
+                  component: Detail
+                }
+              ]
+            }
+          ]
         },
         {
           path: ':userId',

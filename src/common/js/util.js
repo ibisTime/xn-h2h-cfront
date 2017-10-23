@@ -35,6 +35,33 @@ export function getUserId() {
 export function setUser(data) {
   setCookie('userId', data.userId);
   setCookie('token', data.token);
+  setCookie('__sig__', data.sig);
+  setCookie('__accountType__', data.accountType);
+  setCookie('__txAppCode__', data.txAppCode);
+}
+
+// 获取腾讯云登录的sig
+export function getSig () {
+  return getCookie('__sig__') || '';
+}
+
+// 获取腾讯云登录的accountType
+export function getAccountType () {
+  return getCookie('__accountType__') || '';
+}
+
+// 获取腾讯云登录的txAppCode
+export function getTxAppCode () {
+  return getCookie('__txAppCode__') || '';
+}
+
+// 获取腾讯云登录的参数
+export function getTencentParams () {
+  return {
+    sig: getSig(),
+    accountType: getAccountType(),
+    txAppCode: getTxAppCode()
+  };
 }
 
 // 删除用户登录信息
@@ -398,4 +425,39 @@ export function addressValid(value) {
     result.msg = '长度不能超过50位';
   }
   return result;
+}
+
+/**
+ * 获取用户登录系统的时间间隔
+ * @param {yyyy-MM-dd-hh-mm} beforeTime
+ */
+export function calcSpace (beforeTime) {
+  let now = formatDate(null, 'yyyy-MM-dd-hh-mm').split('-');
+  let before = beforeTime.split('-');
+  let nowYear = +now[0];
+  let beforeYear = +before[0];
+  let nowMonth = +now[1];
+  let beforeMonth = +before[1];
+  if (nowYear > beforeYear) {
+    let diffY = nowYear - beforeYear;
+    let diffM = diffY * 12 + nowMonth - beforeMonth;
+    return diffM < 12 ? diffM + '月前来过' : diffY + '年前来过';
+  }
+  if (nowMonth > beforeMonth) {
+    return nowMonth - beforeMonth + '月前来过';
+  }
+  let nowDay = now[2];
+  let beforeDay = before[2];
+  if (nowDay > beforeDay) {
+    return nowDay - beforeDay + '天前来过';
+  }
+  let nowHour = now[3];
+  let beforeHour = before[3];
+  if (nowHour > beforeHour) {
+    return nowHour - beforeHour + '小时前来过';
+  }
+  let nowMinute = now[4];
+  let beforeMinute = before[4];
+  let diffMinute = nowMinute - beforeMinute;
+  return diffMinute <= 5 ? '刚刚来过' : diffMinute + '分钟前来过';
 }

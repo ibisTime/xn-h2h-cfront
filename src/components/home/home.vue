@@ -1,6 +1,6 @@
 <template>
   <div class="home-wrapper">
-    <scroll :data="currentList" :hasMore="hasMore">
+    <scroll :data="currentList" :hasMore="hasMore" @pullingUp="getPageData">
       <div class="slider-wrapper">
         <slider v-if="banners.length" :loop="loop">
           <div class="home-slider" v-for="item in banners" :key="item.code">
@@ -165,6 +165,7 @@
               this.hasMore = this.config[0].hasMore;
               this.currentList = this.goodsObj[0];
             }
+            this.config[0].start++;
           }
         });
       },
@@ -180,6 +181,7 @@
               this.hasMore = this.config[1].hasMore;
               this.currentList = this.goodsObj[1];
             }
+            this.config[1].start++;
           }
         });
       },
@@ -217,6 +219,13 @@
           } else {
             this.getPageGoods();
           }
+        }
+      },
+      getPageData() {
+        if (this.currentIndex === 1) {
+          this.getPageNearbyGoods();
+        } else {
+          this.getPageGoods();
         }
       },
       goPublish() {

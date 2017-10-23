@@ -220,6 +220,7 @@
           if (data.list.length < this.limit || data.totalCount <= this.limit) {
             this.hasMore = false;
           }
+          this.start++;
         }).catch(() => {});
       },
       getUser() {

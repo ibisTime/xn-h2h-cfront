@@ -1,4 +1,4 @@
-import {formatAvatar, formatDate} from 'common/js/util';
+import {formatAvatar, formatDate, calcSpace} from 'common/js/util';
 
 const GENDER = {
   '0': '女',
@@ -125,40 +125,6 @@ function getCostellation (month, day) {
       constellation = '';
   }
   return constellation;
-}
-
-/**
- * @param {yyyy-MM-dd-hh-mm} beforeTime
- */
-function calcSpace (beforeTime) {
-  let now = formatDate(null, 'yyyy-MM-dd-hh-mm').split('-');
-  let before = beforeTime.split('-');
-  let nowYear = +now[0];
-  let beforeYear = +before[0];
-  let nowMonth = +now[1];
-  let beforeMonth = +before[1];
-  if (nowYear > beforeYear) {
-    let diffY = nowYear - beforeYear;
-    let diffM = diffY * 12 + nowMonth - beforeMonth;
-    return diffM < 12 ? diffM + '月前来过' : diffY + '年前来过';
-  }
-  if (nowMonth > beforeMonth) {
-    return nowMonth - beforeMonth + '月前来过';
-  }
-  let nowDay = now[2];
-  let beforeDay = before[2];
-  if (nowDay > beforeDay) {
-    return nowDay - beforeDay + '天前来过';
-  }
-  let nowHour = now[3];
-  let beforeHour = before[3];
-  if (nowHour > beforeHour) {
-    return nowHour - beforeHour + '小时前来过';
-  }
-  let nowMinute = now[4];
-  let beforeMinute = before[4];
-  let diffMinute = nowMinute - beforeMinute;
-  return diffMinute <= 5 ? '刚刚来过' : diffMinute + '分钟前来过';
 }
 
 function calcTotalDays (createDatetime) {
