@@ -21,14 +21,14 @@
                   </div>
                   <div class="right">
                     <p>¥{{item.amount1 | formatAmount}}</p>
+                    <p class="status">{{item.status | formatStatus}}</p>
                   </div>
                 </div>
                 <div class="bottom">总价：<span class="unit">¥</span><span class="price">{{getTotalAmount(item) | formatAmount}}</span></div>
               </div>
               <i v-if="item.status==='5'" class="success-icon"></i>
             </div>
-            <div class="clearfix btns">
-              <span class="status fl">{{item.status | formatStatus}}</span>
+            <div class="clearfix btns" v-show="showBtns(item.status)">
               <span class="btn cancel fr" v-show="showCancelBtn(item.status)" @click.stop="_cancelOrder(item)">取消订单</span>
               <span class="btn fr" v-show="showFhBtn(item.status)" @click.stop="_fhOrder(item)">发货</span>
               <span class="btn fr" v-show="showHandleTkBtn(item.status)" @click.stop="_handleTkOrder(item)">退款处理</span>
@@ -209,6 +209,12 @@
         }
         return false;
       },
+      showBtns(status) {
+        if (status !== '1' && status !== '2' && status !== '5' && status !== '6') {
+          return false;
+        }
+        return true;
+      },
       showCancelBtn(status) {
         return status === '1';
       },
@@ -226,14 +232,15 @@
           return order.code === item.code;
         });
       },
-      updateOrder(code, status) {
+      updateOrder(code, status, params) {
         if (this.orderList.length) {
           let index = this.findIndex({code});
           if (~index) {
             let item = this.orderList[index];
             this.orderList.splice(index, 1, {
               ...item,
-              status
+              status,
+              ...params
             });
           }
         }
@@ -359,6 +366,12 @@
                 text-align: right;
                 white-space: nowrap;
                 font-size: $font-size-small;
+
+                .status {
+                  margin-top: 0.2rem;
+                  color: $color-red;
+                  font-size: $font-size-medium-s;
+                }
               }
             }
 
@@ -382,7 +395,7 @@
           .success-icon {
             position: absolute;
             bottom: 0.3rem;
-            right: 0.3rem;
+            right: 0.2rem;
             width: 1rem;
             height: 1rem;
             background-size: 1rem;
@@ -409,13 +422,6 @@
               color: $color-text-l;
             }
           }
-        }
-
-        .status {
-          height: 0.64rem;
-          line-height: 0.64rem;
-          color: $color-red;
-          font-size: $font-size-medium-s;
         }
       }
     }

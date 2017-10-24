@@ -4,14 +4,20 @@
       <div class="form-wrapper">
         <div class="form-item">
           <div class="item-label">充值金额</div>
-          <div class="item-input-wrapper">
-            <input type="number" class="item-input" v-model="amount" @change="_amountValid" placeholder="充值金额最多两位小数">
-            <span v-show="amountErr" class="error-tip">{{amountErr}}</span>
-          </div>
+          <div class="inner-label"></div>
         </div>
-
+        <div class="form-item big-input">
+          <label>¥</label>
+          <input type="number" v-model="amount" @input="_amountValid"/>
+          <span v-show="amountErr" class="error-tip">{{amountErr}}</span>
+        </div>
+        <div class="split"></div>
+        <div class="small-title">支付方式</div>
+        <div class="pay-types">
+          <div class="pay-type"><img src="./weixin@2x.png">微信支付<i class="chose-icon"></i></div>
+        </div>
         <div class="form-btn">
-          <button :disabled="setting" @click="_recharge">确认充值</button>
+          <button :disabled="setting" @click="_recharge">充值</button>
         </div>
         <full-loading v-show="!user || !cnyAccount || setting"></full-loading>
         <toast ref="toast" :text="text"></toast>
@@ -125,6 +131,7 @@
 </script>
 <style lang="scss" scoped rel="stylesheet/scss">
   @import "~common/scss/variable";
+  @import "~common/scss/mixin";
 
   .recharge-wrapper {
     position: fixed;
@@ -134,19 +141,68 @@
     height: 100%;
     background: $color-background;
 
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
+    .form-wrapper {
+      padding-top: 0;
 
-      .loading-wrapper {
+      .small-title {
+        padding-left: 0.3rem;
+        height: 0.6rem;
+        line-height: 0.6rem;
+        font-size: $font-size-small;
+        color: $color-text-l;
+      }
+
+      .pay-types {
+        padding: 0 0.3rem;
+        background-color: #fff;
+
+        .pay-type {
+          height: 1rem;
+          line-height: 1rem;
+          font-size: $font-size-medium-x;
+
+          img {
+            width: 0.6rem;
+            height: 0.6rem;
+            vertical-align: middle;
+            margin-right: 0.2rem;
+          }
+
+          .chose-icon {
+            float: right;
+            margin-top: 0.28rem;
+            width: 0.44rem;
+            height: 0.44rem;
+            background-size: 0.44rem 0.44rem;
+            @include bg-image('selected');
+          }
+        }
+      }
+
+      .split {
+        height: 0.3rem;
+        background-color: #fff;
+      }
+    }
+
+    .big-input {
+      padding-left: 0.3rem;
+      font-size: $font-size-large-xxxx;
+      color: #333;
+
+      input {
+        flex: 1;
+        padding-left: 0.04rem;
+        padding-right: 0.3rem;
+      }
+
+      .error-tip {
         position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
+        right: 0.16rem;
+        top: 0.38rem;
+        white-space: nowrap;
+        font-size: $font-size-medium;
+        color: #ff0000;
       }
     }
   }

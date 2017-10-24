@@ -20,7 +20,7 @@
       <div class="content-wrapper">
         <scroll :hasMore="hasMore" @pullingUp="getPageGoods" :data="goodsList">
           <mall-items :data="goodsList"></mall-items>
-          <no-result v-show="!goodsList.length && !hasMore" title="抱歉，暂无商品"></no-result>
+          <no-result v-show="!goodsList.length && !hasMore" class="no-result-wrapper" title="抱歉，暂无商品"></no-result>
         </scroll>
       </div>
       <category-city ref="cityPicker"
@@ -113,7 +113,7 @@
     },
     methods: {
       shouldGetData() {
-        if (this.$route.path === '/category/list') {
+        if (this.$route.path === '/category/list' || this.$route.path === '/category/categories/list') {
           setTitle('商品列表');
           // 当前页面,并且微信sdk未初始化
           if(!this.isWxConfiging && !this.wxData) {
@@ -434,6 +434,10 @@
       bottom: 0;
       left: 0;
       width: 100%;
+
+      .no-result-wrapper {
+        margin-top: 1.12rem;
+      }
     }
 
     &.slide-enter-active, &.slide-leave-active {

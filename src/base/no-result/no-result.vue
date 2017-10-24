@@ -1,16 +1,30 @@
 <template>
   <div class="no-result">
-    <div class="no-result-icon"></div>
+    <div class="no-result-icon" :style="getImg()"></div>
     <p class="no-result-text">{{title}}</p>
+    <slot></slot>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import noImg from './no-result.png';
+
   export default {
     props: {
       title: {
         type: String,
         default: ''
+      },
+      icon: {
+        type: String,
+        default: ''
+      }
+    },
+    methods: {
+      getImg() {
+        return {
+          backgroundImage: `url(${this.icon || noImg})`
+        };
       }
     }
   };
@@ -23,14 +37,14 @@
     text-align: center;
 
     .no-result-icon {
-      width: 1.72rem;
-      height: 1.8rem;
+      width: 2.4rem;
+      height: 2rem;
+      background-repeat: no-repeat;
       margin: 0 auto;
-      background-image: url('no-result.png');
-      background-size: 1.72rem 1.8rem;
+      background-size: 2.4rem;
     }
     .no-result-text {
-      margin-top: 0.6rem;
+      margin-top: 0.3rem;
       font-size: $font-size-medium;
       color: $color-text-d;
     }

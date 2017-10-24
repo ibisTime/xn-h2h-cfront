@@ -212,6 +212,7 @@
         } else {
           err = false;
         }
+        err && this.$refs.toast.show();
         return !err;
       },
       prepareParams() {

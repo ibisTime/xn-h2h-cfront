@@ -111,6 +111,9 @@
       },
       selectItem(item) {
         this.setCurAddr(item);
+        if (this.$route.path === '/category/confirm/address') {
+          this.$router.back();
+        }
       },
       goAdd() {
         this.$router.push(this.$route.path + '/add');

@@ -1,7 +1,7 @@
 <template>
   <transition name="slide">
     <div class="user-center-wrapper">
-      <scroll :data="goodsList" :hasMore="hasMore" @pullingUp="getPageGoods">
+      <scroll ref="scroll" :data="goodsList" :hasMore="hasMore" @pullingUp="getPageGoods">
         <div class="top-wrapper">
           <div class="top"></div>
           <div class="user-info">
@@ -13,7 +13,8 @@
               </div>
             </div>
             <div class="bottom-info">
-              <div class="description">{{description}}</div>
+              <div class="description" :class="moreCls">{{description}}</div>
+              <div class="up-down" @click="showAllDesc" v-show="showMore"></div>
               <div class="btns">
                 <span v-if="!this.isMine" class="btn" @click="handleClick">{{btnText}}</span>
                 <span v-else class="btn" @click="goSetting">编辑</span>
@@ -62,7 +63,8 @@
         isMine: false,
         totalProduct: 0,
         totalOnProduct: 0,
-        isFollow: false
+        isFollow: false,
+        showMore: false
       };
     },
     computed: {
@@ -80,6 +82,9 @@
       },
       btnText() {
         return this.isFollow ? '取消关注' : '+ 关注';
+      },
+      moreCls() {
+        return this.showMore ? '' : 'more';
       },
       ...mapGetters([
         'user',
@@ -118,9 +123,11 @@
             getUser().then((data) => {
               this.setUser(data);
               this.userInfo = new User(data);
+              this.isShowMore();
             }).catch(() => {});
           } else {
             this.userInfo = this.user;
+            this.isShowMore();
           }
         } else {
           isFollowUser(this.userId).then((data) => {
@@ -129,11 +136,17 @@
           if (!this.watchingUser) {
             getUserById(this.userId).then((data) => {
               this.userInfo = new User(data);
+              this.isShowMore();
             });
           } else {
             this.userInfo = this.watchingUser;
+            this.isShowMore();
           }
         }
+      },
+      isShowMore() {
+        let desc = this.userInfo.getDescription();
+        this.showMore = desc.length >= 70;
       },
       getPageGoods() {
         getPageMineGoods(this.start, this.limit, [3, 4, 5, 6], this.userId, 'status', 'asc').then((data) => {
@@ -185,6 +198,12 @@
             });
           }
         }
+      },
+      showAllDesc() {
+        this.showMore = false;
+        setTimeout(() => {
+          this.$refs.scroll.refresh();
+        }, 20);
       },
       ...mapMutations({
         setUser: SET_USER_STATE,
@@ -270,8 +289,22 @@
           padding-left: 0.1rem;
 
           .description {
+            max-height: 1.12rem;
             line-height: 0.39rem;
+            overflow: hidden;
             font-size: $font-size-medium-x;
+
+            &.more {
+              max-height: none;
+            }
+          }
+
+          .up-down {
+            height: 0.38rem;
+            background-size: 0.2rem;
+            background-repeat: no-repeat;
+            background-position: center;
+            @include bg-image('down-arrow');
           }
 
           .btns {

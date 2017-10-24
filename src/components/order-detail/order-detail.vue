@@ -1,40 +1,43 @@
 <template>
   <transition name="slide">
     <div class="order-detail-wrapper">
-      <scroll ref="scroll" :pullUpLoad="pullUpLoad">
-        <div class="order-info">
-          <div class="info">订单号：{{orderCode}}</div>
-          <div class="info">下单时间：{{applyDatetime | formatDate('yyyy-MM-dd hh:mm')}}</div>
-          <div class="info">订单状态：{{status | formatStatus}}</div>
-        </div>
-        <div class="address-wrapper">
-          <div class="inner">
-            <div class="header">收货人：{{receiver}}<span>{{reMobile}}</span></div>
-            <div class="address">收货地址：{{reAddress}}</div>
+      <div class="scroll-wrapper">
+        <scroll ref="scroll" :pullUpLoad="pullUpLoad">
+          <div class="order-info">
+            <div class="info">订单号：{{orderCode}}</div>
+            <div class="info">下单时间：{{applyDatetime | formatDate('yyyy-MM-dd hh:mm')}}</div>
+            <div class="info">订单状态：{{status | formatStatus}}</div>
           </div>
-        </div>
-        <ul class="goods">
-          <li class="border-bottom-1px" @click="goDetail">
-            <div class="img"><img :src="imgUrl"></div>
-            <div class="note">
-              <div class="top">
-                <div class="name twoline-ellipsis">{{productName}}</div>
-                <div class="desc twoline-ellipsis">{{productDescription}}</div>
-              </div>
-              <div class="price">¥{{productAmount | formatAmount}}</div>
+          <div class="address-wrapper">
+            <div class="inner">
+              <div class="header">收货人：{{receiver}}<span>{{reMobile}}</span></div>
+              <div class="address">收货地址：{{reAddress}}</div>
             </div>
-          </li>
-        </ul>
-        <div class="amount-item">商品总额<span>¥{{productAmount | formatAmount}}</span></div>
-        <div class="amount-item border-bottom-1px">运费<span>¥{{yunfei | formatAmount}}</span></div>
-        <div class="pay-item">支付总价<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
-        <div class="logistics">
-          <div class="name">物流公司：顺丰快递</div>
-          <div class="code">物流单号：45554454545454</div>
-        </div>
-        <div class="amount-item remark" v-show="applyNote"><label>买家嘱咐：</label><div>{{applyNote}}</div></div>
-        <div class="amount-item remark" v-show="remark"><label>备注：</label><div>{{remark}}</div></div>
-      </scroll>
+          </div>
+          <ul class="goods">
+            <li class="border-bottom-1px" @click="goDetail">
+              <div class="img"><img :src="imgUrl"></div>
+              <div class="note">
+                <div class="top">
+                  <div class="name twoline-ellipsis">{{productName}}</div>
+                  <div class="desc twoline-ellipsis">{{productDescription}}</div>
+                </div>
+                <div class="price">¥{{productAmount | formatAmount}}</div>
+              </div>
+            </li>
+          </ul>
+          <div class="amount-item">商品总额<span>¥{{productAmount | formatAmount}}</span></div>
+          <div class="amount-item border-bottom-1px">运费<span>¥{{yunfei | formatAmount}}</span></div>
+          <div class="pay-item">支付总价<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
+          <div class="amount-item remark" v-show="payDesc"><label>支付说明：</label><div>{{payDesc}}</div></div>
+          <div class="logistics" v-if="logisticsCode">
+            <div class="name">物流公司：{{getCompany()}}</div>
+            <div class="code">物流单号：{{logisticsCode}}</div>
+          </div>
+          <div class="amount-item remark" v-show="applyNote"><label>买家嘱咐：</label><div>{{applyNote}}</div></div>
+          <div class="amount-item remark" v-show="remark"><label>备注：</label><div>{{remark}}</div></div>
+        </scroll>
+      </div>
       <div class="btns">
         <div class="btn cancel" v-show="showCancel()" @click="_cancelOrder">取消订单</div>
         <div class="btn" v-show="showTk()" @click="_tkOrder">申请退款</div>
@@ -61,7 +64,7 @@
   import Confirm from 'base/confirm/confirm';
   import ConfirmInput from 'base/confirm-input/confirm-input';
   import Toast from 'base/toast/toast';
-  import {setTitle, isUnDefined, formatImg} from 'common/js/util';
+  import {setTitle, isUnDefined, formatImg, formatAmount} from 'common/js/util';
   import {getDictList} from 'api/general';
   import {ORDER_STATUS} from '../orders/config';
   import {commonMixin} from 'common/js/mixin';
@@ -119,6 +122,9 @@
       yunfei() {
         return this.currentOrder && this.currentOrder.yunfei || 0;
       },
+      logisticsCode() {
+        return this.currentOrder && this.currentOrder.logisticsCode || '';
+      },
       totalAmount() {
         if (this.currentOrder) {
           let amount = this.currentOrder.amount1;
@@ -132,6 +138,22 @@
       },
       applyNote() {
         return this.currentOrder && this.currentOrder.applyNote || '';
+      },
+      payDesc() {
+        if (this.currentOrder) {
+          let amount1 = this.currentOrder.payAmount1;
+          let amount2 = this.currentOrder.payAmount2;
+          let amount3 = this.currentOrder.payAmount3;
+          if (amount1 || amount2 || amount3) {
+            let str = [];
+            str.push(`人民币支付${formatAmount(amount1)}元`);
+            amount2 && str.push(`积分消耗${formatAmount(amount2)}`);
+            amount3 && str.push(`优惠券抵扣${formatAmount(amount3)}元`);
+            return str.join(' + ');
+          }
+          return '';
+        }
+        return '';
       },
       ...mapGetters([
         'currentOrder',
@@ -461,6 +483,14 @@
       .code {
         padding-top: 0.2rem;
       }
+    }
+
+    .scroll-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      bottom: 1rem;
     }
 
     .btns {

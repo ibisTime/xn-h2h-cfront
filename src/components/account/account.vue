@@ -26,11 +26,7 @@
           <p class="title">提现金额</p>
         </div>
       </div>
-      <div v-show="loadingFlag" class="loading-container">
-        <div class="loading-wrapper">
-          <loading title=""></loading>
-        </div>
-      </div>
+      <full-loading v-show="loadingFlag"></full-loading>
       <confirm ref="confirm" text="未设置支付密码" :isAlert="isAlert" @confirm="goTrade"></confirm>
       <router-view @amountUpdate="amountUpdate"></router-view>
     </div>
@@ -43,7 +39,7 @@
   import {getAccount, getAccountInfo} from 'api/account';
   import {formatAmount, setTitle} from 'common/js/util';
   import Confirm from 'base/confirm/confirm';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
 
   export default {
     data() {
@@ -176,7 +172,7 @@
       })
     },
     components: {
-      Loading,
+      FullLoading,
       Confirm
     }
   };
@@ -276,22 +272,6 @@
           font-size: $font-size-small;
           color: #666;
         }
-      }
-    }
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
       }
     }
 

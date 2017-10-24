@@ -184,10 +184,7 @@
             this.text = '支付成功';
             this.$refs.toast.show();
             this.editOrderListByPay({code});
-//            this.$emit('updateNum', 'toPayOrder');
-            setTimeout(() => {
-              this.$router.back();
-            }, 1000);
+            this.handleSuc();
           } else {
             this.wxPay(data, code);
           }
@@ -202,10 +199,7 @@
             this.text = '支付成功';
             this.$refs.toast.show();
             this.editOrderListByPay({code});
-//            this.$emit('updateNum', 'toPayOrder');
-            setTimeout(() => {
-              this.$router.back();
-            }, 1000);
+            this.handleSuc();
           }, () => {
             this.loadingFlag = false;
             this.text = '支付失败';
@@ -218,6 +212,15 @@
           this.text = '支付失败';
           this.$refs.toast.show();
         }
+      },
+      handleSuc() {
+        setTimeout(() => {
+          if (this.$route.path === '/category/confirm/pay') {
+            this.$router.replace('/user/order/' + this.$route.query.code);
+          } else {
+            this.$router.back();
+          }
+        }, 1000);
       },
       ...mapMutations({
         'setCnyAccount': SET_CNY_ACCOUNT,

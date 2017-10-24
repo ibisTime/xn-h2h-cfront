@@ -68,6 +68,9 @@ export function getTencentParams () {
 export function clearUser() {
   delCookie('userId');
   delCookie('token');
+  delCookie('__sig__');
+  delCookie('__accountType__');
+  delCookie('__txAppCode__');
 }
 
 // 是否登录

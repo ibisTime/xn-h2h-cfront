@@ -5,6 +5,7 @@
         <div class="form-item mb20">
           <div class="item-label">银行卡</div>
           <div class="item-input-wrapper">
+            <div class="real-name">{{cardName}}</div>
             <template v-if="bankcardList && bankcardList.length">
               <select class="item-input" v-model="payCardNo">
                 <option v-for="bankcard in bankcardList" :value="bankcard">
@@ -20,7 +21,8 @@
           <div class="inner-label"></div>
         </div>
         <div class="form-item big-input">
-          <input type="number" v-model="amount" @input="_amountValid" placeholder="请输入提现金额"/>
+          <label>¥</label>
+          <input type="number" v-model="amount" @input="_amountValid"/>
           <span v-show="amountErr" class="error-tip">{{amountErr}}</span>
         </div>
         <div class="form-item border-bottom-1px">
@@ -92,6 +94,9 @@
       }
     },
     computed: {
+      cardName() {
+        return this.payCardNo && this.payCardNo.bankName || '请选择银行卡';
+      },
       ...mapGetters([
         'cnyAccount',
         'bankcardList'
@@ -279,6 +284,13 @@
       transform: translate(0, -50%);
     }
 
+    select.item-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+    }
+
     .content {
       display: flex;
       align-items: center;
@@ -305,6 +317,12 @@
       padding-left: 0.3rem;
       font-size: $font-size-large-xxxx;
       color: #333;
+
+      input {
+        flex: 1;
+        padding-left: 0.04rem;
+        padding-right: 0.3rem;
+      }
 
       .error-tip {
         position: absolute;

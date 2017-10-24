@@ -67,12 +67,12 @@
               <h2>关于我们</h2>
               <i class="arrow"></i>
             </div>
+            <div class="set-btns">
+              <button @click="logout">退出登录</button>
+            </div>
           </div>
         </div>
       </scroll>
-      <div class="set-btns">
-        <button @click="logout">退出登录</button>
-      </div>
       <toast :text="text" ref="toast"></toast>
       <full-loading v-show="loadingFlag"></full-loading>
       <clip-img @choseImage="updateImg"
@@ -372,11 +372,12 @@
       }
     }
     .set-btns {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
+      /*position: absolute;*/
+      /*bottom: 0;*/
+      /*left: 0;*/
+      /*width: 100%;*/
       padding: 0.24rem 0.36rem;
+      font-size: 0;
 
       button {
         width: 100%;

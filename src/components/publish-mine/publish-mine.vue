@@ -3,10 +3,10 @@
     <div class="publish-mine-wrapper">
       <div class="top-category border-bottom-1px">
         <div @click="selectItem(0)" class="item" :class="itemCls(0)">
-          <div class="inner">我发布的</div>
+          <div class="inner">我发布的({{upCount}})</div>
         </div>
         <div @click="selectItem(1)" class="item" :class="itemCls(1)">
-          <div class="inner">已下架宝贝</div>
+          <div class="inner">已下架宝贝({{downCount}})</div>
         </div>
       </div>
       <div class="content">
@@ -16,10 +16,12 @@
                            @delete="deleteGoods"
                            @up="upGoods"
                            @down="downGoods"></mall-edit-items>
-          <div v-show="!hasMore && !currentList.length" class="no-result-wrapper">
-            <no-result title="抱歉，暂无商品"></no-result>
-          </div>
         </scroll>
+        <div v-show="!hasMore && !currentList.length" class="no-result-wrapper">
+          <no-result title="还没有发布宝贝哦">
+            <div class="pub-btn"><button @click="goPublish">去发布</button></div>
+          </no-result>
+        </div>
       </div>
       <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
       <confirm ref="confirm" :text="confirmText" @confirm="handleConfirm"></confirm>
@@ -55,7 +57,9 @@
         loadingText: '',
         confirmText: '',
         currentItem: '',
-        currentOperator: ''
+        currentOperator: '',
+        upCount: 0,
+        downCount: 0
       };
     },
     created() {
@@ -76,26 +80,41 @@
       getInitData() {
         if (this.shouldGetData()) {
           this.first = false;
-          this.goodsObj[this.currentIndex] = {
+          this.goodsObj[0] = {
             start: 1,
             limit: 10,
             hasMore: true,
             data: []
           };
-          this.getPageGoods();
+          this.goodsObj[1] = {
+            start: 1,
+            limit: 10,
+            hasMore: true,
+            data: []
+          };
+          this.getPageGoods(0);
+          this.getPageGoods(1);
         }
       },
-      getPageGoods() {
-        let status = IDX2STATUS[this.currentIndex];
-        let item = this.goodsObj[this.currentIndex];
+      getPageGoods(index) {
+        index = index || this.currentIndex;
+        let status = IDX2STATUS[index];
+        let item = this.goodsObj[index];
         getPageMineGoods(item.start, item.limit, status).then((data) => {
           item.data = item.data.concat(data.list);
           if (data.list.length < item.limit || data.totalCount <= item.limit) {
             item.hasMore = false;
           }
-          this.currentList = item.data;
-          this.hasMore = item.hasMore;
+          if (index === this.currentIndex) {
+            this.currentList = item.data;
+            this.hasMore = item.hasMore;
+          }
           item.start++;
+          if (index === 0) {
+            this.upCount = data.totalCount;
+          } else {
+            this.downCount = data.totalCount;
+          }
         });
       },
       handleConfirm() {
@@ -136,6 +155,7 @@
             return product.code === this.currentItem.code;
           });
           this.currentList.splice(index, 1);
+          this.downCount--;
         }).catch(() => {
           this.loadingFlag = false;
         });
@@ -159,6 +179,8 @@
             item.status = '3';
             this.goodsObj[0].data.unshift(item);
           }
+          this.downCount--;
+          this.upCount++;
         }).catch(() => {
           this.loadingFlag = false;
         });
@@ -182,6 +204,8 @@
             item.status = '5';
             this.goodsObj[1].data.unshift(item);
           }
+          this.upCount--;
+          this.downCount++;
         }).catch(() => {
           this.loadingFlag = false;
         });
@@ -204,6 +228,9 @@
       },
       itemCls(index) {
         return this.currentIndex === index ? 'active' : '';
+      },
+      goPublish() {
+        this.$router.push('/user/pub-mine/publish');
       },
       ...mapMutations({
         'setPublishGoods': SET_PUBLISH_GOODS
@@ -232,9 +259,24 @@
 
     .no-result-wrapper {
       position: absolute;
-      top: 50%;
-      transform: translate(0, -50%);
+      top: 1.12rem;
       width: 100%;
+
+      .pub-btn {
+        margin-top: 0.58rem;
+        text-align: center;
+        font-size: 0;
+
+        button {
+          width: 1.97rem;
+          height: 0.7rem;
+          line-height: 0.7rem;
+          border-radius: 0.1rem;
+          font-size: $font-size-medium-x;
+          color: #fff;
+          background: $primary-color;
+        }
+      }
     }
 
     .top-category {

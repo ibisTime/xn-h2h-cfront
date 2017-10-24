@@ -6,6 +6,7 @@
           <div class="img" :style="getSyl(item.advPic)"></div>
           <div class="info">{{item.endDatetime | formatDate}}<span class="read">查看详情 ></span></div>
         </div>
+        <no-result v-show="!list.length && !hasMore" class="no-result-wrapper" title="抱歉，暂无活动"></no-result>
       </scroll>
       <router-view></router-view>
     </div>
@@ -15,6 +16,7 @@
   import {mapMutations} from 'vuex';
   import {SET_CURRENT_ACTIVITY} from 'store/mutation-types';
   import Scroll from 'base/scroll/scroll';
+  import NoResult from 'base/no-result/no-result';
   import {setTitle, formatImg} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
   import {getPageDiscountActivity} from 'api/biz';
@@ -73,7 +75,8 @@
       })
     },
     components: {
-      Scroll
+      Scroll,
+      NoResult
     }
   };
 </script>
@@ -113,6 +116,10 @@
           float: right;
         }
       }
+    }
+
+    .no-result-wrapper {
+      margin-top: 1.12rem;
     }
 
     &.slide-enter-active, &.slide-leave-active {

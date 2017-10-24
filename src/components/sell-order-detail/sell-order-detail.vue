@@ -242,12 +242,13 @@
           this.loadingFlag = false;
         });
       },
-      updateCurOrder(status) {
+      updateCurOrder(status, params = {}) {
         this.setCurrentOrder({
           ...this.currentOrder,
-          status
+          status,
+          ...params
         });
-        this.$emit('updateOrder', this.currentOrder.code, status);
+        this.$emit('updateOrder', this.currentOrder.code, status, params);
       },
       _cancelOrder() {
         this.inputText = '取消原因';
@@ -266,7 +267,9 @@
         cancelOrder(this.code, text).then(() => {
           this.loadingFlag = false;
           this.showToast('取消成功');
-          this.updateCurOrder('91');
+          this.updateCurOrder('91', {
+            remark: text
+          });
         }).catch(() => {
           this.loadingFlag = false;
         });
@@ -292,7 +295,10 @@
         sendOrder(this.code, code, company.dkey).then(() => {
           this.fetching = false;
           this.showToast('发货成功');
-          this.updateCurOrder('3');
+          this.updateCurOrder('3', {
+            logisticsCode: code,
+            logisticsCompany: company.dkey
+          });
         }).catch(() => {
           this.fetching = false;
         });
@@ -307,7 +313,7 @@
           this.fetching = false;
           this.showToast('审核成功');
           let nextStatus = result === '1' ? '8' : '7';
-          this.updateCurOrder(nextStatus);
+          this.updateCurOrder(nextStatus, { remark });
         }).catch(() => {
           this.fetching = false;
         });

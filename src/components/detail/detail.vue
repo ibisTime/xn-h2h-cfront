@@ -72,7 +72,10 @@
           </scroll>
         </div>
         <footer>
-          <div class="price">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
+          <div class="price">
+            <div class="top">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
+            <div class="bottom" v-show="showDiscount">已享受8折优惠</div>
+          </div>
           <div v-show="showSell" class="btn">联系卖家</div>
           <div v-show="showShare" class="btn buy" @click="shareGoods">分享宝贝</div>
           <div class="btn buy" @click="goBuy" v-show="showBuy">马上买</div>
@@ -176,6 +179,13 @@
           return (price + yunfei) * discount / 10;
         }
         return 0;
+      },
+      showDiscount() {
+        if (this.detail) {
+          let discount = this.detail.discount;
+          return !isUnDefined(discount) && +discount !== 1;
+        }
+        return false;
       },
       lat() {
         return this.detail && +this.detail.latitude || 0;
@@ -513,6 +523,7 @@
         font-size: $font-size-medium-x;
         max-height: 2.1rem;
         overflow: hidden;
+        word-break: break-all;
 
         &.show {
           margin-bottom: 0.3rem;
@@ -777,15 +788,26 @@
       background: #fff;
 
       .price {
-        font-size: $font-size-medium-s;
+        display: flex;
+        flex-direction: column;
 
-        span {
-          font-size: $font-size-medium-x;
-          color: $color-red;
+        .top {
+          font-size: $font-size-medium-s;
 
-          &.unit {
-            font-size: $font-size-small;
+          span {
+            font-size: $font-size-medium-x;
+            color: $color-red;
+
+            &.unit {
+              font-size: $font-size-small;
+            }
           }
+        }
+
+        .bottom {
+          margin-top: 0.06rem;
+          font-size: $font-size-small-s;
+          color: $color-text-l;
         }
         padding-right: 0.1rem;
       }

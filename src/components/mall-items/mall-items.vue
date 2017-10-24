@@ -8,7 +8,7 @@
       <div class="info">
         <h2 class="twoline-ellipsis">{{item.name}}</h2>
         <div class="label">
-          <label>{{item.typeName}}</label>
+          <label>来自{{item.typeName}}</label>
           <label v-if="item.isNew==='1'">全新</label>
         </div>
         <div class="price">

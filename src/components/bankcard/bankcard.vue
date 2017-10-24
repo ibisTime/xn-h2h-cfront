@@ -25,11 +25,7 @@
           </li>
         </ul>
       </scroll>
-      <div v-show="delLoading" class="loading-container">
-        <div class="loading-wrapper">
-          <loading title="删除中..."></loading>
-        </div>
-      </div>
+      <full-loading v-show="delLoading" title="删除中..."></full-loading>
       <confirm ref="confirm" text="确定删除银行卡吗" @confirm="_deleteBankCard"></confirm>
       <toast ref="toast" text="删除成功"></toast>
       <router-view></router-view>
@@ -39,7 +35,7 @@
 <script>
   import {mapMutations, mapGetters, mapActions} from 'vuex';
   import Scroll from 'base/scroll/scroll';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Confirm from 'base/confirm/confirm';
   import Toast from 'base/toast/toast';
   import {prefixStyle} from 'common/js/dom';
@@ -187,7 +183,7 @@
       ])
     },
     components: {
-      Loading,
+      FullLoading,
       Scroll,
       Confirm,
       Toast
@@ -280,22 +276,6 @@
 
     .no-result-wrapper {
       margin-bottom: 20px;
-    }
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
-      }
     }
   }
   .slide-enter-active, .slide-leave-active {

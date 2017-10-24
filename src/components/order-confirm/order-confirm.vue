@@ -137,6 +137,7 @@
     created() {
       this.pullUpLoad = null;
       this.first = true;
+      this.setCurAddr(null);
       this.getInitData();
     },
     updated() {
@@ -226,8 +227,8 @@
           this.text = '下单成功';
           this.$refs.toast.show();
           setTimeout(() => {
-            this.$router.push('/category/confirm/pay?code=' + data.code);
-          }, 500);
+            this.$router.replace('/category/confirm/pay?code=' + data.code);
+          }, 1000);
         }).catch(() => {
           this.loadingFlag = false;
         });

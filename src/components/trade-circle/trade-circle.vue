@@ -6,7 +6,7 @@
           <div class="trade-top">
             <div class="head-pic" :style="getImgStyl(item.pic)"></div>
             <div class="person-info">
-              <div class="name">{{item.name}}</div>
+              <div class="name">{{item.nickName}}</div>
               <div class="area">
                 <span>{{item.city}} </span>|<span> {{spaceTime(item)}}</span>
               </div>

@@ -46,12 +46,7 @@
         <div class="form-btn">
           <button :disabled="setting" @click="saveBankCard">保存</button>
         </div>
-
-        <div v-show="showLoading()" class="loading-container">
-          <div class="loading-wrapper">
-            <loading title=""></loading>
-          </div>
-        </div>
+        <full-loading v-show="showLoading()"></full-loading>
         <toast ref="toast" :text="text"></toast>
       </div>
     </div>
@@ -62,7 +57,7 @@
   import {SET_BANKCARD_LIST} from 'store/mutation-types';
   import {getBankCardList, getBankCodeList, addBankCard, editBankCard} from 'api/account';
   import {mobileValid, realNameValid, subbranchValid, bankcardNumberValid, bankNameValid, setTitle} from 'common/js/util';
-  import Loading from 'base/loading/loading';
+  import FullLoading from 'base/full-loading/full-loading';
   import Toast from 'base/toast/toast';
 
   export default {
@@ -112,7 +107,7 @@
           this.bankcodeList = data;
           this.bankName = data[0];
           return data;
-        }).catch(() => {});
+        });
       },
       _getBankCardList() {
         if (!this.bankcardList) {
@@ -142,20 +137,22 @@
         }
       },
       _initPageData(bankCard, bankCode) {
-        let index = bankCode.findIndex((item) => {
-          return item.bankCode === bankCard.bankCode;
-        });
-        this.bankName = bankCode[index];
-        this.realName = bankCard.realName;
-        this.subbranch = bankCard.subbranch;
-        this.bankcardNumber = bankCard.bankcardNumber;
-        this.bindMobile = bankCard.bindMobile;
+        setTimeout(() => {
+          let index = bankCode.findIndex((item) => {
+            return item.bankCode === bankCard.bankCode;
+          });
+          this.bankName = bankCode[index];
+          this.realName = bankCard.realName;
+          this.subbranch = bankCard.subbranch;
+          this.bankcardNumber = bankCard.bankcardNumber;
+          this.bindMobile = bankCard.bindMobile;
+        }, 100);
       },
       showLoading() {
         if (!this.$route.params.id) {   // 新增
           return !this.bankcodeList.length;
         } else {   // 修改
-          return !this.bankcodeList.length || !this.bankcardNumber;
+          return !this.bankcodeList.length || !this.bankName;
         }
       },
       saveBankCard() {
@@ -252,7 +249,7 @@
       ])
     },
     components: {
-      Loading,
+      FullLoading,
       Toast
     }
   };
@@ -280,22 +277,6 @@
       height: 0.3rem;
       top: 50%;
       transform: translate(0, -50%);
-    }
-
-    .loading-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.2);
-
-      .loading-wrapper {
-        position: absolute;
-        top: 50%;
-        width: 100%;
-        transform: translate3d(0, -50%, 0);
-      }
     }
   }
   .slide-enter-active, .slide-leave-active {

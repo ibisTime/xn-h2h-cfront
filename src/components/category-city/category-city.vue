@@ -20,7 +20,7 @@
               </ul>
             </scroll>
           </div>
-          <div class="city item">
+          <div class="city item" :class="rightWrapCls">
             <scroll ref="cityScroll" :pullUpLoad="pullUpLoad" :data="cityList">
               <li v-for="(city,index) in cityList"
                   ref="city"
@@ -28,7 +28,7 @@
                   @click="citySelect(index)">{{city.text}}</li>
             </scroll>
           </div>
-          <div class="area item">
+          <div class="area item" :class="rightWrapCls">
             <scroll ref="areaScroll" :pullUpLoad="pullUpLoad" :data="areaList">
               <li v-for="(area,index) in areaList"
                   ref="area"
@@ -78,6 +78,9 @@
       };
     },
     computed: {
+      rightWrapCls() {
+        return this.provIndex === 0 ? 'flex0' : '';
+      },
       position() {
         if (this.location) {
           let address = this.location.addressComponent;
@@ -296,6 +299,10 @@
         flex: 1;
         padding: 0 0.3rem;
 
+        &.flex1 {
+          flex: 1;
+        }
+
         .top {
           padding-left: 0.34rem;
           padding-top: 0.33rem;
@@ -370,6 +377,10 @@
           flex: 1;
           overflow: hidden;
           height: 100%;
+
+          &.flex0 {
+            flex: 0;
+          }
         }
 
         .province {

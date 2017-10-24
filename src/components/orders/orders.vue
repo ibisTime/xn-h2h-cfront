@@ -27,13 +27,13 @@
                     </div>
                     <div class="right">
                       <p>¥{{item.amount1 | formatAmount}}</p>
+                      <p class="status">{{item.status | formatStatus}}</p>
                     </div>
                   </div>
                   <div class="bottom">总价：<span class="unit">¥</span><span class="price">{{getTotalAmount(item) | formatAmount}}</span></div>
                 </div>
               </div>
-              <div class="clearfix btns">
-                <span class="status fl">{{item.status | formatStatus}}</span>
+              <div class="clearfix btns" v-show="showBtns(item.status)">
                 <span class="btn fr" v-show="showPayBtn(item.status)" @click.stop="payOrder(item)">立即支付</span>
                 <span class="btn cancel fr" v-show="showCancelBtn(item.status)" @click.stop="_cancelOrder(item)">取消订单</span>
                 <span class="btn cancel fr" v-show="showTkBtn(item.status)" @click.stop="_tkOrder(item)">申请退款</span>
@@ -42,9 +42,7 @@
               </div>
             </li>
           </ul>
-          <div v-show="!currentList.hasMore && !(currentList.data && currentList.data.length)" class="no-result-wrapper">
-            <img src="./no-result.png"/><p>暂无订单</p>
-          </div>
+          <no-result v-show="!currentList.hasMore && !(currentList.data && currentList.data.length)" title="暂无订单" class="no-result-wrapper"></no-result>
         </scroll>
       </div>
       <full-loading v-show="fetching" :title="fetchText"></full-loading>
@@ -239,6 +237,12 @@
         this.curItem = item;
         this.$refs.confirm.show();
       },
+      showBtns(status) {
+        if (status !== '1' && status !== '2' && status !== '3' && status !== '4') {
+          return false;
+        }
+        return true;
+      },
       showPayBtn(status) {
         return status === '1';
       },
@@ -412,6 +416,12 @@
                   text-align: right;
                   white-space: nowrap;
                   font-size: $font-size-small;
+
+                  .status {
+                    margin-top: 0.2rem;
+                    color: $color-red;
+                    font-size: $font-size-medium-s;
+                  }
                 }
               }
 
@@ -451,13 +461,6 @@
                 color: $color-text-l;
               }
             }
-          }
-
-          .status {
-            height: 0.64rem;
-            line-height: 0.64rem;
-            color: $color-red;
-            font-size: $font-size-medium-s;
           }
         }
       }

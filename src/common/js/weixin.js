@@ -30,7 +30,7 @@ export function initShare(config, suc, err) {
         config.link = config.link + '?userReferee=' + getUserId();
       }
     } else {
-      config.link.replace(/((?:\?|$)userReferee=)[^&$]+/, '$1' + getUserId());
+      config.link.replace(/((?:\?|&)userReferee=)[^&$]+/, '$1' + getUserId());
     }
     _initShare(data, config);
   }).catch(() => {

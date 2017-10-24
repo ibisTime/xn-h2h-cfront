@@ -167,6 +167,9 @@
           let index = addressList.findIndex((item) => {
             return item.code === this.code;
           });
+          if (addressList.length === 1) {
+            param.isDefault = '1';
+          }
           addressList.splice(index, 1, param);
           this.setAddressList(addressList);
           this.setCurAddr(param);
@@ -186,9 +189,12 @@
             code: data.code,
             ...param
           };
-          this.setCurAddr(_item);
           let addressList = this.addressList.slice();
+          if (addressList.length === 0) {
+            _item.isDefault = '1';
+          }
           addressList.push(_item);
+          this.setCurAddr(_item);
           this.setAddressList(addressList);
           setTimeout(() => {
             this.$router.back();

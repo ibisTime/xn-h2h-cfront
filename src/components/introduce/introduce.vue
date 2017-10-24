@@ -1,6 +1,6 @@
 <template>
   <transition name="slide">
-    <div class="nickname-wrapper">
+    <div class="introduce-wrapper">
       <div class="form-wrapper">
         <div class="form-item is-textarea">
           <div class="item-input-wrapper">
@@ -92,7 +92,7 @@
 <style lang="scss" scoped rel="stylesheet/scss">
   @import "~common/scss/variable";
 
-  .nickname-wrapper {
+  .introduce-wrapper {
     position: fixed;
     top: 0;
     left: 0;

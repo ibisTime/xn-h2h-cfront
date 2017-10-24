@@ -32,7 +32,7 @@
           <i class="icon-right"></i>
         </router-link>
       </div>
-      <router-link to="/home/trade"tag="div">
+      <router-link to="/home/trade" tag="div">
         <div class="trade-wrapper">
           <div class="trade-icon"></div>
         </div>
@@ -48,7 +48,7 @@
       </div>
       <div class="mall-content">
         <mall-items :data="currentList"></mall-items>
-        <no-result v-show="!currentList.length && !hasMore" title="抱歉，暂无商品"></no-result>
+        <no-result v-show="!currentList.length && !hasMore" class="no-result-wrapper" title="抱歉，暂无商品"></no-result>
       </div>
     </scroll>
     <toast ref="toast" :text="text"></toast>
@@ -440,6 +440,9 @@
           }
         }
       }
+    }
+    .no-result-wrapper {
+      margin-top: 0.2rem;
     }
   }
 </style>
