@@ -3,6 +3,8 @@ import storage from 'good-storage';
 const SEARCH_KEY = '__search__';
 const SEARCH_MAX_LEN = 50;
 
+const MESSAGE_KEY = '__message__';
+
 function insertArray(arr, val, compare, maxLen) {
   const index = arr.findIndex(compare);
   if (index === 0) {
@@ -49,4 +51,28 @@ export function clearSearch() {
 
 export function loadSearch() {
   return storage.get(SEARCH_KEY, []);
+}
+
+export function saveChatData(msg, toUser, fromUser) {
+  let chatData = storage.get(MESSAGE_KEY, {});
+  if (!chatData[fromUser]) {
+    chatData[fromUser] = {};
+    chatData[fromUser].users = [];
+  }
+
+  if (!chatData[fromUser][toUser]) {
+    chatData[fromUser][toUser] = [];
+  }
+
+  chatData[fromUser][toUser].push(msg);
+
+  insertArray(chatData[fromUser].users, toUser, (item) => {
+    return item === toUser;
+  });
+  storage.set(MESSAGE_KEY, chatData);
+  return chatData;
+}
+
+export function loadChatData() {
+  return storage.get(MESSAGE_KEY, {});
 }

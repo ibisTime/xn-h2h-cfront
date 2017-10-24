@@ -64,7 +64,6 @@ export default {
   position: relative;
   left: 0.4rem;
   width: 90%;
-  height: 3.72rem;
   bottom: 0.6rem;
   background: #fff;
   z-index: 10;
@@ -104,17 +103,17 @@ export default {
     overflow-x: hidden;
     position: relative;
     li {
-      height: 2.8rem;
       width: 100%;
       font-size: 0;
       padding: 0.1rem;
-      margin-left: 0.15rem;
+      /*margin-left: 0.15rem;*/
       a {
         float: left;
         overflow: hidden;
         height: 0.7rem;
         transition: all ease-out .2s;
         border-radius: 4px;
+        padding: 0.1rem;
         &:hover {
           background-color: #d8d8d8;
           border-color: #d8d8d8;

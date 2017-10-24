@@ -1,20 +1,20 @@
 <template>
   <transition  name="slide">
     <div class="chat-wrapper" @click='hide'>
-      <scroll>
-    	   <div class="message-content">
-           <div class="receive">
-              <span class="avatar"></span>
-              <p>
-                <span class="triangle-left"></span>
-                <i>111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</i>
-              </p>
-           </div>
-           <div class="post">
+      <scroll :data="curChatList"  :pullUpLoad="pullUpLoad" rel="chatData">
+        <div v-for="info in curChatList"  class="message-content">
+          <div class="receive" v-if="isSendReceive(info)">
+            <span class="avatar"></span>
+            <p>
+              <span class="triangle-left"></span>
+              <i v-html="getContent(info)"></i>
+            </p>
+           </div>                
+           <div v-else class="post clearfix">
               <span class="avatar"></span>
               <p>
                 <span class="triangle-right"></span>
-                <i>2222222</i>
+                <i v-html="getContent(info)"></i>
               </p>
            </div>
          </div>
@@ -25,28 +25,51 @@
           <span @click.stop="show"></span>
           <emoji ref="emoji" @select="selectItem"></emoji>
           <i @click="show"></i>
-          <input class="file" type="file" :multiple="multiple" ref="fileInput" accept="image/*" >        
+          <input class="file" type="file" :multiple="multiple" ref="fileInput" @change="uploadPic" accept="image/*" >    
         </div>        
       </div>
     </div>
   </transition>
 </template>
 <script>
+  import {mapGetters, mapActions, mapMutations} from 'vuex';
   import Scroll from 'base/scroll/scroll';
   import Emoji from 'base/emoji/emoji';
-  import {onSendMsg, getHistoryMsgCallback} from 'static/webim/message';
+  import {onSendMsg, getLastC2CHistoryMsgs, addMsg} from 'common/js/message';
+  import {getUserId, debounce} from 'common/js/util';
+  import {SET_CHAT_USERID, SET_CHAT_LIST} from 'store/mutation-types';
+  // import {onMsgNotify} from 'common/js/message-mixin';
+
+  const selType = webim.SESSION_TYPE.C2C;
 
   export default {
     data () {
       return {
+        text: '',
         emoji: '',
         photos: []
       };
     },
     created() {
-      this.multiple = true;
+      this.pullUpLoad = null;
+      this.multiple = false;
+      this.selToID = this.$route.params.id;
+      this.selSess = null;
+      this.$watch('chatData', debounce((newData) => {
+        if (!newData) {
+          setTimeout(() => {
+            this.$refs.chatData.refresh();
+          }, 20);
+        };
+      }, 200));
       // this.dealMessage();
-      this.getMessage();
+      this.getHistoryMessage();
+    },
+    computed: {
+      ...mapGetters([
+        'curChatList',
+        'curChatUserId'
+      ])
     },
     methods: {
       show() {
@@ -59,11 +82,120 @@
         this.emoji += emoji;
       },
       dealMessage() {
-        onSendMsg();
+        onSendMsg(this.emoji, (info) => {
+          this.saveChatHistory(info);
+        });
       },
-      getMessage() {
-        getHistoryMsgCallback();
-      }
+      getContent(item) {
+        let html = '';
+        item.elems.forEach((msg) => {
+          if(msg.type === 'TIMTextElem') {
+            html += `<i>${msg.content.text}</i>`;
+          } else if (msg.type === 'TIMFaceElem') {
+            html += `<img src="${webim.Emotions[msg.content.index][1]}"/>`;
+          } else if (msg.type === 'TIMImageElem') {
+            html += `<img src="${msg.content.ImageInfoArray[0].url}" style="width: 4rem;"/>`;
+          }
+        });
+        return html;
+      },
+      isSendReceive(info) {
+        if (info.fromUser === this.curChatUserId) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      getHistoryMessage() {
+        getLastC2CHistoryMsgs((info) => {
+          let _list = this.curChatList.slice();
+          _list = info.concat(_list);
+          this.setCurChatList(_list);
+        });
+      },
+      uploadPic(e) {
+        console.log('test');
+        let files;
+        if (e.dataTransfer) {
+          files = e.dataTransfer.files;
+        } else if (e.target) {
+          files = e.target.files;
+        }
+        files = Array.prototype.slice.call(files, 0, 1);
+        let self = this;
+        let file = files[0];
+        // 封装上传图片请求
+        var opt = {
+          'file': file, // 图片对象
+          'onProgressCallBack': self.onProgressCallBack, // 上传图片进度条回调函数
+          // 'abortButton': document.getElementById('upd_abort'), // 停止上传图片按钮
+          'To_Account': self.selToID, // 接收者
+          'businessType': webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG // 业务类型
+        };
+        // 上传图片
+        webim.uploadPic(opt,
+          function(resp) {
+            self.sendPic(resp, file.name);
+          },
+          function(err) {
+            alert(err.ErrorInfo);
+          }
+        );
+      },
+      sendPic(images, imgName) {
+        if (!this.selToID) {
+          alert('您还没有好友，暂不能聊天');
+          return;
+        }
+
+        if (!this.selSess) {
+          this.selSess = new webim.Session(selType, this.selToID, this.selToID, '', Math.round(new Date().getTime() / 1000));
+        }
+        var msg = new webim.Msg(this.selSess, true, -1, -1, -1, getUserId(), 0, 'ppp');
+        var imagesObj = new webim.Msg.Elem.Images(images.File_UUID);
+        for (var i in images.URL_INFO) {
+          var img = images.URL_INFO[i];
+          var newImg;
+          var type;
+          switch (img.PIC_TYPE) {
+            case 1: // 原图
+              type = 1; // 原图
+              break;
+            case 2: // 小图（缩略图）
+              type = 3; // 小图
+              break;
+            case 4: // 大图
+              type = 2; // 大图
+              break;
+          }
+          newImg = new webim.Msg.Elem.Images.Image(type, img.PIC_Size, img.PIC_Width, img.PIC_Height, img.DownUrl);
+          imagesObj.addImage(newImg);
+        }
+        msg.addImage(imagesObj);
+        // if(imgName){
+        //     var data=imgName;// 通过自定义消息中的data字段保存图片名称
+        //     var custom_obj = new webim.Msg.Elem.Custom(data, '', '');
+        //     msg.addCustom(custom_obj);
+        // }
+        var self = this;
+        // 调用发送图片消息接口
+        webim.sendMsg(msg, function(resp) {
+          if (selType === webim.SESSION_TYPE.C2C) {
+            self.saveChatHistory(addMsg(msg));
+          }
+        }, function(err) {
+          alert(err.ErrorInfo);
+        });
+      },
+      onProgressCallBack() {},
+      ...mapMutations({
+        setCurChatUserId: SET_CHAT_USERID,
+        setCurChatList: SET_CHAT_LIST
+      }),
+      ...mapActions([
+        'saveChatHistory'
+      ])
+
     },
     components: {
       Scroll,
@@ -125,7 +257,6 @@
       }
       p{
         max-width:4.8rem;
-        min-width:3rem;
         min-height:1rem;
         box-sizing:content-box;
         margin-left: 0.4rem;
@@ -158,7 +289,7 @@
         @include bg-image('heads');
       }
       p{
-        min-width:3rem;
+        max-width: 4.8rem;
         min-height:0.95rem;
         box-sizing:content-box;
         margin-right: 0.4rem;

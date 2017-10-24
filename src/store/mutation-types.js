@@ -48,3 +48,9 @@ export const SET_LOG_FLAG = 'SET_LOG_FLAG';
 export const SET_WATCHING_USER = 'SET_WATCHING_USER';
 // 设置当前正在查看的活动
 export const SET_CURRENT_ACTIVITY = 'SET_CURRENT_ACTIVITY';
+// 设置所有的聊天记录
+export const SET_CHAT_DATA = 'SET_CHAT_DATA';
+// 设置当前正在聊天的记录
+export const SET_CHAT_LIST = 'SET_CHAT_LIST';
+// 设置当前正在聊天的userId
+export const SET_CHAT_USERID = 'SET_CHAT_USERID';

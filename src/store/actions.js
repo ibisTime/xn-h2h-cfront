@@ -1,5 +1,5 @@
 import * as types from './mutation-types';
-import {saveSearch, clearSearch, deleteSearch} from 'common/js/cache';
+import {saveSearch, clearSearch, deleteSearch, saveChatData} from 'common/js/cache';
 
 function _getOrderList(state, code, prevStatus, nextStatus) {
   let allList = null;
@@ -230,4 +230,15 @@ export const editOrderListByReceived = function({commit, state}, {code}) {
     _order.status = nextStatus;
     commit(types.SET_CURRENT_ORDER, _order);
   }
+};
+
+// 保存所有聊天记录
+export const saveChatHistory = function ({commit, state}, {msg, toUser, fromUser}) {
+  debugger;
+  if (state.curChatUserId === toUser) {
+    let _list = state.curChatList.slice();
+    _list.push(msg);
+    commit(types.SET_CHAT_LIST, _list);
+  }
+  commit(types.SET_CHAT_DATA, saveChatData(msg, toUser, fromUser));
 };

@@ -16,15 +16,14 @@
 <script type="text/ecmascript-6">
   import Loading from 'base/loading/loading';
   import Toast from 'base/toast/toast';
-  import {isLogin, setUser, getWxMobAndCapt, getSig, getAccountType, getTxAppCode, getUserId} from 'common/js/util';
+  import {isLogin, setUser, getWxMobAndCapt} from 'common/js/util';
   import {getLocation} from 'common/js/location';
   import {getAppId} from 'api/general';
-  import {wxLogin, saveLoginLog, getTencentParamsAPi} from 'api/user';
+  import {wxLogin, saveLoginLog} from 'api/user';
   import {mapMutations, mapGetters} from 'vuex';
   import {SET_LOCATION, SET_IS_LOCA_ERR, SET_LOG_FLAG} from 'store/mutation-types';
   import WxBindMobile from 'components/wx-bind-mobile/wx-bind-mobile';
-  // import {onConnNotify, onMsgNotify} from 'static/webim/login';
-  import {messageMixin} from 'common/js/mixin';
+  import {messageMixin} from 'common/js/message-mixin';
 
   export default {
     mixins: [messageMixin],
@@ -127,49 +126,6 @@
             location.replace(`${url}?appid=${appId}&redirect_uri=${redirectUri}${suffix}`);
           }, 100);
         });
-      },
-      tencentLogin() {
-        let loginInfo = {};
-        loginInfo.identifier = getUserId();
-        loginInfo.accountType = getAccountType();
-        loginInfo.userSig = getSig();
-        loginInfo.sdkAppID = getTxAppCode();
-        loginInfo.appIDAt3rd = getTxAppCode();
-        if (!loginInfo.sdkAppID || !loginInfo.accountType || !loginInfo.userSig) {
-          getTencentParamsAPi().then((data) => {
-            loginInfo.accountType = data.accountType;
-            loginInfo.userSig = data.sig;
-            loginInfo.sdkAppID = data.txAppCode;
-            loginInfo.appIDAt3rd = data.txAppCode;
-            this.login(loginInfo);
-          });
-        } else {
-          this.login(loginInfo);
-        }
-      },
-      login(loginInfo) {
-        let listeners = {
-          'onConnNotify': this.onConnNotify,
-          'onMsgNotify': this.onMsgNotify
-        };
-        let options = {
-          'isAccessFormalEnv': true,
-          'isLogOn': true
-        };
-        var self = this;
-        webim.login(
-          loginInfo, listeners, options,
-          function(resp) {
-            console.log(resp);
-            loginInfo.identifierNick = resp.identifierNick;
-            loginInfo.headurl = resp.headurl;
-            // initInfoMap(initInfoMapCallbackOK);
-            self.onMsgNotify();
-          },
-          function(err) {
-            alert(err.ErrorInfo);
-          }
-        );
       },
       ...mapMutations({
         setLocation: SET_LOCATION,

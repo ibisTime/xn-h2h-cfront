@@ -96,6 +96,15 @@ const mutations = {
   },
   [types.SET_CURRENT_ACTIVITY](state, activity) {
     state.currentActivity = activity;
+  },
+  [types.SET_CHAT_DATA](state, chatData) {
+    state.chatData = chatData;
+  },
+  [types.SET_CHAT_LIST](state, curChatList) {
+    state.curChatList = curChatList;
+  },
+  [types.SET_CHAT_USERID](state, curChatUserId) {
+    state.curChatUserId = curChatUserId;
   }
 };
 

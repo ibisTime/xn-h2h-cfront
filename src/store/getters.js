@@ -29,3 +29,9 @@ export const logFLag = state => state.logFLag;
 export const watchingUser = state => state.watchingUser;
 
 export const currentActivity = state => state.currentActivity;
+
+export const chatData = state => state.chatData;
+
+export const curChatList = state => state.curChatList;
+
+export const curChatUserId = state => state.curChatUserId;

@@ -1,4 +1,4 @@
-import {loadSearch} from 'common/js/cache';
+import {loadSearch, loadChatData} from 'common/js/cache';
 
 const state = {
   publishCategory: null,
@@ -16,7 +16,10 @@ const state = {
   currentOrder: null,
   logFLag: false,
   watchingUser: null,
-  currentActivity: null
+  currentActivity: null,
+  chatData: loadChatData(),
+  curChatList: [],
+  curChatUserId: ''
 };
 
 export default state;

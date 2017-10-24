@@ -1,17 +1,17 @@
 <template>           
   <div class="list-wrapper" >
-    <scroll>
-      <div class="list-item" @click ="goChat('U201710131354390878485')" >
+    <scroll :data="list" :hasMore="hasMore">
+      <div v-for="item in list" class="list-item" @click ="goChat('U11111111111111112')" >
         <div class="headPic">
         </div>
         <div class="content">
           <p>名字</p>
-          <span>hello</span>
+          <span>{{item}}</span>
         </div>
         <div class="time">下午4:40</div>      
       </div>
     </scroll>
-    <div v-show="!messageList.length && !hasMore" class="no-result">
+    <div v-show="!list.length && !hasMore" class="no-result">
       <div class="no-result-icon"></div>
       <p class="no-result-text">{{title}}</p>
     </div>  
@@ -20,32 +20,59 @@
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
-  // import {getPageUser} from 'api/user';
+  import {mapMutations, mapGetters} from 'vuex';
+  import {SET_CHAT_LIST, SET_CHAT_USERID} from 'store/mutation-types';
+  import {getUserId} from 'common/js/util';
 
   export default {
     data () {
       return {
-        messageList: 0,
-        hasMore: true,
         title: '暂无结果',
         start: 1,
         limit: 20
       };
     },
     created() {
-      // this.getUser();
+      this.hasMore = false;
+    },
+    computed: {
+      list() {
+        let chatData = this.chatData[getUserId()];
+        if (chatData) {
+          return chatData.users.map((userId) => {
+            let msg = chatData[userId][chatData[userId].length - 1];
+            return this.getContent(msg);
+          });
+        }
+        return [];
+      },
+      ...mapGetters([
+        'chatData'
+      ])
     },
     methods: {
-      // getUser() {
-      //   getPageUser(this.start, this.limit).then(() => {
-      //     this.loadingFlag = false;
-      //   }).catch(() => {
-      //     this.loadingFlag = false;
-      //   });
-      // },
+      getContent(item) {
+        let html = '';
+        item.elems.forEach((msg) => {
+          if(msg.type === 'TIMTextElem') {
+            html += `<i>${msg.content.text}</i>`;
+          } else if (msg.type === 'TIMFaceElem') {
+            html += `<img src="${webim.Emotions[msg.content.index][1]}"/>`;
+          } else if (msg.type === 'TIMImageElem') {
+            html += '[图片]';
+          }
+        });
+        return html;
+      },
       goChat(id) {
+        this.setCurChatList([]);
+        this.setCurChatUserId(id);
         this.$router.push(this.$route.path + '/' + id);
-      }
+      },
+      ...mapMutations({
+        setCurChatList: SET_CHAT_LIST,
+        setCurChatUserId: SET_CHAT_USERID
+      })
     },
     components: {
       Scroll
