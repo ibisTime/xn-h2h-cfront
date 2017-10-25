@@ -53,19 +53,29 @@ export function loadSearch() {
   return storage.get(SEARCH_KEY, []);
 }
 
-export function saveChatData(msg, toUser, fromUser) {
+export function saveChatData(msg, toUser, fromUser, isTalking) {
   let chatData = storage.get(MESSAGE_KEY, {});
   if (!chatData[fromUser]) {
-    chatData[fromUser] = {};
-    chatData[fromUser].users = [];
+    chatData[fromUser] = {
+      unRead: 0,
+      users: []
+    };
   }
-
   if (!chatData[fromUser][toUser]) {
-    chatData[fromUser][toUser] = [];
+    chatData[fromUser][toUser] = {
+      unRead: 0,
+      list: []
+    };
   }
-
-  chatData[fromUser][toUser].push(msg);
-
+  let before = chatData[fromUser][toUser].unRead;
+  if (isTalking) {
+    chatData[fromUser][toUser].unRead = 0;
+    chatData[fromUser].unRead -= before;
+  } else {
+    chatData[fromUser][toUser].unRead++;
+    chatData[fromUser].unRead++;
+  }
+  chatData[fromUser][toUser].list.push(msg);
   insertArray(chatData[fromUser].users, toUser, (item) => {
     return item === toUser;
   });
@@ -76,7 +86,7 @@ export function saveChatData(msg, toUser, fromUser) {
 export function updateChatData (sender, receiver) {
   let chatData = storage.get(MESSAGE_KEY, {});
   if (chatData[sender.userId] && chatData[sender.userId][receiver.userId]) {
-    let list = chatData[sender.userId][receiver.userId];
+    let list = chatData[sender.userId][receiver.userId].list;
     let newList = list.map((item) => {
       if (item.fromAccount === sender.userId) {
         return {
@@ -92,7 +102,10 @@ export function updateChatData (sender, receiver) {
         };
       }
     });
-    chatData[sender.userId][receiver.userId] = newList;
+    chatData[sender.userId][receiver.userId].list = newList;
+    let _item = chatData[sender.userId][receiver.userId];
+    chatData[sender.userId].unRead -= _item.unRead;
+    _item.unRead = 0;
   }
   storage.set(MESSAGE_KEY, chatData);
   return chatData;

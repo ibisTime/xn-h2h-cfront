@@ -435,7 +435,7 @@ export function addressValid(value) {
  * @param {yyyy-MM-dd-hh-mm} beforeTime
  */
 export function calcSpace (beforeTime) {
-  let now = formatDate(null, 'yyyy-MM-dd-hh-mm').split('-');
+  let now = formatDate(new Date().getTime(), 'yyyy-MM-dd-hh-mm').split('-');
   let before = beforeTime.split('-');
   let nowYear = +now[0];
   let beforeYear = +before[0];
@@ -467,33 +467,26 @@ export function calcSpace (beforeTime) {
 
 // 聊天日期格式化
 export function formatChatDate(timeStamp, param) {
-  // let item = new Date(parseInt(1514775600, 10) * 1000);
-  let beforeTime = new Date(timeStamp);
-  let before = formatDate(beforeTime, 'yyyy-MM-dd-hh-mm').split('-');
-  let now = formatDate(null, 'yyyy-MM-dd-hh-mm').split('-');
-  let nowYear = +now[0];
-  let beforeYear = +before[0];
-  let nowMonth = +now[1];
-  let beforeMonth = +before[1];
-  let nowDay = +now[2];
-  let beforeDay = +before[2];
+  let now = new Date();
+  let nowStamp = now.getTime();
+  let before = new Date(timeStamp);
   let week = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-  let diffY = nowYear - beforeYear;
-  let diffM = diffY * 12 + nowMonth - beforeMonth;
-  let diffD = diffM * 30 + nowDay - beforeDay;
-  if (diffD > 7 || diffD < 0) {
-    return param ? formatDate(beforeTime, 'yyyy/MM/dd hh:mm') : formatDate(beforeTime, 'yyyy/MM/dd');
+  let oneDay = 3600000 * 24;
+  let sevenDay = 7 * oneDay;
+  let twoDay = 2 * oneDay;
+  if (nowStamp - timeStamp > sevenDay) {
+    return param ? formatDate(timeStamp, 'yyyy年MM月dd日 hh:mm') : formatDate(timeStamp, 'yyyy/MM/dd');
   }
-  if (diffD <= 7 && diffD > 1) {
-    return param ? week[beforeTime.getDay()] + formatDate(beforeTime, 'hh:mm') : week[beforeTime.getDay()];
+  if (nowStamp - timeStamp > twoDay) {
+    return param ? week[before.getDay()] + ' ' + formatDate(timeStamp, 'hh:mm') : week[before.getDay()];
   }
-  if(diffD === 1) {
-    return param ? '昨天' + formatDate(beforeTime, 'hh:mm') : '昨天';
+  if (now.getDate() === before.getDate()) {
+    return formatDate(timeStamp, 'hh:mm');
   }
-  if(diffD === 0) {
-    return formatDate(beforeTime, 'hh:mm');
+  let _before = new Date(timeStamp);
+  _before.setDate(_before.getDate() + 1);
+  if (_before.getDate() === now.getDate()) {
+    return param ? '昨天 ' + formatDate(timeStamp, 'hh:mm') : '昨天';
   }
-  // if() {
-
-  // }
+  return param ? week[before.getDay()] + ' ' + formatDate(timeStamp, 'hh:mm') : week[before.getDay()];
 }

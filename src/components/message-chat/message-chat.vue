@@ -11,14 +11,15 @@
           <div v-show="hasMore" class="loading-wrapper">
             <loading title=""></loading>
           </div>
-          <div v-for="info in curChatList" ref="mesRef" class="message-content">
-            <div class="receive" v-if="!isMine(info)">
+          <div v-for="(info,index) in curChatList" ref="mesRef" class="message-content">
+            <div class="time-split"><div v-show="showTime(info, index)" class="time-content">{{getDate(info.time)}}</div></div>
+            <div class="receive" v-if="!info.isSend">
               <span class="avatar"><img :src="info.icon"/></span>
               <p>
                 <span class="triangle-left"></span>
                 <i>
                   <template v-for="item in getContent(info)">
-                    <i v-if="item.type==='TIMTextElem'">{{item.content}}</i>
+                    <template v-if="item.type==='TIMTextElem'">{{item.content}}</template>
                     <img @load="handleLoad" v-else :src="item.content"/>
                   </template>
                 </i>
@@ -30,7 +31,7 @@
                 <span class="triangle-right"></span>
                 <i>
                   <template v-for="item in getContent(info)">
-                    <i v-if="item.type==='TIMTextElem'">{{item.content}}</i>
+                    <template v-if="item.type==='TIMTextElem'">{{item.content}}</template>
                     <img @load="handleLoad" v-else :src="item.content"/>
                   </template>
                 </i>
@@ -41,7 +42,7 @@
       </div>
       <div class="message-footer">
         <div class="message-input">
-          <input type="text" placeholder="输入聊天内容" v-model="emoji" @keyup.enter="dealMessage" class="msgedit"/>
+          <input type="text" placeholder="输入聊天内容" ref="inputText" v-model="emoji" @keyup.enter="dealMessage" class="msgedit"/>
           <span @click.stop="show"></span>
           <emoji ref="emoji" @select="selectItem"></emoji>
           <i @click="show"></i>
@@ -62,7 +63,7 @@
   import Emoji from 'base/emoji/emoji';
   import Toast from 'base/toast/toast';
   import {addMsg} from 'common/js/message';
-  import {getUserId, isUnDefined} from 'common/js/util';
+  import {getUserId, isUnDefined, formatChatDate} from 'common/js/util';
   import User from 'common/bean/user';
   import {getUser, getUserById} from 'api/user';
 
@@ -149,6 +150,7 @@
         this.emoji += emoji;
       },
       dealMessage() {
+        this.$refs.inputText.blur();
         if (!isUnDefined(this.emoji) && this.emoji.trim() !== '') {
           this.onSendMsg(this.emoji, (info) => {
             this.saveChatHistory(info);
@@ -177,9 +179,6 @@
           arr.push(_item);
         });
         return arr;
-      },
-      isMine(info) {
-        return info.fromAccount === this.userId;
       },
       getHistoryMessage() {
         let self = this;
@@ -230,12 +229,14 @@
             return {
               ...item,
               icon: this.user.photo,
+              photo: this.receiver.photo,
               fromAccountNick: this.user.nickname
             };
           } else {
             return {
               ...item,
               icon: this.receiver.photo,
+              photo: this.receiver.photo,
               fromAccountNick: this.receiver.nickname
             };
           }
@@ -257,7 +258,6 @@
           this.showToast('消息长度超出限制(最多' + Math.round(maxLen / 3) + '汉字)');
           return;
         }
-        // 发消息处理
         this.handleMsgSend(msgContent, suc);
       },
       handleMsgSend(msgContent, suc) {
@@ -267,7 +267,6 @@
         let random = Math.round(Math.random() * 4294967296); // 消息随机数，用于去重
         let msgTime = Math.round(new Date().getTime() / 1000); // 消息时间戳
         let msg = new webim.Msg(this.selSess, true, -1, random, msgTime, this.userId, subType, this.user.nickname);
-
         let textObj, faceObj, tmsg, emotionIndex, emotion, restMsgIndex;
         // 解析文本和表情
         let expr = /\[[^[\]]{1,3}\]/mg;
@@ -284,7 +283,6 @@
             }
             emotionIndex = webim.EmotionDataIndexs[emotions[i]];
             emotion = webim.Emotions[emotionIndex];
-
             if (emotion) {
               faceObj = new webim.Msg.Elem.Face(emotionIndex, emotions[i]);
               msg.addFace(faceObj);
@@ -302,7 +300,7 @@
         }
         webim.sendMsg(msg, () => {
           if (selType === webim.SESSION_TYPE.C2C) {
-            suc && suc(addMsg(msg, this.selToID));
+            suc && suc(addMsg(msg, this.selToID, this.receiver.photo));
           }
         }, () => {
           this.showToast('消息发送失败，请重新发送');
@@ -333,7 +331,7 @@
         if (!this.selSess) {
           this.selSess = new webim.Session(selType, this.selToID, this.selToID, '', Math.round(new Date().getTime() / 1000));
         }
-        var msg = new webim.Msg(this.selSess, true, -1, -1, -1, this.userId, 0, 'ppp');
+        var msg = new webim.Msg(this.selSess, true, -1, -1, -1, this.userId, 0, this.user.nickname);
         var imagesObj = new webim.Msg.Elem.Images(images.File_UUID);
         for (var i in images.URL_INFO) {
           var img = images.URL_INFO[i];
@@ -356,7 +354,7 @@
         msg.addImage(imagesObj);
         webim.sendMsg(msg, () => {
           if (selType === webim.SESSION_TYPE.C2C) {
-            this.saveChatHistory(addMsg(msg, this.selToID));
+            this.saveChatHistory(addMsg(msg, this.selToID, this.receiver.photo));
             setTimeout(() => {
               this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
             }, 40);
@@ -399,6 +397,16 @@
           this.$refs.scroll.refresh();
         }, 20);
       },
+      showTime(item, index) {
+        if (!index) {
+          return true;
+        }
+        let prevItem = this.curChatList[index - 1];
+        return (item.time - prevItem.time) >= 60;
+      },
+      getDate(timestamp) {
+        return formatChatDate(timestamp * 1000, true);
+      },
       ...mapMutations({
         setCurChatUserId: SET_CHAT_USERID,
         setCurChatList: SET_CHAT_LIST,
@@ -406,9 +414,12 @@
       }),
       ...mapActions([
         'saveChatHistory',
-        'updateMessages',
-        'updateCurMessage'
+        'updateMessages'
       ])
+    },
+    beforeDestroy() {
+      this.setCurChatUserId('');
+      this.setCurChatList([]);
     },
     watch: {
       tencentLogined(newVal) {
@@ -459,8 +470,26 @@
 
     .message-content {
       font-size: 0;
-      min-height: 1.6rem;
-      padding: 0.3rem;
+      padding: 0 0.3rem;
+
+      &:last-child {
+        padding-bottom: 0.3rem;
+      }
+
+      .time-split {
+        padding: 0.3rem 0;
+        text-align: center;
+        font-size: 0;
+
+        .time-content {
+          display: inline-block;
+          padding: 0.1rem;
+          border-radius: 0.1rem;
+          font-size: $font-size-small;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+      }
 
       p, span {
         display: inline-block;
@@ -470,21 +499,20 @@
 
       p {
         position: relative;
-        padding: 0 0.2rem;
         vertical-align: top;
         word-wrap: break-word;
         background: #fff;
-        border-radius: 0.2rem;
+        border-radius: 0.1rem;
 
         i {
           display: block;
           padding: 0.2rem;
+          line-height: 0.38rem;
           font-style: normal;
         }
       }
       .receive {
         width: 6.9rem;
-        min-height: 1rem;
 
         .avatar {
           width: 0.76rem;
@@ -507,7 +535,7 @@
           .triangle-left {
             position: absolute;
             left: -0.2rem;
-            top: 0.2rem;
+            top: 0.1rem;
             display: inline-block;
             width: 0;
             height: 0;
@@ -517,14 +545,14 @@
           }
 
           img {
-            max-width: 3rem;
+            max-width: 100%;
+            vertical-align: bottom;
           }
         }
       }
 
       .post {
         width: 6.9rem;
-        min-height: 1rem;
 
         p, span {
           float: right;
@@ -551,7 +579,7 @@
           .triangle-right {
             position: absolute;
             right: -0.2rem;
-            top: 0.2rem;
+            top: 0.1rem;
             display: inline-block;
             width: 0;
             height: 0;
@@ -561,7 +589,8 @@
           }
 
           img {
-            max-width: 3rem;
+            max-width: 100%;
+            vertical-align: bottom;
           }
         }
       }

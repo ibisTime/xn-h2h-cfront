@@ -1,6 +1,6 @@
 import {getUserId, formatAvatar} from 'common/js/util';
 
-export function addMsg(msg, selToID) {
+export function addMsg(msg, selToID, photo) {
   var sess = msg.sess;
   if (!webim.MsgStore.sessMap[sess._impl.id]) {
     webim.MsgStore.sessMap[sess._impl.id] = sess;
@@ -41,6 +41,9 @@ export function addMsg(msg, selToID) {
     icon: formatAvatar(msg.getSession().icon()),
     elems: _elems
   };
+  if (photo) {
+    _msg.photo = photo;
+  }
   var toUser = selToID;
   var fromUser = getUserId();
   return {

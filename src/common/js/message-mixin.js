@@ -32,27 +32,14 @@ export const messageMixin = {
     },
     onMsgNotify(newMsgList) {
       var selSess;
-      // 获取所有聊天会话
-      var sessMap = webim.MsgStore.sessMap();
-      // 遍历新消息
       for (var j in newMsgList) {
         var newMsg = newMsgList[j];
-        // 为当前聊天对象的消息
         if (newMsg.getSession().id() === this.curChatUserId) {
           selSess = newMsg.getSession();
-          this.saveChatHistory(addMsg(newMsg, newMsg.getSession().id()));
         }
+        this.saveChatHistory(addMsg(newMsg, newMsg.getSession().id()));
       }
-      // 消息已读上报，以及设置会话自动已读标记
       webim.setAutoRead(selSess, true, true);
-      debugger;
-      for (var i in sessMap) {
-        var sess = sessMap[i];
-        // 更新其他聊天对象的未读消息数
-        if (this.curChatUserId !== sess.id()) {
-          console.debug(sess.id(), sess.unread());
-        }
-      }
     },
     tencentLogin() {
       let loginInfo = {};

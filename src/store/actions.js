@@ -239,7 +239,7 @@ export const saveChatHistory = function ({commit, state}, {msg, toUser, fromUser
     _list.push(msg);
     commit(types.SET_CHAT_LIST, _list);
   }
-  commit(types.SET_CHAT_DATA, saveChatData(msg, toUser, fromUser));
+  commit(types.SET_CHAT_DATA, saveChatData(msg, toUser, fromUser, state.curChatUserId === toUser));
 };
 
 // 更新localStorage的头像、昵称

@@ -15,6 +15,7 @@
     <router-link tag="div" class="foot-item item-3" to="/message">
       <i></i>
       <p>消息</p>
+      <div class="badge-wrapper"><badge v-show="count" :text="count"></badge></div>
     </router-link>
     <router-link tag="div" class="foot-item item-4" to="/user">
       <i></i>
@@ -23,6 +24,10 @@
   </div>
 </template>
 <script>
+  import {mapGetters} from 'vuex';
+  import Badge from 'base/badge/badge';
+  import {getUserId} from 'common/js/util';
+
   export default {
     props: {
       currentIndex: {
@@ -30,10 +35,26 @@
         default: 0
       }
     },
+    computed: {
+      count() {
+        let userId = getUserId();
+        if (this.chatData[userId]) {
+          let unRead = this.chatData[userId].unRead;
+          return unRead === 0 ? '' : unRead + '';
+        }
+        return '';
+      },
+      ...mapGetters([
+        'chatData'
+      ])
+    },
     methods: {
       goPublish() {
         this.$emit('goPublish');
       }
+    },
+    components: {
+      Badge
     }
   };
 </script>
@@ -128,6 +149,13 @@
       p {
         font-size: $font-size-small-s;
         padding-top: 0.12rem;
+      }
+
+      .badge-wrapper {
+        position: absolute;
+        top: 0.04rem;
+        left: 50%;
+        font-size: 0;
       }
 
       &.item-0 {
