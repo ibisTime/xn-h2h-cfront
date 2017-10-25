@@ -35,3 +35,5 @@ export const chatData = state => state.chatData;
 export const curChatList = state => state.curChatList;
 
 export const curChatUserId = state => state.curChatUserId;
+
+export const tencentLogined = state => state.tencentLogined;

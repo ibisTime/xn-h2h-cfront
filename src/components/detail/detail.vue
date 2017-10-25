@@ -76,7 +76,7 @@
             <div class="top">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
             <div class="bottom" v-show="showDiscount">已享受8折优惠</div>
           </div>
-          <div v-show="showSell" class="btn">联系卖家</div>
+          <div v-show="showSell" class="btn" @click="goChat">联系卖家</div>
           <div v-show="showShare" class="btn buy" @click="shareGoods">分享宝贝</div>
           <div class="btn buy" @click="goBuy" v-show="showBuy">马上买</div>
         </footer>
@@ -338,6 +338,9 @@
       },
       goUserCenter() {
         this.$router.push('/user/' + this.publisher.userId);
+      },
+      goChat() {
+        this.$router.push('/message/' + this.publisher.userId);
       },
       ...mapMutations({
         setUser: SET_USER_STATE,

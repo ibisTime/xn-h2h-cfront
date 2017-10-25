@@ -1,22 +1,21 @@
-<template>           
+<template>
   <div class="list-wrapper" >
     <scroll :data="list" :hasMore="hasMore">
-      <div v-for="item in list" class="list-item" @click ="goChat('U11111111111111112')" >
-        <div class="headPic">
-        </div>
+      <div v-for="item in list" class="list-item" @click ="goChat(item.userId)" >
+        <div class="headPic"><img :src="item.icon"/></div>
         <div class="content">
-          <p>名字</p>
-          <span>{{item}}</span>
+          <p>{{item.fromAccountNick}}</p>
+          <span v-html="item.text"></span>
         </div>
-        <div class="time">下午4:40</div>      
+        <div class="time">下午4:40</div>
       </div>
     </scroll>
     <div v-show="!list.length && !hasMore" class="no-result">
       <div class="no-result-icon"></div>
       <p class="no-result-text">{{title}}</p>
-    </div>  
-    <router-view></router-view>    
-  </div>   
+    </div>
+    <router-view></router-view>
+  </div>
 </template>
 <script>
   import Scroll from 'base/scroll/scroll';
@@ -41,7 +40,12 @@
         if (chatData) {
           return chatData.users.map((userId) => {
             let msg = chatData[userId][chatData[userId].length - 1];
-            return this.getContent(msg);
+            return {
+              userId,
+              text: this.getContent(msg),
+              icon: msg.icon,
+              fromAccountNick: msg.fromAccountNick
+            };
           });
         }
         return [];
@@ -65,8 +69,6 @@
         return html;
       },
       goChat(id) {
-        this.setCurChatList([]);
-        this.setCurChatUserId(id);
         this.$router.push(this.$route.path + '/' + id);
       },
       ...mapMutations({
@@ -85,19 +87,25 @@
 
 .list-wrapper {
    width: 100%;
-   
+
   .list-item{
     display: flex;
     width: 100%;
     height: 1.36rem;
-    background: #fff;    
+    background: #fff;
+
     .headPic{
       margin:  0.16rem 0.2rem 0.16rem 0.3rem;
       width: 1rem;
       height: 1rem;
-      @include bg-image('headf');
-      background-size: 100%;
-    } 
+      border-radius: 50%;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
 
     .content{
       flex: 2;
@@ -109,7 +117,7 @@
         font-size: $font-size-medium;
         color: #999;
       }
-    } 
+    }
 
     .time{
       margin-right: 0.3rem;
@@ -118,9 +126,9 @@
       color: #999;
     }
   }
-  
+
   .no-result {
-    text-align: center;    
+    text-align: center;
     margin-top: 1.4rem;
 
     .no-result-icon {
@@ -137,7 +145,7 @@
       font-size: $font-size-medium;
       color: $color-text-d;
     }
-  }  
+  }
 
-}  
+}
 </style>

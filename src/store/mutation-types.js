@@ -54,3 +54,5 @@ export const SET_CHAT_DATA = 'SET_CHAT_DATA';
 export const SET_CHAT_LIST = 'SET_CHAT_LIST';
 // 设置当前正在聊天的userId
 export const SET_CHAT_USERID = 'SET_CHAT_USERID';
+// 设置腾讯云通信是否已经登录
+export const SET_TENCENT_LOGINED = 'SET_TENCENT_LOGINED';

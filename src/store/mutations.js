@@ -105,6 +105,9 @@ const mutations = {
   },
   [types.SET_CHAT_USERID](state, curChatUserId) {
     state.curChatUserId = curChatUserId;
+  },
+  [types.SET_TENCENT_LOGINED](state, flag) {
+    state.tencentLogined = flag;
   }
 };
 

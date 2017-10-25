@@ -73,6 +73,31 @@ export function saveChatData(msg, toUser, fromUser) {
   return chatData;
 }
 
+export function updateChatData (sender, receiver) {
+  let chatData = storage.get(MESSAGE_KEY, {});
+  if (chatData[sender.userId] && chatData[sender.userId][receiver.userId]) {
+    let list = chatData[sender.userId][receiver.userId];
+    let newList = list.map((item) => {
+      if (item.fromAccount === sender.userId) {
+        return {
+          ...item,
+          icon: sender.photo,
+          fromAccountNick: sender.nickname
+        };
+      } else {
+        return {
+          ...item,
+          icon: receiver.photo,
+          fromAccountNick: receiver.nickname
+        };
+      }
+    });
+    chatData[sender.userId][receiver.userId] = newList;
+  }
+  storage.set(MESSAGE_KEY, chatData);
+  return chatData;
+}
+
 export function loadChatData() {
   return storage.get(MESSAGE_KEY, {});
 }

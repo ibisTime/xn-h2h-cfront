@@ -1,23 +1,17 @@
 <template>
   <div class="emoji"  v-show="showFlag">
-    <scroll ref="scroll" :pullUpLoad="pullUpLoad"> 
+    <scroll ref="scroll" :pullUpLoad="pullUpLoad">
       <ul class="emoji-container" @click.stop>
         <li style="padding: 0">
-          <a 
-            href="javascript:;" 
-            v-for="(emoji, index) in emojiData"  
+          <a
+            href="javascript:;"
+            v-for="(emoji, index) in emojiData"
             :key="index" @click="selectItem(emoji[0])">
              <img :src="emoji[1]">
           </a>
         </li>
       </ul>
-    </scroll> 
-    <!-- <ul class="emoji-controller">
-      <li 
-        v-for="(pannel,index) in pannels" 
-        @click.stop="changeActive(index)"
-        :class="{'active': index === activeIndex}">{{ pannel }}</li>
-    </ul> -->
+    </scroll>
   </div>
 </template>
 <script>
@@ -67,7 +61,7 @@ export default {
   bottom: 0.6rem;
   background: #fff;
   z-index: 10;
-  padding: 10px;  
+  padding: 10px;
   border: 1px solid #eee;
   .scroll-content{
     height: 2.8rem;

@@ -19,7 +19,8 @@ const state = {
   currentActivity: null,
   chatData: loadChatData(),
   curChatList: [],
-  curChatUserId: ''
+  curChatUserId: '',
+  tencentLogined: false
 };
 
 export default state;

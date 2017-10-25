@@ -56,9 +56,7 @@ export function getUser() {
  * @param {string} userId
  */
 export function getUserById(userId) {
-  return fetch(805121, {
-    userId
-  });
+  return fetch(805121, { userId });
 }
 
 /**
