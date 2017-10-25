@@ -561,6 +561,16 @@ export default new Router({
       component: Message,
       children: [
         {
+          path: 'publish',
+          component: Publish,
+          children: [
+            {
+              path: 'category',
+              component: PublishCategories
+            }
+          ]
+        },
+        {
           path: ':id',
           component: Chat
         }

@@ -108,7 +108,7 @@
             this.$refs.bindMobile.show();
           } else {
             setUser(data);
-            if (this.$route.path === '/user/recommend') {
+            if (this.$route.path === '/home/recommend') {
               location.replace(`${location.origin}/?#/home`);
             } else {
               location.replace(`${location.origin}/?#${this.$route.fullPath}`);

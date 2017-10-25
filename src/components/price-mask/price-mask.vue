@@ -11,7 +11,7 @@
           <label>原价</label>
           <div class="input-item">
             <input type="number" placeholder="¥0.00" @input="validOriPrice" v-model="oriPrice">
-            <span v-show="spErr" class="error-tip">{{oriErr}}</span>
+            <span v-show="oriErr" class="error-tip">{{oriErr}}</span>
           </div>
         </div>
         <div class="item">

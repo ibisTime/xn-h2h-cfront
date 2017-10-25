@@ -15,7 +15,7 @@
             <div class="time-split"><div v-show="showTime(info, index)" class="time-content">{{getDate(info.time)}}</div></div>
             <div class="receive" v-if="!info.isSend">
               <span class="avatar"><img :src="info.icon"/></span>
-              <p>
+              <div class="p-content">
                 <span class="triangle-left"></span>
                 <i>
                   <template v-for="item in getContent(info)">
@@ -23,11 +23,11 @@
                     <img @load="handleLoad" v-else :src="item.content"/>
                   </template>
                 </i>
-              </p>
+              </div>
             </div>
             <div v-else class="post clearfix">
               <span class="avatar"><img :src="info.icon"/></span>
-              <p>
+              <div class="p-content">
                 <span class="triangle-right"></span>
                 <i>
                   <template v-for="item in getContent(info)">
@@ -35,7 +35,9 @@
                     <img @load="handleLoad" v-else :src="item.content"/>
                   </template>
                 </i>
-              </p>
+                <div @click="reSendMsg(info, index)" v-show="showErr(info)" class="error-icon"></div>
+                <div class="loading-wrapper" v-show="showLoading(info)"><loading title=""></loading></div>
+              </div>
             </div>
            </div>
         </scroll>
@@ -70,6 +72,9 @@
   const selType = webim.SESSION_TYPE.C2C;
   const subType = webim.C2C_MSG_SUB_TYPE.COMMON;
   const LIMIT = 10;
+  const ERR = -1;
+  const SENDING = 0;
+  const SUCCESS = 1;
 
   export default {
     data () {
@@ -93,6 +98,7 @@
       this.selSess = null;
       this.LastMsgTime = 0;
       this.MsgKey = '';
+      this.msgMap = {};
       this.setCurChatList([]);
       this.setCurChatUserId(this.selToID);
       this.getInitData();
@@ -298,13 +304,56 @@
             msg.addText(textObj);
           }
         }
+        let result = addMsg(msg, this.selToID, this.receiver.photo);
+        result.msg.status = SENDING;
+        this.addMsg2CurList(result.msg);
+        if (!this.msgMap[msg.uniqueId]) {
+          this.msgMap[msg.uniqueId] = msg;
+        }
         webim.sendMsg(msg, () => {
           if (selType === webim.SESSION_TYPE.C2C) {
-            suc && suc(addMsg(msg, this.selToID, this.receiver.photo));
+            let newMsg = {
+              toUser: result.toUser,
+              fromUser: result.fromUser,
+              msg: {
+                ...result.msg,
+                status: SUCCESS
+              }
+            };
+            suc && suc(newMsg);
           }
         }, () => {
+          let newMsg = {
+            toUser: result.toUser,
+            fromUser: result.fromUser,
+            msg: {
+              ...result.msg,
+              status: ERR
+            }
+          };
+          this.updateCurStatus(newMsg.msg);
           this.showToast('消息发送失败，请重新发送');
         });
+      },
+      updateCurStatus(msg, idx) {
+        let list = this.curChatList.slice();
+        let index = list.findIndex((item) => {
+          return item.uniqueId === msg.uniqueId;
+        });
+        list.splice(index, 1, msg);
+        this.setCurChatList(list);
+        setTimeout(() => {
+          let _idx = isUnDefined(idx) ? this.curChatList.length - 1 : idx;
+          this.$refs.scroll.scrollToElement(this.$refs.mesRef[_idx], 100);
+        }, 40);
+      },
+      addMsg2CurList(msg) {
+        let list = this.curChatList.slice();
+        list.push(msg);
+        this.setCurChatList(list);
+        setTimeout(() => {
+          this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
+        }, 40);
       },
       uploadPic(e) {
         let files;
@@ -325,7 +374,6 @@
         }, function() {
           self.showToast('图片发送失败，请重新发送');
         });
-        this.$refs.fileInput.value = null;
       },
       sendPic(images) {
         if (!this.selSess) {
@@ -352,14 +400,38 @@
           imagesObj.addImage(newImg);
         }
         msg.addImage(imagesObj);
+        let result = addMsg(msg, this.selToID, this.receiver.photo);
+        result.msg.status = SENDING;
+        this.addMsg2CurList(result.msg);
+        if (!this.msgMap[msg.uniqueId]) {
+          this.msgMap[msg.uniqueId] = msg;
+        }
         webim.sendMsg(msg, () => {
+          this.$refs.fileInput.value = null;
           if (selType === webim.SESSION_TYPE.C2C) {
-            this.saveChatHistory(addMsg(msg, this.selToID, this.receiver.photo));
+            let newMsg = {
+              toUser: result.toUser,
+              fromUser: result.fromUser,
+              msg: {
+                ...result.msg,
+                status: SUCCESS
+              }
+            };
+            this.saveChatHistory(newMsg);
             setTimeout(() => {
               this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
             }, 40);
           }
         }, () => {
+          let newMsg = {
+            toUser: result.toUser,
+            fromUser: result.fromUser,
+            msg: {
+              ...result.msg,
+              status: ERR
+            }
+          };
+          this.updateCurStatus(newMsg.msg);
           this.showToast('消息发送失败，请重新发送');
         });
       },
@@ -406,6 +478,45 @@
       },
       getDate(timestamp) {
         return formatChatDate(timestamp * 1000, true);
+      },
+      showLoading(item) {
+        return item.status === SENDING;
+      },
+      showErr(item) {
+        return item.status === ERR;
+      },
+      reSendMsg(item, index) {
+        let msg = this.msgMap[item.uniqueId];
+        let result = addMsg(msg, this.selToID, this.receiver.photo);
+        result.msg.status = SENDING;
+        this.updateCurStatus(result.msg, index);
+        webim.sendMsg(msg, () => {
+          if (selType === webim.SESSION_TYPE.C2C) {
+            let newMsg = {
+              toUser: result.toUser,
+              fromUser: result.fromUser,
+              msg: {
+                ...result.msg,
+                status: SUCCESS
+              }
+            };
+            this.saveChatHistory(newMsg);
+            setTimeout(() => {
+              this.$refs.scroll.scrollToElement(this.$refs.mesRef[index], 100);
+            }, 40);
+          }
+        }, () => {
+          let newMsg = {
+            toUser: result.toUser,
+            fromUser: result.fromUser,
+            msg: {
+              ...result.msg,
+              status: ERR
+            }
+          };
+          this.updateCurStatus(newMsg.msg);
+          this.showToast('消息发送失败，请重新发送');
+        });
       },
       ...mapMutations({
         setCurChatUserId: SET_CHAT_USERID,
@@ -472,6 +583,15 @@
       font-size: 0;
       padding: 0 0.3rem;
 
+      .error-icon {
+        width: 1rem;
+        height: 1rem;
+        background-size: 0.6rem;
+        background-repeat: no-repeat;
+        background-position: center;
+        @include bg-image('gth');
+      }
+
       &:last-child {
         padding-bottom: 0.3rem;
       }
@@ -491,13 +611,13 @@
         }
       }
 
-      p, span {
+      .p-content, span {
         display: inline-block;
         background-size: 100% 100%;
         background-repeat: no-repeat;
       }
 
-      p {
+      .p-content {
         position: relative;
         vertical-align: top;
         word-wrap: break-word;
@@ -514,6 +634,20 @@
       .receive {
         width: 6.9rem;
 
+        .loading-wrapper {
+          position: absolute;
+          top: 50%;
+          right: -0.1rem;
+          transform: translate(100%, -50%);
+        }
+
+        .error-icon {
+          position: absolute;
+          top: 50%;
+          right: 0;
+          transform: translate(100%, -50%);
+        }
+
         .avatar {
           width: 0.76rem;
           height: 0.76rem;
@@ -526,7 +660,7 @@
           }
         }
 
-        p {
+        .p-content {
           max-width: 4.8rem;
           box-sizing: content-box;
           margin-left: 0.4rem;
@@ -554,7 +688,21 @@
       .post {
         width: 6.9rem;
 
-        p, span {
+        .loading-wrapper {
+          position: absolute;
+          top: 50%;
+          left: -0.1rem;
+          transform: translate(-100%, -50%);
+        }
+
+        .error-icon {
+          position: absolute;
+          top: 50%;
+          left: 0;
+          transform: translate(-100%, -50%);
+        }
+
+        .p-content, span {
           float: right;
           font-size:$font-size-medium-xx;
         }
@@ -571,7 +719,7 @@
           }
         }
 
-        p {
+        .p-content {
           max-width: 4.8rem;
           box-sizing: content-box;
           margin-right: 0.4rem;

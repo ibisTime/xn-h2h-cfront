@@ -236,7 +236,14 @@ export const editOrderListByReceived = function({commit, state}, {code}) {
 export const saveChatHistory = function ({commit, state}, {msg, toUser, fromUser}) {
   if (state.curChatUserId === toUser) {
     let _list = state.curChatList.slice();
-    _list.push(msg);
+    let index = _list.findIndex((item) => {
+      return item.uniqueId === msg.uniqueId;
+    });
+    if (~index) {
+      _list.splice(index, 1, msg);
+    } else {
+      _list.push(msg);
+    }
     commit(types.SET_CHAT_LIST, _list);
   }
   commit(types.SET_CHAT_DATA, saveChatData(msg, toUser, fromUser, state.curChatUserId === toUser));

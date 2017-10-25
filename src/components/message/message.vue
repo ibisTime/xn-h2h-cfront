@@ -1,17 +1,9 @@
 <template>
   <div class="message-wrapper">
-  <!--   <div class="message-title">
-      <ul class="clearfix">
-        <li class="tab_items"
-          v-for="(tab, index) in tabs"
-          :class="{active:index===selected}"
-          @click="choose(index)">{{tab.tabName}}({{totalCount}})</li>
-      </ul>        
-    </div>  -->
     <div class="content-wrapper">
-    <message-list></message-list>
-    </div>       
-    <m-footer></m-footer>
+      <message-list></message-list>
+    </div>
+    <m-footer @goPublish="goPublish"></m-footer>
   </div>
 </template>
 <script>
@@ -19,18 +11,9 @@
   import MessageList from 'components/message-list/message-list';
 
   export default {
-    data () {
-      return {
-        tabs: [
-            {tabName: '我的关注'},
-            {tabName: '我的粉丝'}
-        ],
-        selected: 0
-      };
-    },
     methods: {
-      choose (index) {
-        this.selected = index;
+      goPublish() {
+        this.$router.push('/home/publish');
       }
     },
     components: {
@@ -42,7 +25,7 @@
 <style lang="scss" scoped>
   @import "~common/scss/variable";
   @import "~common/scss/mixin";
-  
+
   .message-wrapper{
     position: fixed;
     top: 0;
@@ -60,25 +43,25 @@
       @include border-bottom-1px(#F2F2F2);
       font-size: $font-size-medium-xx;
 
-      ul{ 
-        display: flex;  
+      ul{
+        display: flex;
 
         li{
           flex: 1;
           height: 0.9rem;
-          text-align: center; 
+          text-align: center;
           display: block;
-          
+
           &.active{
             border-bottom: 0.05rem solid #48b0fb;
             box-sizing:border-box;
             color: #48b0fb;
-          
+
           }
-        }        
+        }
       }
     }
-    
+
   }
 
 </style>
