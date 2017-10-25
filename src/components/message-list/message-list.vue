@@ -7,7 +7,7 @@
           <p>{{item.fromAccountNick}}</p>
           <span v-html="item.text"></span>
         </div>
-        <div class="time">下午4:40</div>
+        <div class="time">{{chatTime(item.time)}}</div>
       </div>
     </scroll>
     <div v-show="!list.length && !hasMore" class="no-result">
@@ -21,7 +21,7 @@
   import Scroll from 'base/scroll/scroll';
   import {mapMutations, mapGetters} from 'vuex';
   import {SET_CHAT_LIST, SET_CHAT_USERID} from 'store/mutation-types';
-  import {getUserId} from 'common/js/util';
+  import {getUserId, formatChatDate} from 'common/js/util';
 
   export default {
     data () {
@@ -44,7 +44,8 @@
               userId,
               text: this.getContent(msg),
               icon: msg.icon,
-              fromAccountNick: msg.fromAccountNick
+              fromAccountNick: msg.fromAccountNick,
+              time: msg.time
             };
           });
         }
@@ -70,6 +71,9 @@
       },
       goChat(id) {
         this.$router.push(this.$route.path + '/' + id);
+      },
+      chatTime(item) {
+        return formatChatDate(item);
       },
       ...mapMutations({
         setCurChatList: SET_CHAT_LIST,

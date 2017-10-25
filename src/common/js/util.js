@@ -464,3 +464,36 @@ export function calcSpace (beforeTime) {
   let diffMinute = nowMinute - beforeMinute;
   return diffMinute <= 5 ? '刚刚来过' : diffMinute + '分钟前来过';
 }
+
+// 聊天日期格式化
+export function formatChatDate(timeStamp, param) {
+  // let item = new Date(parseInt(1514775600, 10) * 1000);
+  let beforeTime = new Date(timeStamp);
+  let before = formatDate(beforeTime, 'yyyy-MM-dd-hh-mm').split('-');
+  let now = formatDate(null, 'yyyy-MM-dd-hh-mm').split('-');
+  let nowYear = +now[0];
+  let beforeYear = +before[0];
+  let nowMonth = +now[1];
+  let beforeMonth = +before[1];
+  let nowDay = +now[2];
+  let beforeDay = +before[2];
+  let week = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  let diffY = nowYear - beforeYear;
+  let diffM = diffY * 12 + nowMonth - beforeMonth;
+  let diffD = diffM * 30 + nowDay - beforeDay;
+  if (diffD > 7 || diffD < 0) {
+    return param ? formatDate(beforeTime, 'yyyy/MM/dd hh:mm') : formatDate(beforeTime, 'yyyy/MM/dd');
+  }
+  if (diffD <= 7 && diffD > 1) {
+    return param ? week[beforeTime.getDay()] + formatDate(beforeTime, 'hh:mm') : week[beforeTime.getDay()];
+  }
+  if(diffD === 1) {
+    return param ? '昨天' + formatDate(beforeTime, 'hh:mm') : '昨天';
+  }
+  if(diffD === 0) {
+    return formatDate(beforeTime, 'hh:mm');
+  }
+  // if() {
+
+  // }
+}
