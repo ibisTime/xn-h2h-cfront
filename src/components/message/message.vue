@@ -12,8 +12,8 @@
 
   export default {
     methods: {
-      goPublish() {
-        this.$router.push('/home/publish');
+      goPublish () {
+        this.$router.push('/message/publish');
       }
     },
     components: {
@@ -26,7 +26,7 @@
   @import "~common/scss/variable";
   @import "~common/scss/mixin";
 
-  .message-wrapper{
+  .message-wrapper {
     position: fixed;
     top: 0;
     left: 0;
@@ -34,7 +34,7 @@
     bottom: 1rem;
     color: #484848;
 
-    .message-title{
+    .message-title {
       width: 100%;
       height: 0.9rem;
       line-height: 0.9rem;
@@ -43,25 +43,23 @@
       @include border-bottom-1px(#F2F2F2);
       font-size: $font-size-medium-xx;
 
-      ul{
+      ul {
         display: flex;
 
-        li{
+        li {
           flex: 1;
           height: 0.9rem;
           text-align: center;
           display: block;
 
-          &.active{
+          &.active {
             border-bottom: 0.05rem solid #48b0fb;
-            box-sizing:border-box;
+            box-sizing: border-box;
             color: #48b0fb;
 
           }
         }
       }
     }
-
   }
-
 </style>

@@ -7,7 +7,8 @@ import {SET_TENCENT_LOGINED} from 'store/mutation-types';
 export const messageMixin = {
   computed: {
     ...mapGetters([
-      'curChatUserId'
+      'curChatUserId',
+      'userMap'
     ])
   },
   methods: {
@@ -37,7 +38,13 @@ export const messageMixin = {
         if (newMsg.getSession().id() === this.curChatUserId) {
           selSess = newMsg.getSession();
         }
-        this.saveChatHistory(addMsg(newMsg, newMsg.getSession().id()));
+        let photo = '';
+        let user = this.userMap[newMsg.fromAccount];
+        if (user) {
+          newMsg.fromAccountNick = user.nickname;
+          photo = user.photo;
+        }
+        this.saveChatHistory(addMsg(newMsg, newMsg.getSession().id(), photo));
       }
       webim.setAutoRead(selSess, true, true);
     },

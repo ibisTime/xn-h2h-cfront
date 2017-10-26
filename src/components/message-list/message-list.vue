@@ -24,7 +24,7 @@
   import Badge from 'base/badge/badge';
   import {mapMutations, mapGetters} from 'vuex';
   import {SET_CHAT_LIST, SET_CHAT_USERID} from 'store/mutation-types';
-  import {getUserId, formatChatDate} from 'common/js/util';
+  import {getUserId, formatChatDate, setTitle} from 'common/js/util';
 
   export default {
     data () {
@@ -36,6 +36,10 @@
     },
     created() {
       this.hasMore = false;
+      this.setTitle();
+    },
+    updated() {
+      this.setTitle();
     },
     computed: {
       list() {
@@ -45,11 +49,19 @@
           return chatData.users.map((userId) => {
             let list = chatData[userId].list;
             let msg = list[list.length - 1];
+            let nickname = '';
+            if (mine !== msg.fromAccount) {
+              nickname = msg.fromAccountNick;
+            } else if (this.userMap[userId]) {
+              nickname = this.userMap[userId].nickname;
+            } else {
+              nickname = userId;
+            }
             return {
               userId,
               text: this.getContent(msg),
-              icon: mine !== msg.fromAccount ? msg.icon : msg.photo,
-              fromAccountNick: msg.fromAccountNick,
+              icon: msg.photo,
+              fromAccountNick: nickname,
               unRead: chatData[userId].unRead === 0 ? '' : chatData[userId].unRead + '',
               time: msg.time
             };
@@ -58,10 +70,16 @@
         return [];
       },
       ...mapGetters([
-        'chatData'
+        'chatData',
+        'userMap'
       ])
     },
     methods: {
+      setTitle() {
+        if (this.$route.path === '/message') {
+          setTitle('消息');
+        }
+      },
       getContent(item) {
         let html = '';
         item.elems.forEach((msg) => {

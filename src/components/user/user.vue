@@ -3,7 +3,7 @@
     <div class="top-wrapper">
       <div class="personal">
         <div @click="goCenter" class="head-bg">
-          <img :src="user && user.photo"/>
+          <img :src="user && user.photo | formatAvatar"/>
         </div>
         <div class="person-info">
           <div class="name">{{userName}}</div>

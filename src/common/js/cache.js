@@ -5,6 +5,8 @@ const SEARCH_MAX_LEN = 50;
 
 const MESSAGE_KEY = '__message__';
 
+const USER_KEY = '__usermap__';
+
 function insertArray(arr, val, compare, maxLen) {
   const index = arr.findIndex(compare);
   if (index === 0) {
@@ -92,12 +94,14 @@ export function updateChatData (sender, receiver) {
         return {
           ...item,
           icon: sender.photo,
+          photo: receiver.photo,
           fromAccountNick: sender.nickname
         };
       } else {
         return {
           ...item,
           icon: receiver.photo,
+          photo: receiver.photo,
           fromAccountNick: receiver.nickname
         };
       }
@@ -111,6 +115,20 @@ export function updateChatData (sender, receiver) {
   return chatData;
 }
 
-export function loadChatData() {
+export function loadChatData () {
   return storage.get(MESSAGE_KEY, {});
+}
+
+export function saveUserMap(user) {
+  let userMap = storage.get(USER_KEY, {});
+  userMap[user.userId] = {
+    nickname: user.nickname,
+    photo: user.photo
+  };
+  storage.set(USER_KEY, userMap);
+  return userMap;
+}
+
+export function loadUserMap () {
+  return storage.get(USER_KEY, {});
 }

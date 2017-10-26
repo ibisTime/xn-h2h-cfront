@@ -9,7 +9,6 @@
           <p>{{jfText}}</p>
         </div>
       </div>
-      <div class="signTip">连续签到29天可获得额外奖励</div>
     </div>
     <div class="date-wrapper">
       <calendar :dates="signDateList"></calendar>
@@ -76,7 +75,7 @@
       },
       getSignDate () {
         signNum(this.start, LIMIT).then((data) => {
-          data.list.forEach((item, index) => {
+          data.list.forEach((item) => {
             this.signDateList.push(formatDate(item.signDatetime, 'yyyy-MM-dd'));
           });
         });
@@ -160,14 +159,6 @@
           font-size: $font-size-small-ss;
         }
   		}
-  	}
-
-  	.signTip {
-      position: absolute;
-      top: 3.6rem;
-      bottom: 0.32rem;
-      text-align: center;
-      width: 100%;
   	}
 	}
 

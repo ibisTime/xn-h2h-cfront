@@ -20,7 +20,7 @@
                 <i>
                   <template v-for="item in getContent(info)">
                     <template v-if="item.type==='TIMTextElem'">{{item.content}}</template>
-                    <img @load="handleLoad" v-else :src="item.content"/>
+                    <img v-else @click="showImage(item.type, item.content)" @load="handleLoad" :src="item.content"/>
                   </template>
                 </i>
               </div>
@@ -32,7 +32,7 @@
                 <i>
                   <template v-for="item in getContent(info)">
                     <template v-if="item.type==='TIMTextElem'">{{item.content}}</template>
-                    <img @load="handleLoad" v-else :src="item.content"/>
+                    <img v-else @click="showImage(item.type, item.content)" @load="handleLoad" :src="item.content"/>
                   </template>
                 </i>
                 <div @click="reSendMsg(info, index)" v-show="showErr(info)" class="error-icon"></div>
@@ -48,7 +48,9 @@
           <span @click.stop="show"></span>
           <emoji ref="emoji" @select="selectItem"></emoji>
           <i @click="show"></i>
-          <input class="file" type="file" :multiple="multiple" ref="fileInput" @change="uploadPic" accept="image/*"/>
+          <div class="file" v-if="token">
+            <qiniu :multiple="multiple" @beforeUpload="handleUpload" @error="handleError" :token="token" ref="qiniu"></qiniu>
+          </div>
         </div>
       </div>
       <toast :text="text" ref="toast"></toast>
@@ -64,29 +66,38 @@
   import Loading from 'base/loading/loading';
   import Emoji from 'base/emoji/emoji';
   import Toast from 'base/toast/toast';
+  import Qiniu from 'base/qiniu/qiniu';
   import {addMsg} from 'common/js/message';
-  import {getUserId, isUnDefined, formatChatDate} from 'common/js/util';
+  import {getUserId, isUnDefined, formatChatDate, formatImg, setTitle} from 'common/js/util';
   import User from 'common/bean/user';
   import {getUser, getUserById} from 'api/user';
+  import {getQiniuToken} from 'api/general';
+  import {initShowImage} from 'common/js/weixin';
 
   const selType = webim.SESSION_TYPE.C2C;
   const subType = webim.C2C_MSG_SUB_TYPE.COMMON;
-  const LIMIT = 10;
+  const LIMIT = 20;
   const ERR = -1;
   const SENDING = 0;
   const SUCCESS = 1;
+  const IMG_SUFFIX1 = '?imageMogr2/auto-orient/thumbnail/!30p';
+  const IMG_SUFFIX2 = '?imageMogr2/auto-orient/thumbnail/!70p';
+  const IMG_SUFFIX3 = '?imageMogr2/auto-orient/thumbnail/!100p';
 
   export default {
     data () {
       return {
         emoji: '',
+        start: -1,
         hasMore: true,
         text: '',
         receiver: null,
-        showEmoji: false
+        showEmoji: false,
+        token: ''
       };
     },
     created() {
+      this.selToID = this.$route.params.id;
       this.firstUpdate = true;
       this.firstFetching = true;
       this.userId = getUserId();
@@ -94,33 +105,45 @@
       this.listenScroll = true;
       this.probeType = 3;
       this.multiple = false;
-      this.selToID = this.$route.params.id;
       this.selSess = null;
-      this.LastMsgTime = 0;
-      this.MsgKey = '';
-      this.msgMap = {};
+      this.msgMap = {}; // 保存发送的msg，用于重发
+      this.picMap = {}; // 保存正常往7牛上传的msg的对象，用于正式往腾讯云发消息是创建的msg的模版
+      this.getStart();
       this.setCurChatList([]);
       this.setCurChatUserId(this.selToID);
       this.getInitData();
+      initShowImage();
+    },
+    mounted() {
+      let title = '聊天';
+      if (this.userMap[this.selToID]) {
+        title = this.userMap[this.selToID].nickname;
+      }
+      setTitle(title);
     },
     computed: {
       loadingFlag() {
-        if (this.user && this.receiver && this.tencentLogined) {
+        if (this.user && this.receiver && this.tencentLogined && this.token) {
           return !((!this.curChatList.length && !this.hasMore) || this.curChatList.length);
         }
         return true;
       },
       ...mapGetters([
         'user',
+        'chatData',
         'curChatList',
         'curChatUserId',
-        'tencentLogined'
+        'tencentLogined',
+        'userMap'
       ])
     },
     methods: {
       getInitData() {
         this.getUser();
         this.getReceiveUser();
+        getQiniuToken().then((data) => {
+          this.token = data.uploadToken;
+        }).catch(() => {});
       },
       getUser() {
         if (!this.user) {
@@ -132,12 +155,23 @@
       getReceiveUser() {
         getUserById(this.selToID).then((data) => {
           this.receiver = new User(data);
+          setTitle(this.receiver.nickname);
         }).catch(() => {});
+      },
+      getStart() {
+        let obj = this.chatData[this.userId];
+        if (obj && obj[this.selToID]) {
+          this.start = obj[this.selToID].list.length;
+        } else {
+          this.start = -1;
+        }
       },
       scroll(pos) {
         if (pos.y > -20 && !this.fetching && !this.firstFetching && this.hasMore) {
           this.fetching = true;
-          this.getHistoryMessage();
+          setTimeout(() => {
+            this.getHistoryMessage();
+          }, 200);
         }
       },
       show() {
@@ -180,36 +214,32 @@
           } else if (msg.type === 'TIMFaceElem') {
             _item.content = webim.Emotions[msg.content.index][1];
           } else if (msg.type === 'TIMImageElem') {
-            _item.content = msg.content.ImageInfoArray[2].url;
+            _item.content = msg.content.ImageInfoArray[0].url;
           }
           arr.push(_item);
         });
         return arr;
       },
       getHistoryMessage() {
-        let self = this;
-        this.getLastC2CHistoryMsgs((info, complete) => {
-          self.hasMore = !complete;
-          if (info.length) {
-            let list = self.curChatList.slice();
-            let _list = self.getNewList(info);
-            _list = _list.concat(list);
-            self.setCurChatList(_list);
-            self.updateChatData();
-            if (self.firstFetching) {
-              self.scrollToElement();
-            } else {
-              self.scrollToTop();
-            }
+        let obj = this.chatData[this.userId];
+        if (this.start >= 0 && obj && obj[this.selToID]) {
+          let min = Math.max(0, this.start - LIMIT);
+          let max = this.start;
+          let list = obj[this.selToID].list.slice(min, max);
+          let newList = this.getNewList(list);
+          let oriList = this.curChatList.slice();
+          this.setCurChatList(newList.concat(oriList));
+          this.hasMore = min !== 0;
+          this.start -= LIMIT;
+          if (this.firstFetching) {
+            this.updateChatData();
+            this.scrollToElement();
           } else {
-            self.firstFetching = false;
-            self.fetching = false;
+            this.scrollToTop();
           }
-        }, () => {
-          setTimeout(() => {
-            self.showToast('历史消息获取失败');
-          }, 20);
-        });
+        } else {
+          this.hasMore = false;
+        }
       },
       scrollToElement() {
         setTimeout(() => {
@@ -310,42 +340,22 @@
         if (!this.msgMap[msg.uniqueId]) {
           this.msgMap[msg.uniqueId] = msg;
         }
-        webim.sendMsg(msg, () => {
-          if (selType === webim.SESSION_TYPE.C2C) {
-            let newMsg = {
-              toUser: result.toUser,
-              fromUser: result.fromUser,
-              msg: {
-                ...result.msg,
-                status: SUCCESS
-              }
-            };
-            suc && suc(newMsg);
-          }
-        }, () => {
-          let newMsg = {
-            toUser: result.toUser,
-            fromUser: result.fromUser,
-            msg: {
-              ...result.msg,
-              status: ERR
-            }
-          };
-          this.updateCurStatus(newMsg.msg);
-          this.showToast('消息发送失败，请重新发送');
-        });
+        this.sendCommonMsg(msg, result);
       },
       updateCurStatus(msg, idx) {
         let list = this.curChatList.slice();
-        let index = list.findIndex((item) => {
-          return item.uniqueId === msg.uniqueId;
-        });
+        let index = this.findIndex(msg);
         list.splice(index, 1, msg);
         this.setCurChatList(list);
         setTimeout(() => {
           let _idx = isUnDefined(idx) ? this.curChatList.length - 1 : idx;
           this.$refs.scroll.scrollToElement(this.$refs.mesRef[_idx], 100);
         }, 40);
+      },
+      findIndex(msg) {
+        return this.curChatList.findIndex((item) => {
+          return item.uniqueId === msg.uniqueId;
+        });
       },
       addMsg2CurList(msg) {
         let list = this.curChatList.slice();
@@ -355,59 +365,8 @@
           this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
         }, 40);
       },
-      uploadPic(e) {
-        let files;
-        if (e.dataTransfer) {
-          files = e.dataTransfer.files;
-        } else if (e.target) {
-          files = e.target.files;
-        }
-        files = Array.prototype.slice.call(files, 0, 1);
-        let self = this;
-        webim.uploadPic({
-          'file': files[0],
-          'onProgressCallBack': self.onProgressCallBack,
-          'To_Account': self.selToID,
-          'businessType': webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
-        }, function(resp) {
-          self.sendPic(resp);
-        }, function() {
-          self.showToast('图片发送失败，请重新发送');
-        });
-      },
-      sendPic(images) {
-        if (!this.selSess) {
-          this.selSess = new webim.Session(selType, this.selToID, this.selToID, '', Math.round(new Date().getTime() / 1000));
-        }
-        var msg = new webim.Msg(this.selSess, true, -1, -1, -1, this.userId, 0, this.user.nickname);
-        var imagesObj = new webim.Msg.Elem.Images(images.File_UUID);
-        for (var i in images.URL_INFO) {
-          var img = images.URL_INFO[i];
-          var newImg;
-          var type;
-          switch (img.PIC_TYPE) {
-            case 1: // 原图
-              type = 1; // 原图
-              break;
-            case 2: // 小图（缩略图）
-              type = 3; // 小图
-              break;
-            case 4: // 大图
-              type = 2; // 大图
-              break;
-          }
-          newImg = new webim.Msg.Elem.Images.Image(type, img.PIC_Size, img.PIC_Width, img.PIC_Height, img.DownUrl);
-          imagesObj.addImage(newImg);
-        }
-        msg.addImage(imagesObj);
-        let result = addMsg(msg, this.selToID, this.receiver.photo);
-        result.msg.status = SENDING;
-        this.addMsg2CurList(result.msg);
-        if (!this.msgMap[msg.uniqueId]) {
-          this.msgMap[msg.uniqueId] = msg;
-        }
+      sendCommonMsg(msg, result, index) {
         webim.sendMsg(msg, () => {
-          this.$refs.fileInput.value = null;
           if (selType === webim.SESSION_TYPE.C2C) {
             let newMsg = {
               toUser: result.toUser,
@@ -419,7 +378,8 @@
             };
             this.saveChatHistory(newMsg);
             setTimeout(() => {
-              this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
+              index = isUnDefined(index) ? this.curChatList.length - 1 : index;
+              this.$refs.scroll.scrollToElement(this.$refs.mesRef[index], 100);
             }, 40);
           }
         }, () => {
@@ -436,30 +396,6 @@
         });
       },
       onProgressCallBack() {},
-      getLastC2CHistoryMsgs(cbOk, cbError) {
-        webim.MsgStore.delSessByTypeId(selType, this.selToID);
-        webim.getC2CHistoryMsgs({
-          'Peer_Account': this.selToID,
-          'MaxCnt': LIMIT,
-          'LastMsgTime': this.LastMsgTime, // 最近的消息时间，即从这个时间点向前拉取历史消息
-          'MsgKey': this.MsgKey
-        }, (resp) => {
-          // 是否还有历史消息可以拉取，1-表示没有，0-表示有
-          var complete = resp.Complete;
-          if (resp.MsgList.length === 0) {
-            cbOk([], true);
-          }
-          // 保留服务器返回的最近消息时间和消息Key, 用于下次向前拉取历史消息
-          this.LastMsgTime = resp.LastMsgTime;
-          this.MsgKey = resp.MsgKey;
-          if (cbOk) {
-            var _list = resp.MsgList.map((item) => {
-              return addMsg(item, this.selToID).msg;
-            });
-            cbOk(_list, !!complete);
-          }
-        }, cbError);
-      },
       showToast(msg) {
         this.text = msg;
         this.$refs.toast.show();
@@ -490,33 +426,77 @@
         let result = addMsg(msg, this.selToID, this.receiver.photo);
         result.msg.status = SENDING;
         this.updateCurStatus(result.msg, index);
-        webim.sendMsg(msg, () => {
-          if (selType === webim.SESSION_TYPE.C2C) {
-            let newMsg = {
-              toUser: result.toUser,
-              fromUser: result.fromUser,
-              msg: {
-                ...result.msg,
-                status: SUCCESS
-              }
-            };
-            this.saveChatHistory(newMsg);
-            setTimeout(() => {
-              this.$refs.scroll.scrollToElement(this.$refs.mesRef[index], 100);
-            }, 40);
+        this.sendCommonMsg(msg, result, index);
+      },
+      handleUpload(file) {
+        this.hide();
+        if (!this.selSess) {
+          this.selSess = new webim.Session(selType, this.selToID, this.selToID, this.user.photo, Math.round(new Date().getTime() / 1000));
+        }
+        let msg = new webim.Msg(this.selSess, true, -1, -1, -1, this.userId, 0, this.user.nickname);
+        let UUID = file.preview.split('/').pop();
+        var imagesObj = new webim.Msg.Elem.Images(UUID);
+        let newImg = new webim.Msg.Elem.Images.Image(1, file.size, 100, 100, file.preview);
+        imagesObj.addImage(newImg);
+        imagesObj.addImage(newImg);
+        imagesObj.addImage(newImg);
+        msg.addImage(imagesObj);
+        let result = addMsg(msg, this.selToID, this.receiver.photo);
+        result.msg.status = SENDING;
+        this.addMsg2CurList(result.msg);
+        if (!this.picMap[msg.uniqueId]) {
+          this.picMap[msg.uniqueId] = msg;
+        }
+        file.uniqueId = msg.uniqueId;
+        file.onprogress = (e) => {
+          console.log(this.findIndex(file));
+          if (e.srcElement.status === 200) {
+            this.sendPicByMsg(msg, file);
           }
-        }, () => {
-          let newMsg = {
-            toUser: result.toUser,
-            fromUser: result.fromUser,
-            msg: {
-              ...result.msg,
-              status: ERR
+        };
+      },
+      handleError(error, file) {
+        let list = this.curChatList.slice();
+        let index = this.findIndex(file);
+        list.splice(index, 1);
+        this.setCurChatList(list);
+        setTimeout(() => {
+          this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
+        }, 40);
+        this.showToast(error.body && error.body.error || '图片上传出错');
+      },
+      sendPicByMsg(_msg, file) {
+        let msg = new webim.Msg(this.selSess, true, _msg.seq, _msg.random, _msg.time, this.userId, 0, this.user.nickname);
+        let UUID = file.preview.split('/').pop();
+        var imagesObj = new webim.Msg.Elem.Images(UUID);
+        let newImg1 = new webim.Msg.Elem.Images.Image(1, file.size, 100, 100, formatImg(file.key, IMG_SUFFIX1));
+        let newImg2 = new webim.Msg.Elem.Images.Image(2, file.size, 100, 100, formatImg(file.key, IMG_SUFFIX2));
+        let newImg3 = new webim.Msg.Elem.Images.Image(3, file.size, 100, 100, formatImg(file.key, IMG_SUFFIX3));
+        imagesObj.addImage(newImg1);
+        imagesObj.addImage(newImg2);
+        imagesObj.addImage(newImg3);
+        msg.addImage(imagesObj);
+        let result = addMsg(msg, this.selToID, this.receiver.photo);
+        result.msg.status = SENDING;
+        this.updateCurStatus(result.msg);
+        if (!this.msgMap[msg.uniqueId]) {
+          this.msgMap[msg.uniqueId] = msg;
+        }
+        this.sendCommonMsg(msg, result);
+      },
+      showImage(type, pic) {
+        if (type === 'TIMImageElem') {
+          let pics = [];
+          this.curChatList.forEach((item) => {
+            if (item.elems[0].type === 'TIMImageElem') {
+              pics.push(item.elems[0].content.ImageInfoArray[2].url);
             }
-          };
-          this.updateCurStatus(newMsg.msg);
-          this.showToast('消息发送失败，请重新发送');
-        });
+          });
+          wx.previewImage({
+            current: pic,
+            urls: pics
+          });
+        }
       },
       ...mapMutations({
         setCurChatUserId: SET_CHAT_USERID,
@@ -553,6 +533,7 @@
       Scroll,
       Emoji,
       Toast,
+      Qiniu,
       Loading,
       FullLoading
     }
@@ -586,7 +567,7 @@
       .error-icon {
         width: 1rem;
         height: 1rem;
-        background-size: 0.6rem;
+        background-size: 0.48rem;
         background-repeat: no-repeat;
         background-position: center;
         @include bg-image('gth');
@@ -633,20 +614,6 @@
       }
       .receive {
         width: 6.9rem;
-
-        .loading-wrapper {
-          position: absolute;
-          top: 50%;
-          right: -0.1rem;
-          transform: translate(100%, -50%);
-        }
-
-        .error-icon {
-          position: absolute;
-          top: 50%;
-          right: 0;
-          transform: translate(100%, -50%);
-        }
 
         .avatar {
           width: 0.76rem;
@@ -815,10 +782,10 @@
 
         .file {
           position: absolute;
-          top: 0.2rem;
-          right: 0.4rem;
-          width: 0.5rem;
-          height: 0.5rem;
+          top: 0.15rem;
+          right: 0;
+          width: 1rem;
+          height: 0.7rem;
           opacity: 0;
           z-index: 100;
         }

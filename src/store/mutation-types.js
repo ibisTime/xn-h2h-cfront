@@ -56,3 +56,5 @@ export const SET_CHAT_LIST = 'SET_CHAT_LIST';
 export const SET_CHAT_USERID = 'SET_CHAT_USERID';
 // 设置腾讯云通信是否已经登录
 export const SET_TENCENT_LOGINED = 'SET_TENCENT_LOGINED';
+// 设置聊过天的所有用户的头像、昵称
+export const SET_USER_MAP = 'SET_USER_MAP';

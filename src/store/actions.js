@@ -1,5 +1,5 @@
 import * as types from './mutation-types';
-import {saveSearch, clearSearch, deleteSearch, saveChatData, updateChatData} from 'common/js/cache';
+import {saveSearch, clearSearch, deleteSearch, saveChatData, updateChatData, saveUserMap} from 'common/js/cache';
 
 function _getOrderList(state, code, prevStatus, nextStatus) {
   let allList = null;
@@ -252,4 +252,5 @@ export const saveChatHistory = function ({commit, state}, {msg, toUser, fromUser
 // 更新localStorage的头像、昵称
 export const updateMessages = function ({commit}, {sender, receiver}) {
   commit(types.SET_CHAT_DATA, updateChatData(sender, receiver));
+  commit(types.SET_USER_MAP, saveUserMap(receiver));
 };

@@ -71,11 +71,16 @@
     },
     methods: {
       getInitData() {
-        if (this.bigCode) {
+        if (this.outBigCode) {
           Promise.all([
             getCategories(0),
-            this.getSmallCategories(this.bigCode)
+            this.getSmallCategories(this.outBigCode)
           ]).then(([left]) => {
+            left.forEach(item => {
+              if (item.code === this.outBigCode) {
+                this.$emit('firstUpdateBigName', item.name);
+              }
+            });
             this.bigList = left;
             this.bigList.unshift({
               code: '',
@@ -157,9 +162,13 @@
         setTimeout(() => {
           this.$refs.leftScroll.scrollToElement(this.$refs.leftMenu[bigIndex], 200, false, true);
         }, 20);
-        if (this.bigCode && !this.smallData[this.bigCode]) {
-          this.getSmallCategories(this.bigCode);
-        } else if (!this.bigCode) {
+        if (this.bigCode) {
+          if (!this.smallData[this.bigCode]) {
+            this.getSmallCategories(this.bigCode);
+          } else {
+            this.smallList = this.smallData[this.bigCode];
+          }
+        } else {
           this.smallList = [];
           this.rLoadingFlag = false;
         }

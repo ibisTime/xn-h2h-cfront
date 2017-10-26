@@ -15,7 +15,7 @@ let globalConfig = {};
  *   imgUrl 分享图标
  * }
  */
-export function initShare(config, suc, err) {
+export function initShare(config, suc, err, isInitImage) {
   getInitWXSDKConfig().then((data) => {
     suc && suc(data);
     if (!/(\?|&)userReferee/.test(config.link)) {
@@ -32,7 +32,7 @@ export function initShare(config, suc, err) {
     } else {
       config.link.replace(/((?:\?|&)userReferee=)[^&$]+/, '$1' + getUserId());
     }
-    _initShare(data, config);
+    _initShare(data, config, isInitImage);
   }).catch(() => {
     err && err();
   });
@@ -65,6 +65,23 @@ export function initPay(wxConfig, success, error, cancel) {
 }
 
 /**
+ * 初始化预览图片
+ */
+export function initShowImage () {
+  getInitWXSDKConfig().then((data) => {
+    wx.config({
+      appId: data.appId,
+      timestamp: data.timestamp,
+      nonceStr: data.nonceStr,
+      signature: data.signature,
+      jsApiList: ['previewImage']
+    });
+    wx.ready(() => {});
+    wx.error(() => {});
+  });
+}
+
+/**
  * 初始化微信分享
  * @param data: {appId, timestamp, nonceStr, signature}
  * @param config: {
@@ -74,18 +91,22 @@ export function initPay(wxConfig, success, error, cancel) {
  *   imgUrl  分享图标
  * }
  */
-function _initShare(data, config) {
+function _initShare(data, config, isInitImage) {
+  let jsApiList = [
+    'onMenuShareTimeline',
+    'onMenuShareAppMessage',
+    'onMenuShareQQ',
+    'onMenuShareQZone'
+  ];
+  if (isInitImage) {
+    jsApiList.push('previewImage');
+  }
   wx.config({
     appId: data.appId,
     timestamp: data.timestamp,
     nonceStr: data.nonceStr,
     signature: data.signature,
-    jsApiList: [
-      'onMenuShareTimeline',
-      'onMenuShareAppMessage',
-      'onMenuShareQQ',
-      'onMenuShareQZone'
-    ]
+    jsApiList: jsApiList
   });
   wx.ready(() => {
     // 分享给某人

@@ -75,36 +75,34 @@
 
         let maxSizeLimit = this._formatMaxSize(this.maxSize || 0);
         for (let i = 0; i < maxFiles; i++) {
-          if (maxSizeLimit && files[i].size > maxSizeLimit) {
+          let file = files[i];
+          if (maxSizeLimit && file.size > maxSizeLimit) {
             console.trace && console.trace(new Error('文件大小错误!'));
             this.$emit('error', {
               coed: 1,
               message: '上传的文件大小超出了限制:' + this.props.maxSize
             });
           } else {
-            files[i].preview = URL.createObjectURL(files[i]);
-            files[i].request = this.upload(files[i]);
-            files[i].uploadPromise = files[i].request.promise();
-            files[i].uploadPromise.catch((error) => {
-              this.$emit('error', error);
+            file.preview = URL.createObjectURL(file);
+            let key = file.preview.split('/').pop() + '.' + file.name.split('.').pop();
+            if (this.prefix) {
+              key = this.prefix + key;
+            }
+            file.key = key;
+            this.$emit('beforeUpload', file, e);
+            file.request = this.upload(file);
+            file.uploadPromise = file.request.promise();
+            file.uploadPromise.catch((error) => {
+              this.$emit('error', error, file);
             });
           }
         }
-        files = Array.prototype.slice.call(files, 0, maxFiles);
         this.$emit('drop', files, e);
       },
       upload(file) {
-        if (!file || file.size === 0) {
-          return null;
-        }
-        let key = file.preview.split('/').pop() + '.' + file.name.split('.').pop();
-        if (this.prefix) {
-          key = this.prefix + key;
-        }
-        file.key = key;
         let r = request
           .post(this.uploadUrl)
-          .field('key', key)
+          .field('key', file.key)
           .field('token', this.token)
           .field('x:filename', file.name)
           .field('x:size', file.size)

@@ -32,6 +32,7 @@
       <category-small ref="smallCategory"
                       @hide="handleSmallHide"
                       @confirm="handleConfirm"
+                      @firstUpdateBigName="firstUpdateBigName"
                       :outSmallCode="smallCode"
                       :outBigCode="bigCode"></category-small>
       <category-filter ref="filterCategory"
@@ -143,6 +144,9 @@
           this.isWxConfiging = false;
           this.wxData = null;
         });
+      },
+      firstUpdateBigName(name) {
+        this.smallName = name;
       },
       getPageGoods() {
         let param = {

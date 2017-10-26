@@ -1,4 +1,4 @@
-import {loadSearch, loadChatData} from 'common/js/cache';
+import {loadSearch, loadChatData, loadUserMap} from 'common/js/cache';
 
 const state = {
   publishCategory: null,
@@ -20,7 +20,8 @@ const state = {
   chatData: loadChatData(),
   curChatList: [],
   curChatUserId: '',
-  tencentLogined: false
+  tencentLogined: false,
+  userMap: loadUserMap()
 };
 
 export default state;

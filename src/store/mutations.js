@@ -108,6 +108,9 @@ const mutations = {
   },
   [types.SET_TENCENT_LOGINED](state, flag) {
     state.tencentLogined = flag;
+  },
+  [types.SET_USER_MAP](state, userMap) {
+    state.userMap = userMap;
   }
 };
 

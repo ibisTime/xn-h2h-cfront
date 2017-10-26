@@ -4,11 +4,11 @@
       <ul>
         <li v-for="item in users">
           <div class="avatar">
-            <img :src="formatImg(item.photo)"/>
+            <img :src="item.photo | formatAvatar"/>
           </div>
           <div class="info">
             <h2>{{item.nickname}}</h2>
-            <p>加入时间：{{formatDate(item.createDatetime)}}</p>
+            <p>加入时间：{{item.createDatetime | formatDate('yyyy-MM-dd hh:mm')}}</p>
           </div>
         </li>
       </ul>
@@ -21,12 +21,14 @@
 <script>
   import Scroll from 'base/scroll/scroll';
   import NoResult from 'base/no-result/no-result';
-  import {setTitle, formatDate, formatImg} from 'common/js/util';
+  import {setTitle} from 'common/js/util';
+  import {commonMixin} from 'common/js/mixin';
   import {getPageChildren} from 'api/user';
 
   const LIMIT = 20;
 
   export default {
+    mixins: [commonMixin],
     data() {
       return {
         start: 1,
@@ -50,15 +52,6 @@
             this.start++;
           });
         }
-      },
-      formatImg(img) {
-        if (!img) {
-          return require('./avatar.png');
-        }
-        return formatImg(img);
-      },
-      formatDate(date) {
-        return formatDate(date, 'yyyy-MM-dd hh:mm');
       }
     },
     components: {

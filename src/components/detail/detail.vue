@@ -30,11 +30,11 @@
               <div class="up-down" v-if="showAll" @click="showDesc">展开<i class="icon down"></i></div>
               <div class="pic-wrapper">
                 <div class="normal-pic">
-                  <img @load="imgLoad" v-for="item in noramlPic" :src="item | formatImg"/>
+                  <img @load="imgLoad" @click="showImage(item)" v-for="item in noramlPic" :src="item"/>
                 </div>
                 <div class="special-pic">
                   <div class="spec-item" v-for="item in specialPic">
-                    <div class="inner" :style="getSyl(item)"></div>
+                    <div class="inner" @click="showImage(item)" :style="getSyl(item)"></div>
                   </div>
                 </div>
               </div>
@@ -199,6 +199,7 @@
     },
     created() {
       this.code = this.$route.params.code;
+      this.pics = [];
       setTitle('商品详情');
       Promise.all([
         this.getDetail(),
@@ -221,7 +222,7 @@
               desc: data.description,
               link: location.href,
               imgUrl: getShareImg(data.pic)
-            });
+            }, null, null, true);
             setTitle(data.name);
             if (data.storeCode === getUserId()) {
               this.showSell = false;
@@ -240,6 +241,9 @@
             this.showAll = this.description.length >= 200;
             this.isShow = this.description.length < 200;
             let pics = this.detail.pic.split('||');
+            this.pics = pics.map((pic) => {
+              return formatImg(pic);
+            });
             let len = pics.length;
             let sIdx = 4;
             if (len <= 4) {
@@ -247,8 +251,8 @@
             } else if (len % 2) {
               sIdx = 3;
             }
-            this.noramlPic = pics.slice(0, sIdx);
-            this.specialPic = pics.slice(sIdx);
+            this.noramlPic = this.pics.slice(0, sIdx);
+            this.specialPic = this.pics.slice(sIdx);
           } else {
             this.none = true;
           }
@@ -305,7 +309,7 @@
         }).catch(() => {});
       },
       getSyl(pic) {
-        return {backgroundImage: `url(${formatImg(pic)})`};
+        return {backgroundImage: `url(${pic})`};
       },
       formatImg(pic) {
         return formatImg(pic);
@@ -341,6 +345,12 @@
       },
       goChat() {
         this.$router.push('/message/' + this.publisher.userId);
+      },
+      showImage(pic) {
+        wx.previewImage({
+          current: pic,
+          urls: this.pics
+        });
       },
       ...mapMutations({
         setUser: SET_USER_STATE,

@@ -228,7 +228,7 @@
           pic,
           description: this.description,
           isNew: this.isNew ? 1 : 0,
-          isPublish: 1,
+          isPublish: this.isPublish ? 1 : 0,
           name: this.name,
           originalPrice: this.oriPrice * 1000,
           price: this.sellPrice * 1000,

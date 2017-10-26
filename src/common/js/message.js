@@ -1,11 +1,11 @@
-import {getUserId, formatAvatar} from 'common/js/util';
+import {getUserId, formatAvatar, isUnDefined} from 'common/js/util';
 
-export function addMsg(msg, selToID, photo) {
+export function addMsg(msg, selToID, photo = '') {
   var sess = msg.sess;
   if (!webim.MsgStore.sessMap[sess._impl.id]) {
     webim.MsgStore.sessMap[sess._impl.id] = sess;
   }
-  let {fromAccount, fromAccountNick, time, uniqueId, random, isSend, elems} = msg;
+  let {fromAccount, fromAccountNick, time, uniqueId, random, seq, isSend, elems} = msg;
   let _elems = elems.map((item) => {
     let obj = {
       type: item.type
@@ -34,6 +34,7 @@ export function addMsg(msg, selToID, photo) {
   let _msg = {
     fromAccount,
     fromAccountNick,
+    seq,
     time,
     uniqueId,
     random,
@@ -41,14 +42,43 @@ export function addMsg(msg, selToID, photo) {
     icon: formatAvatar(msg.getSession().icon()),
     elems: _elems
   };
-  if (photo) {
-    _msg.photo = photo;
-  }
   var toUser = selToID;
   var fromUser = getUserId();
+  if (photo) {
+    _msg.photo = photo;
+  } else if (fromUser !== fromAccount) {
+    _msg.photo = _msg.icon;
+  }
   return {
     msg: _msg,
     toUser,
     fromUser
   };
+}
+
+const GENDER = {
+  '0': 'Gender_Type_Female',
+  '1': 'Gender_Type_Male'
 };
+
+export function setProfilePortrait ({gender, nickname, photo}) {
+  var profileItem = [{
+    'Tag': 'Tag_Profile_IM_Nick',
+    'Value': nickname
+  }, {
+    'Tag': 'Tag_Profile_IM_AllowType',
+    'Value': 'AllowType_Type_AllowAny'
+  }];
+  photo && profileItem.push({
+    'Tag': 'Tag_Profile_IM_Image',
+    'Value': photo
+  });
+  !isUnDefined(gender) && profileItem.push({
+    'Tag': 'Tag_Profile_IM_Gender',
+    'Value': GENDER[gender]
+  });
+  var options = {
+    'ProfileItem': profileItem
+  };
+  webim.setProfilePortrait(options);
+}
