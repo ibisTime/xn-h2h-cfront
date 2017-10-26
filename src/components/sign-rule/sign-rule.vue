@@ -28,7 +28,7 @@
     },
     methods: {
       showRule () {
-        getUserSystemConfig('cardsTradition').then((data) => {
+        getUserSystemConfig('signRegulation').then((data) => {
           this.loadingFlag = false;
           this.text = data.cvalue;
         }).catch(() => {

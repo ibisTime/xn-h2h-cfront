@@ -4,7 +4,7 @@
       <ul class="trades-items-wrapper" ref="tradeList">
         <li v-for="item in tradeList" @click="goDetail(item.code)" class="trade-wrapper" >
           <div class="trade-top">
-            <div class="head-pic" :style="getImgStyl(item.pic)"></div>
+            <div class="head-pic" :style="getImgStyl(item.photo)"></div>
             <div class="person-info">
               <div class="name">{{item.nickName}}</div>
               <div class="area">
@@ -14,7 +14,7 @@
             <div class="clothes">来自{{item.categoryName}}</div>
           </div>
           <div class="photos-wrapper">
-            <trade-scroll :data="tradeList"></trade-scroll>
+            <trade-scroll :data="item.pic.split('||')"></trade-scroll>
           </div>
           <div class="trade-bottom">
             <div class="description">{{item.description}}</div>

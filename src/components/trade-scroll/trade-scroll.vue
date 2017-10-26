@@ -2,8 +2,7 @@
   <div class="photo-scroll-wrapper" ref="scrollWrapper"> 
     <div class="scroll-wrapper" ref="photoGroup"> 
       <div class="item" v-for="item in data" ref="photoItem">
-        <div class="inner" :style="getBg(item.pic)">
-          <!-- <div v-if="index===0" class="title">图....</div> -->
+        <div class="inner" :style="getBg(item)">
         </div>
       </div>
     </div>
@@ -18,7 +17,7 @@
     props: {
       data: {
         type: Array,
-        default: () => []
+        default: []
       }
     },
     data() {
@@ -52,9 +51,9 @@
         });
       },
       getBg(photo) {
-        let url = formatImg(photo);
+        console.log(photo);
         return {
-          backgroundImage: `url(${url})`
+          backgroundImage: `url(${formatImg(photo)})`
         };
       }
     }
