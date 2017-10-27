@@ -485,15 +485,19 @@
         this.sendCommonMsg(msg, result);
       },
       showImage(type, pic) {
+        let nowPic = pic;
         if (type === 'TIMImageElem') {
           let pics = [];
           this.curChatList.forEach((item) => {
             if (item.elems[0].type === 'TIMImageElem') {
+              if (item.elems[0].content.ImageInfoArray[0].url === pic || item.elems[0].content.ImageInfoArray[1].url === pic) {
+                nowPic = item.elems[0].content.ImageInfoArray[2].url;
+              }
               pics.push(item.elems[0].content.ImageInfoArray[2].url);
             }
           });
           wx.previewImage({
-            current: pic,
+            current: nowPic,
             urls: pics
           });
         }
