@@ -92,3 +92,11 @@ export function getBankCardList() {
     status: 1
   });
 }
+
+// 获取签到积分
+export function getSignIntegral(accountNumber, bizType) {
+  return fetch(802900, {
+    accountNumber,
+    bizType
+  });
+}

@@ -24,7 +24,7 @@
   import FullLoading from 'base/full-loading/full-loading';
   import {getUserSystemConfig} from 'api/general';
   import {sign, signNum, signQuery} from 'api/user';
-  import {getAccount} from 'api/account';
+  import {getAccount, getSignIntegral} from 'api/account';
   import {formatAmount, formatDate} from 'common/js/util';
 
   const LIMIT = 30;
@@ -69,8 +69,10 @@
       },
       getJF () {
         getAccount().then((data) => {
-          this.jfOwn = Math.floor(formatAmount(data[1].amount));
-          this.jfText = '已获积分';
+          getSignIntegral(data[1].accountNumber, '02').then((data) => {
+            this.jfOwn = Math.floor(formatAmount(data.totalAmount));
+            this.jfText = '已获积分';
+          });
         });
       },
       getSignDate () {
