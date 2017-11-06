@@ -63,7 +63,7 @@ const _MONTH2DAYS = {
 export function getYears() {
   let current = now.getFullYear();
   let min = current - 100;
-  let max = current + 100;
+  let max = current;
   let years = [];
   for(let i = min; i <= max; i++) {
     years.push({

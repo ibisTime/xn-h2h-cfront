@@ -25,7 +25,7 @@
           <div class="info-item border-bottom-1px" @click="showPrice">价格
             <div class="label" :class="sellCls">{{sellText}}</div>
           </div>
-          <div class="info-item">同步到圈子<div class="label">
+          <div v-show="isPublish" class="info-item">同步到圈子<div class="label">
             <switch-option class="option" :value="isPublish" @update:value="updatePublish"></switch-option>
           </div></div>
         </div>
@@ -77,6 +77,7 @@
       this.code = this.$route.query.code || '';
       this.showBack = false;
       this.border = true;
+      /act/.test(this.$route.path) ? this.isPublish = false : this.isPublish = true;
       if (this.code) {
         this.getData();
       } else {
@@ -158,7 +159,11 @@
         this.oriPrice = +this.publishGoods.originalPrice / 1000;
         this.freight = +this.publishGoods.yunfei / 1000;
         this.isFree = this.publishGoods.yunfei === 0;
-        this.isPublish = this.publishGoods.isPublish === '1';
+        if (/act/.test(this.$route.path)) {
+          this.isPublish = this.publishGoods.isPublish === 0;
+        } else {
+          this.isPublish = this.publishGoods.isPublish === 1;
+        }
         setTimeout(() => {
           this.$refs.priceMask.updateData(this.sellPrice, this.isFree, this.freight, this.oriPrice);
         }, 20);
@@ -247,9 +252,15 @@
               this.loadingFlag = false;
               this.text = '发布成功';
               this.$refs.toast.show();
-              setTimeout(() => {
-                this.$router.push('/category');
-              }, 1000);
+              if (/act/.test(this.$route.path)) {
+                setTimeout(() => {
+                  this.$router.push('/category/list?act=1');
+                }, 1000);
+              } else {
+                setTimeout(() => {
+                  this.$router.push('/category');
+                }, 1000);
+              }
             }).catch(() => {
               this.loadingFlag = false;
             });

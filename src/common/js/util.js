@@ -1,4 +1,5 @@
 import {setCookie, getCookie, delCookie} from './cookie';
+// import {setProfilePortrait} from 'common/js/message';
 
 // 日期格式化
 export function formatDate(date, fmt) {

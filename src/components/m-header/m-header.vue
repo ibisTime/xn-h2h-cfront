@@ -1,7 +1,7 @@
 <template>
   <div class="head-wrapper" @click.stop>
     <div class="inner" :class="innerCls">
-      <i v-if="showBack" class="icon-back" @click="back"></i>
+      <!-- <i v-if="showBack" class="icon-back" @click="back"></i> -->
       <h2>{{title}}</h2>
       <div v-if="actText" @click="handleAction" class="action">{{actText}}</div>
     </div>

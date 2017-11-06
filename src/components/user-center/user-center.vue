@@ -16,7 +16,10 @@
               <div class="description" :class="moreCls">{{description}}</div>
               <div class="up-down" @click="showAllDesc" v-show="showMore"></div>
               <div class="btns">
-                <span v-if="!this.isMine" class="btn" @click="handleClick">{{btnText}}</span>
+                <span v-if="!this.isMine">
+                  <span class="btn btn-left" @click="handleClick">{{btnText}}</span>
+                  <span class="btn" @click="goChat">私信他</span>
+                </span>
                 <span v-else class="btn" @click="goSetting">编辑</span>
               </div>
             </div>
@@ -175,6 +178,9 @@
       goDetail(item) {
         this.$router.push(this.$route.path + '/' + item.code);
       },
+      goChat() {
+        this.$router.push(`/message/${this.userId}`);
+      },
       handleClick() {
         if (!this.fetching) {
           this.fetching = true;
@@ -321,6 +327,9 @@
               font-size: $font-size-medium;
               color: $primary-color;
             }
+            .btn-left {
+              margin-right: 0.2rem;
+            }            
           }
         }
       }

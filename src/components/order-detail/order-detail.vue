@@ -40,15 +40,16 @@
       </div>
       <div class="btns">
         <div class="btn cancel" v-show="showCancel()" @click="_cancelOrder">取消订单</div>
-        <div class="btn" v-show="showTk()" @click="_tkOrder">申请退款</div>
+        <div class="btn cancel" v-show="showTk()" @click="_tkOrder">申请退款</div>
+        <div class="btn" v-show="showRemind()" @click="_remindBtn">催货</div>
         <div class="btn" v-show="showPay()" @click="payOrder">立即支付</div>
         <div class="btn" v-show="showReceive()" @click="_receiveOrder">确认收货</div>
         <div class="btn" v-show="showRating()" @click="ratingOrder">立即评价</div>
-        <div class="btn" v-show="showWatch()">查看评价</div>
+        <div class="btn" v-show="showWatch()" @click="showOrderRating">查看评价</div>
       </div>
       <full-loading v-show="loadingFlag" :title="loadingText"></full-loading>
       <rating ref="rating" @ratingSuc="ratingSuccess" :orderCode="orderCode" :parentCode="parentCode"></rating>
-      <confirm ref="confirm" :text="text" @confirm="receiveOrder"></confirm>
+      <confirm ref="confirm" :text="text" @confirm="handleConfirm"></confirm>
       <confirm ref="alert" :isAlert="isAlert" :text="ratingContent"></confirm>
       <confirm-input ref="confirmInput" :text="inputText" @confirm="handleInputConfirm"></confirm-input>
       <toast :text="toastText" ref="toast"></toast>
@@ -69,7 +70,7 @@
   import {ORDER_STATUS} from '../orders/config';
   import {commonMixin} from 'common/js/mixin';
   import Rating from 'components/rating/rating';
-  import {getOrder, cancelOrder, receiveOrder, tkOrder} from 'api/biz';
+  import {getOrder, cancelOrder, receiveOrder, tkOrder, getOrderRating, remindOrder} from 'api/biz';
 
   export default {
     mixins: [commonMixin],
@@ -146,7 +147,7 @@
           let amount3 = this.currentOrder.payAmount3;
           if (amount1 || amount2 || amount3) {
             let str = [];
-            str.push(`人民币支付${formatAmount(amount1)}元`);
+            amount1 && str.push(`人民币支付${formatAmount(amount1)}元`);
             amount2 && str.push(`积分消耗${formatAmount(amount2)}`);
             amount3 && str.push(`优惠券抵扣${formatAmount(amount3)}元`);
             return str.join(' + ');
@@ -216,6 +217,12 @@
         }
         return false;
       },
+      showRemind(status) {
+        if (this.currentOrder) {
+          return this.currentOrder.status === '2';
+        }
+        return false;
+      },
       showPay() {
         if (this.currentOrder) {
           return this.currentOrder.status === '1';
@@ -262,6 +269,14 @@
           this.tkOrder(text);
         }
       },
+      handleConfirm(text) {
+        this.loadingFlag = true;
+        if (this.currentOrder.status === '2') {
+          this.remindOrder(text);
+        } else if (this.currentOrder.status === '3') {
+          this.receiveOrder(text);
+        }
+      },
       receiveOrder() {
         this.loadingFlag = true;
         this.loadingText = '收货中...';
@@ -272,6 +287,17 @@
           this.editOrderListByReceived({
             code: this.code
           });
+        }).catch(() => {
+          this.loadingFlag = false;
+        });
+      },
+      remindOrder() {
+        this.loadingFlag = true;
+        this.fetchText = '催货中...';
+        remindOrder(this.code).then(() => {
+          this.loadingFlag = false;
+          this.toastText = '催货成功';
+          this.$refs.toast.show();
         }).catch(() => {
           this.loadingFlag = false;
         });
@@ -303,10 +329,20 @@
         });
       },
       payOrder() {
-        this.$router.push(`${this.$route.path}/pay?code=${this.code}`);
+        this.$router.push(`${this.$route.path}/pay?code=${this.$route.params.code}`);
       },
       ratingOrder() {
         this.$refs.rating.show();
+      },
+      showOrderRating() {
+        getOrderRating(this.$route.params.id).then((data) => {
+          if (data.status === 'A' || data.status === 'B') {
+            this.ratingContent = data.content;
+          } else {
+            this.ratingContent = '您的评论存在敏感词，请耐心等待管理人员审核。';
+          }
+          this.$refs.alert.show();
+        }).catch(() => {});
       },
       _receiveOrder() {
         this.text = '确认收货';
@@ -315,6 +351,10 @@
       _tkOrder() {
         this.inputText = '申请退款原因';
         this.$refs.confirmInput.show();
+      },
+      _remindBtn(item) {
+        this.text = '确认催货';
+        this.$refs.confirm.show();
       },
       ratingSuccess(code) {
         this.editOrderListByRating({code});

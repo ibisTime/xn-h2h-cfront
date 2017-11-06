@@ -25,14 +25,12 @@
       <!-- 日期 -->
       <div class="dayPanel">
         <ul class="days">
-        <!-- 核心 v-for循环 每一次循环用<li>标签创建一天 -->
         <li v-for="dayobject in days">
-          <!--本月-->
-          <!--如果不是本月  改变类名加灰色-->
-          <span v-if="isGray(dayobject)" class="other-month">{{ dayobject.day.getDate() }}</span>
-          <!--如果是本月  还需要判断是不是这一天-->
+          <span v-if="isGray(dayobject)">
+            <span v-if="dayobject.sign" class="other-month active">{{ dayobject.day.getDate() }}<i></i></span>
+            <span v-else class="other-month">{{ dayobject.day.getDate() }}</span>
+          </span>
           <span v-else>
-            <!--今天  同年同月同日-->
             <span v-if="dayobject.sign" class="active">{{ dayobject.day.getDate() }}<i></i></span>
             <span v-else>{{ dayobject.day.getDate() }}</span>
           </span>

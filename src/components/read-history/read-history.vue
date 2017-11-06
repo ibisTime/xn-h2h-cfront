@@ -50,8 +50,11 @@
       },
       getPageReads() {
         getPageReads(this.start, this.limit).then((data) => {
-          let _list = data.list.map((item) => {
-            return item.product;
+          let _list = [];
+          data.list.map((item) => {
+            if (item.code && item.product) {
+              return _list.push(item.product);
+            }
           });
           this.list = this.list.concat(_list);
           if (data.list.length < this.limit || data.totalCount <= this.limit) {

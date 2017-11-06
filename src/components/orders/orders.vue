@@ -36,6 +36,7 @@
               <div class="clearfix btns" v-show="showBtns(item.status)">
                 <span class="btn fr" v-show="showPayBtn(item.status)" @click.stop="payOrder(item)">立即支付</span>
                 <span class="btn cancel fr" v-show="showCancelBtn(item.status)" @click.stop="_cancelOrder(item)">取消订单</span>
+                <span class="btn fr" v-show="showRemindBtn(item.status)" @click.stop="_remindBtn(item)">催货</span>
                 <span class="btn cancel fr" v-show="showTkBtn(item.status)" @click.stop="_tkOrder(item)">申请退款</span>
                 <span class="btn fr" v-show="showReceiveBtn(item.status)" @click.stop="_receiveOrder(item)">确认收货</span>
                 <span class="btn fr" v-show="showRatingBtn(item.status)" @click.stop="ratingOrder(item)">立即评价</span>
@@ -46,7 +47,7 @@
         </scroll>
       </div>
       <full-loading v-show="fetching" :title="fetchText"></full-loading>
-      <confirm ref="confirm" :text="text" @confirm="receiveOrder"></confirm>
+      <confirm ref="confirm" :text="text" @confirm="handleConfirm"></confirm>
       <confirm ref="alert" :isAlert="isAlert" :text="ratingContent"></confirm>
       <confirm-input ref="confirmInput" :text="inputText" @confirm="handleInputConfirm"></confirm-input>
       <toast :text="toastText" ref="toast"></toast>
@@ -66,7 +67,7 @@
   import Toast from 'base/toast/toast';
   import {mapGetters, mapMutations, mapActions} from 'vuex';
   import {SET_ORDER_LIST, SET_CURRENT_ORDER} from 'store/mutation-types';
-  import {getPageOrders, cancelOrder, receiveOrder, tkOrder} from 'api/biz';
+  import {getPageOrders, cancelOrder, receiveOrder, tkOrder, remindOrder} from 'api/biz';
   import {commonMixin} from 'common/js/mixin';
   import {formatImg, setTitle} from 'common/js/util';
   import Rating from 'components/rating/rating';
@@ -183,6 +184,15 @@
         this.curItem = item;
         this.$refs.confirmInput.show();
       },
+      remindOrder() {
+        this.fetching = true;
+        this.fetchText = '催货中...';
+        remindOrder(this.curItem.code).then(() => {
+          this.fetching = false;
+        }).catch(() => {
+          this.fetching = false;
+        });
+      },
       receiveOrder() {
         this.fetching = true;
         this.fetchText = '收货中...';
@@ -194,6 +204,14 @@
         }).catch(() => {
           this.fetching = false;
         });
+      },
+      handleConfirm(text) {
+        this.fetching = true;
+        if (this.curItem.status === '2') {
+          this.remindOrder(text);
+        } else if (this.curItem.status === '3') {
+          this.receiveOrder(text);
+        }
       },
       handleInputConfirm(text) {
         this.fetching = true;
@@ -232,6 +250,11 @@
         this.currentGoodsCode = item.productOrderList[0].productCode;
         this.$refs.rating.show();
       },
+      _remindBtn(item) {
+        this.text = '确认催货';
+        this.curItem = item;
+        this.$refs.confirm.show();
+      },
       _receiveOrder(item) {
         this.text = '确认收货';
         this.curItem = item;
@@ -248,6 +271,9 @@
       },
       showCancelBtn(status) {
         return status === '1';
+      },
+      showRemindBtn(status) {
+        return status === '2';
       },
       showTkBtn(status) {
         return status === '2';

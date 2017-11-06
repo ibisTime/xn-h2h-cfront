@@ -152,6 +152,7 @@
           };
           if (this.code) {
             param.code = this.code;
+            param.isDefault = this.isDefault;
             this._editAddress(param);
           } else {
             this._addAddress(param);

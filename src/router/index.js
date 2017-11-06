@@ -315,6 +315,10 @@ export default new Router({
               component: CnyFlow
             },
             {
+              path: 'cny-flow:bizType',
+              component: CnyFlow
+            },
+            {
               path: 'recharge',
               component: Recharge
             },

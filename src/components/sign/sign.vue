@@ -70,7 +70,7 @@
       getJF () {
         getAccount().then((data) => {
           getSignIntegral(data[1].accountNumber, '02').then((data) => {
-            this.jfOwn = Math.floor(formatAmount(data.totalAmount));
+            this.jfOwn = formatAmount(data.totalAmount);
             this.jfText = '已获积分';
           });
         });

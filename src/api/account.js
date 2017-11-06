@@ -38,11 +38,12 @@ export function withdraw(params) {
 }
 
 // 分页查询流水
-export function getPageFlow(start, limit, accountNumber) {
+export function getPageFlow(start, limit, accountNumber, bizType) {
   return fetch(802524, {
     start,
     limit,
-    accountNumber
+    accountNumber,
+    bizType
   });
 }
 

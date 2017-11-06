@@ -104,10 +104,11 @@
       },
       yunfei() {
         if (this.detail) {
-          let discount = this.detail.discount;
-          discount = isUnDefined(discount) ? 10 : +discount * 10;
+          // let discount = this.detail.discount;
+          // discount = isUnDefined(discount) ? 10 : +discount * 10;
           let yunfei = this.detail.yunfei;
-          let result = discount * yunfei / 10;
+          this.detail.activityType === '2' ? yunfei = 0 : yunfei;
+          let result = yunfei;
           return formatAmount(result);
         }
         return '0.00';
@@ -118,7 +119,8 @@
           let p2 = +this.detail.yunfei;
           let discount = this.detail.discount;
           discount = isUnDefined(discount) ? 10 : +discount * 10;
-          let result = (p1 + p2) * discount / 10;
+          this.detail.activityType === '2' ? p2 = 0 : p2;
+          let result = (p1 * discount / 10) + p2;
           return formatAmount(result);
         }
         return 0.00;

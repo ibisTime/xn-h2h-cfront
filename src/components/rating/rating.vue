@@ -67,7 +67,7 @@
       orderRating() {
         orderRating(this.content, this.orderCode, this.parentCode).then((data) => {
           this.disabled = false;
-          if (/;filter/.test(data.code)) {
+          if (/filter/.test(data[0])) {
             this.text = '您的评论存在敏感词，我们将进行审核';
           } else {
             this.text = '评价成功';
@@ -77,7 +77,7 @@
           this.content = '';
           setTimeout(() => {
             this.showFlag = false;
-          }, 1000);
+          }, 2000);
         }).catch(() => {
           this.disabled = false;
         });
@@ -85,7 +85,8 @@
       goodsRating() {
         goodsRating(this.content, this.parentCode).then((data) => {
           this.disabled = false;
-          if (/;filter/.test(data.code)) {
+          let reg = /filter/.test(data.code);
+          if (reg) {
             this.text = '您的评论存在敏感词，我们将进行审核';
           } else {
             this.text = '评价成功';
@@ -101,7 +102,7 @@
           this.$refs.toast.show();
           setTimeout(() => {
             this.showFlag = false;
-          }, 1000);
+          }, 2000);
         }).catch(() => {
           this.disabled = false;
         });

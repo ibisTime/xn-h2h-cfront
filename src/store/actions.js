@@ -1,5 +1,6 @@
 import * as types from './mutation-types';
 import {saveSearch, clearSearch, deleteSearch, saveChatData, updateChatData, saveUserMap} from 'common/js/cache';
+import {isUnDefined} from 'common/js/util';
 
 function _getOrderList(state, code, prevStatus, nextStatus) {
   let allList = null;
@@ -125,11 +126,13 @@ export const setDefaultAddress = function ({commit, state}, {code}) {
       idx0 = idx;
     }
   });
-  let addr0 = addressList[idx0];
-  addressList.splice(idx0, 1, {
-    ...addr0,
-    isDefault: '0'
-  });
+  if (!isUnDefined(idx0)) {
+    let addr0 = addressList[idx0];
+    addressList.splice(idx0, 1, {
+      ...addr0,
+      isDefault: '0'
+    });
+  }
   let addr1 = addressList[idx1];
   addressList.splice(idx1, 1, {
     ...addr1,
@@ -172,12 +175,16 @@ export const editOrderListByPay = function({commit, state}, {code}) {
   let _orderList = _getOrderList(state, code, prevStatus, nextStatus);
   commit(types.SET_ORDER_LIST, _orderList);
 
-  if (state.currentOrder && state.currentOrder.code === code) {
-    let _order = {
-      ...state.currentOrder
-    };
-    _order.status = nextStatus;
-    commit(types.SET_CURRENT_ORDER, _order);
+  if (state.currentOrder) {
+    if (state.currentOrder.code === code) {
+      let _order = {
+        ...state.currentOrder
+      };
+      _order.status = nextStatus;
+      commit(types.SET_CURRENT_ORDER, _order);
+    } else {
+      commit(types.SET_CURRENT_ORDER, null);
+    }
   }
 };
 
@@ -253,4 +260,8 @@ export const saveChatHistory = function ({commit, state}, {msg, toUser, fromUser
 export const updateMessages = function ({commit}, {sender, receiver}) {
   commit(types.SET_CHAT_DATA, updateChatData(sender, receiver));
   commit(types.SET_USER_MAP, saveUserMap(receiver));
+};
+
+export const updateUserMap = function ({commit}, user) {
+  commit(types.SET_USER_MAP, saveUserMap(user));
 };

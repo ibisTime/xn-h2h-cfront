@@ -196,7 +196,8 @@ export function goodsRating (content, entityCode) {
   return fetch(801020, {
     content,
     entityCode,
-    commenter: getUserId()
+    commenter: getUserId(),
+    type: 'P'
   });
 }
 
@@ -527,4 +528,14 @@ export function getDiscountActivity (code) {
  */
 export function getPublishGoodsCount (userId) {
   return fetch(808018, { userId });
+}
+
+/**
+ * 统计用户各种订单数量
+ * @param {string} userId
+ */
+export function getOrderCount () {
+  return fetch(808063, {
+    userId: getUserId()
+  });
 }

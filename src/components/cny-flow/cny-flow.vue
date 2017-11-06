@@ -48,11 +48,12 @@
     created() {
       setTitle('人民币账单');
       this.pullup = true;
+      let bizType = this.$route.params.bizType;
       if (this.cnyAccount) {
-        this.getPageFlow();
+        this.getPageFlow(bizType);
       } else {
         this.getAccount().then(() => {
-          this.getPageFlow();
+          this.getPageFlow(bizType);
         });
       }
     },
@@ -72,9 +73,9 @@
           return data;
         });
       },
-      getPageFlow() {
+      getPageFlow(bizType) {
         if (this.hasMore) {
-          return getPageFlow(this.start, LIMIT, this.cnyAccount.accountNumber).then((data) => {
+          return getPageFlow(this.start, LIMIT, this.cnyAccount.accountNumber, bizType).then((data) => {
             if (data.list.length < LIMIT || data.totalCount <= LIMIT) {
               this.hasMore = false;
             }

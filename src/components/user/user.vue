@@ -24,11 +24,25 @@
       </router-link>
       <div class="order-content">
         <ul>
-          <router-link tag="li" to="/user/order?index=1" class="item-payment"><div class="icon"></div><p>待付款</p></router-link>
-          <router-link tag="li" to="/user/order?index=2" class="item-sendGoods"><div class="icon"></div><p>待发货</p></router-link>
-          <router-link tag="li" to="/user/order?index=3" class="item-delivery"><div class="icon"></div><p>待收货</p></router-link>
-          <router-link tag="li" to="/user/order?index=4" class="item-haveGoods"><div class="icon"></div><p>待评价</p></router-link>
-          <router-link tag="li" to="/user/order?index=5" class="item-evaluation"><div class="icon"></div><p>已完成</p></router-link>
+          <router-link tag="li" to="/user/order?index=1" class="item-payment">
+            <div class="icon"></div><p>待付款</p>
+            <div class="badge-wrapper"><badge v-show="count('toPayCount')" :text="count('toPayCount')"></badge></div>
+          </router-link>
+          <router-link tag="li" to="/user/order?index=2" class="item-sendGoods">
+            <div class="icon"></div><p>待发货</p>
+            <div class="badge-wrapper"><badge v-show="count('payCount')" :text="count('payCount')"></badge></div>
+          </router-link>
+          <router-link tag="li" to="/user/order?index=3" class="item-delivery">
+            <div class="icon"></div><p>待收货</p>
+            <div class="badge-wrapper"><badge v-show="count('sendCount')" :text="count('sendCount')"></badge></div>
+          </router-link>
+          <router-link tag="li" to="/user/order?index=4" class="item-haveGoods">
+            <div class="icon"></div><p>待评价</p>
+            <div class="badge-wrapper"><badge v-show="count('receiveCount')" :text="count('receiveCount')"></badge></div>
+          </router-link>
+          <router-link tag="li" to="/user/order?index=5" class="item-evaluation">
+            <div class="icon"></div><p>已完成</p>
+          </router-link>
         </ul>
       </div>
     </div>
@@ -42,6 +56,9 @@
         <router-link tag="li" to="/user/coupon" class="item-coupons">优惠券</router-link>
       </ul>
     </div>
+    <div class="set-btns">
+      <button @click="logout">退出登录</button>
+    </div>    
     <full-loading v-show="loadingFlag"></full-loading>
     <m-footer @goPublish="goPublish"></m-footer>
     <router-view></router-view>
@@ -49,19 +66,23 @@
 </template>
 <script>
   import MFooter from 'components/m-footer/m-footer';
+  import Badge from 'base/badge/badge';
   import {SET_USER_STATE, SET_CNY_ACCOUNT, SET_JF_ACCOUNT} from 'store/mutation-types';
   import {getUser} from 'api/user';
   import {getAccount} from 'api/account';
-  import {setTitle, formatAmount} from 'common/js/util';
+  import {setTitle, formatAmount, clearUser} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
   import FullLoading from 'base/full-loading/full-loading';
   import {mapGetters, mapMutations} from 'vuex';
+  import {getOrderCount} from 'api/biz';
+  import {getAppId} from 'api/general';
 
   export default {
     mixins: [commonMixin],
     data () {
       return {
-        loadingFlag: true
+        loadingFlag: true,
+        orderCountList: {}
       };
     },
     created() {
@@ -96,8 +117,9 @@
           this.first = false;
           Promise.all([
             getUser(),
-            getAccount()
-          ]).then(([userData, accountData]) => {
+            getAccount(),
+            getOrderCount()
+          ]).then(([userData, accountData, orderCount]) => {
             this.loadingFlag = false;
             accountData.forEach((item) => {
               if (item.currency === 'CNY') {
@@ -107,6 +129,7 @@
               }
             });
             this.setUser(userData);
+            this.orderCountList = orderCount;
           }).catch(() => {
             this.loadingFlag = false;
           });
@@ -125,6 +148,28 @@
       goPublish() {
         this.$router.push('/user/publish');
       },
+      count(col) {
+        if (this.orderCountList) {
+          let counts = this.orderCountList[col];
+          return counts === 0 || counts === undefined ? '' : counts + '';
+        }
+        return '';
+      },
+      logout() {
+        clearUser();
+        this._reloadPage();
+      },
+      _reloadPage() {
+        getAppId().then((data) => {
+          let appId = data.cvalue;
+          let redirectUri = encodeURIComponent(`${location.origin}?#/home`);
+          let url = 'https://open.weixin.qq.com/connect/oauth2/authorize';
+          let suffix = '&response_type=code&scope=snsapi_userinfo#wechat_redirect';
+          setTimeout(() => {
+            location.replace(`${url}?appid=${appId}&redirect_uri=${redirectUri}${suffix}`);
+          }, 100);
+        });
+      },
       ...mapMutations({
         setCnyAccount: SET_CNY_ACCOUNT,
         setJFAccount: SET_JF_ACCOUNT,
@@ -136,7 +181,8 @@
     },
     components: {
       MFooter,
-      FullLoading
+      FullLoading,
+      Badge
     }
   };
 </script>
@@ -284,6 +330,7 @@
 
           li{
             flex: 1;
+            position: relative;
             text-align: center;
             display: inline-block;
             font-size: 0;
@@ -316,6 +363,13 @@
           }
           .item-evaluation .icon {
             @include bg-image('evaluation');
+          }
+
+          .badge-wrapper {
+            position: absolute;
+            top: -0.2rem;
+            left: 50%;
+            font-size: 0;
           }
         }
 
@@ -359,6 +413,25 @@
       }
       .item-coupons{
         @include bg-image('coupons');
+      }
+    }
+
+    .set-btns {
+      /*position: absolute;*/
+      /*bottom: 0;*/
+      /*left: 0;*/
+      /*width: 100%;*/
+      padding: 0.24rem 0.36rem;
+      font-size: 0;
+
+      button {
+        width: 100%;
+        border-radius: 0.16rem;
+        height: 0.8rem;
+        line-height: 0.8rem;
+        font-size: $font-size-medium;
+        color: #fff;
+        background-color: #50B5FD;
       }
     }
 

@@ -1,40 +1,42 @@
 <template>
   <transition name="slide">
     <div class="sell-order-detail-wrapper">
-      <scroll ref="scroll" :pullUpLoad="pullUpLoad">
-        <div class="order-info">
-          <div class="info">订单号：{{orderCode}}</div>
-          <div class="info">下单时间：{{applyDatetime | formatDate('yyyy-MM-dd hh:mm')}}</div>
-          <div class="info">订单状态：{{status | formatStatus}}</div>
-        </div>
-        <div class="address-wrapper">
-          <div class="inner">
-            <div class="header">收货人：{{receiver}}<span>{{reMobile}}</span></div>
-            <div class="address">收货地址：{{reAddress}}</div>
+      <div class="scroll-wrapper">
+        <scroll ref="scroll" :pullUpLoad="pullUpLoad">
+          <div class="order-info">
+            <div class="info">订单号：{{orderCode}}</div>
+            <div class="info">下单时间：{{applyDatetime | formatDate('yyyy-MM-dd hh:mm')}}</div>
+            <div class="info">订单状态：{{status | formatStatus}}</div>
           </div>
-        </div>
-        <ul class="goods">
-          <li class="border-bottom-1px" @click="goDetail">
-            <div class="img"><img :src="imgUrl"></div>
-            <div class="note">
-              <div class="top">
-                <div class="name twoline-ellipsis">{{productName}}</div>
-                <div class="desc twoline-ellipsis">{{productDescription}}</div>
-              </div>
-              <div class="price">¥{{productAmount | formatAmount}}</div>
+          <div class="address-wrapper">
+            <div class="inner">
+              <div class="header">收货人：{{receiver}}<span>{{reMobile}}</span></div>
+              <div class="address">收货地址：{{reAddress}}</div>
             </div>
-          </li>
-        </ul>
-        <div class="amount-item">商品总额<span>¥{{productAmount | formatAmount}}</span></div>
-        <div class="amount-item border-bottom-1px">运费<span>¥{{yunfei | formatAmount}}</span></div>
-        <div class="pay-item">支付总价<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
-        <div class="logistics" v-if="logisticsCode">
-          <div class="name">物流公司：{{logisticsCompany}}</div>
-          <div class="code">物流单号：{{logisticsCode}}</div>
-        </div>
-        <div class="amount-item remark" v-show="applyNote"><label>买家嘱咐：</label><div>{{applyNote}}</div></div>
-        <div class="amount-item remark" v-show="remark"><label>备注：</label><div>{{remark}}</div></div>
-      </scroll>
+          </div>
+          <ul class="goods">
+            <li class="border-bottom-1px" @click="goDetail">
+              <div class="img"><img :src="imgUrl"></div>
+              <div class="note">
+                <div class="top">
+                  <div class="name twoline-ellipsis">{{productName}}</div>
+                  <div class="desc twoline-ellipsis">{{productDescription}}</div>
+                </div>
+                <div class="price">¥{{productAmount | formatAmount}}</div>
+              </div>
+            </li>
+          </ul>
+          <div class="amount-item">商品总额<span>¥{{productAmount | formatAmount}}</span></div>
+          <div class="amount-item border-bottom-1px">运费<span>¥{{yunfei | formatAmount}}</span></div>
+          <div class="pay-item">支付总价<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
+          <div class="logistics" v-if="logisticsCode">
+            <div class="name">物流公司：{{logisticsCompany}}</div>
+            <div class="code">物流单号：{{logisticsCode}}</div>
+          </div>
+          <div class="amount-item remark" v-show="applyNote"><label>买家嘱咐：</label><div>{{applyNote}}</div></div>
+          <div class="amount-item remark" v-show="remark"><label>备注：</label><div>{{remark}}</div></div>
+        </scroll>
+      </div>
       <div class="btns">
         <div class="btn" v-show="showCancel()" @click="_cancelOrder">取消订单</div>
         <div class="btn" v-show="showFhBtn()" @click="_fhOrder">发货</div>
@@ -236,7 +238,11 @@
         this.loadingText = '正在载入...';
         getOrderRating(this.code).then((data) => {
           this.loadingFlag = false;
-          this.ratingContent = data.content;
+          if (data.status === 'A' || data.status === 'B') {
+            this.ratingContent = data.content;
+          } else {
+            this.ratingContent = '您的评论存在敏感词，请耐心等待管理人员审核。';
+          }
           this.$refs.alert.show();
         }).catch(() => {
           this.loadingFlag = false;
@@ -489,6 +495,14 @@
         padding-top: 0.2rem;
       }
     }
+
+    .scroll-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      bottom: 1rem;
+    }    
 
     .btns {
       display: flex;

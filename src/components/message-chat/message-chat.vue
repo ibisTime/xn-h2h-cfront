@@ -46,6 +46,7 @@
         <div class="message-input">
           <input type="text" placeholder="输入聊天内容" ref="inputText" v-model="emoji" @keyup.enter="dealMessage" class="msgedit"/>
           <span @click.stop="show"></span>
+          <div class="sendMessage" v-show="sendMessage" @click.stop="dealMessage">发送</div>
           <emoji ref="emoji" @select="selectItem"></emoji>
           <i @click="show"></i>
           <div class="file" v-if="token">
@@ -93,7 +94,8 @@
         text: '',
         receiver: null,
         showEmoji: false,
-        token: ''
+        token: '',
+        sendMessage: false
       };
     },
     created() {
@@ -177,13 +179,16 @@
       show() {
         if (this.showEmoji) {
           this.$refs.emoji.hide();
+          this.sendMessage = false;
         } else {
           this.$refs.emoji.show();
+          this.sendMessage = true;
         }
         this.showEmoji = !this.showEmoji;
       },
       hide() {
         this.showEmoji = false;
+        this.sendMessage = false;
         this.$refs.emoji.hide();
       },
       selectItem (emoji) {
@@ -191,12 +196,15 @@
       },
       dealMessage() {
         this.$refs.inputText.blur();
+        this.sendMessage = false;
+        this.$refs.emoji.hide();
         if (!isUnDefined(this.emoji) && this.emoji.trim() !== '') {
           this.onSendMsg(this.emoji, (info) => {
             this.saveChatHistory(info);
-            setTimeout(() => {
-              this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
-            }, 40);
+            // setTimeout(() => {
+              // this.$refs.scroll.scrollToElement(this.$refs.mesRef[this.curChatList.length - 1], 100);
+              // this.scroll.scrollIntoViewIfNeeded();
+            // }, 40);
           });
           this.emoji = '';
         } else {
@@ -212,7 +220,11 @@
           if(msg.type === 'TIMTextElem') {
             _item.content = msg.content.text;
           } else if (msg.type === 'TIMFaceElem') {
-            _item.content = webim.Emotions[msg.content.index][1];
+            if (webim.Emotions[msg.content.index] === undefined) {
+              _item.content = webim.Emotions[0][1];
+            } else {
+              _item.content = webim.Emotions[msg.content.index][1];
+            }
           } else if (msg.type === 'TIMImageElem') {
             _item.content = msg.content.ImageInfoArray[0].url;
           }
@@ -731,13 +743,30 @@
       background-color: #fff;
 
       .message-input {
-        position: relative;
-        display: flex;
+        position: fixed;
+        // display: flex;
         padding: 0.15rem 0.36rem;
         width: 100%;
         height: 1rem;
         font-size: 0;
         border: 1px solid #eee;
+
+        .sendMessage{
+          display: flex;
+          position: absolute;
+          top: 0.2rem;
+          right: 0.3rem;
+          width: 0.7rem;
+          height: 0.6rem;
+          justify-content: center;
+          align-items: center;
+          line-height: 0.5rem;
+          background: $primary-color;
+          color: $color-highlight-background;
+          border-radius: 0.2rem;
+          font-size: $font-size-small;
+          z-index: 999;
+        }
 
         input {
           display: inline-block;

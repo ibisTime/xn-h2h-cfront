@@ -10,15 +10,15 @@
                 <div class="addr">{{item.province}} {{item.city}} {{item.district}} {{item.detailAddress}}</div>
               </div>
               <div class="opeator border-top-1px">
-                <div class="default" @click="setDefault(item)">
+                <div class="default" @click.top="setDefault(item)">
                   <i class="icon-chose" :class="choseCls(item)"></i>
                   <span>默认地址</span>
                 </div>
-                <div class="edit" @click="goEdit(item)">
+                <div class="edit" @click.top="goEdit(item)">
                   <i class="icon-edit"></i>
                   <span>编辑</span>
                 </div>
-                <div class="delete" @click="deleteItem(item)">
+                <div class="delete" @click.top="deleteItem(item)">
                   <i class="icon-delete"></i>
                   <span>删除</span>
                 </div>

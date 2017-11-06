@@ -4,7 +4,7 @@
       <header class="border-bottom-1px">
         <div class="back" @click="back"></div>
         <div class="search" @click="goSearch">
-          <i class="search-icon"></i><span>鞋子</span>
+          <i class="search-icon"></i><span>搜索</span>
         </div>
       </header>
       <div class="filter-wrapper">

@@ -42,7 +42,7 @@
       text-align: center;
       white-space: nowrap;
       transform-origin: -10% center;
-      z-index: 10;
+      // z-index: 10;
       font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,\\5FAE\8F6F\96C5\9ED1,SimSun,sans-serif;
       font-size: $font-size-small;
       background-color: $color-red;

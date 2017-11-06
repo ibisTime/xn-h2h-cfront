@@ -11,7 +11,7 @@
                 <span>{{item.city}} </span>|<span> {{spaceTime(item)}}</span>
               </div>
             </div>
-            <div class="clothes">来自{{item.categoryName}}</div>
+            <div class="clothes">来自{{item.typeName}}</div>
           </div>
           <div class="photos-wrapper">
             <trade-scroll :data="item.pic.split('||')"></trade-scroll>

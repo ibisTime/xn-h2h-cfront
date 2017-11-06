@@ -96,6 +96,7 @@
       top: 0;
       left: 0;
       width: 100%;
+      height: 100%;
       bottom: 1.4rem;
       background: #fff;
     }

@@ -120,3 +120,10 @@ export function getPageSysNotices(start, limit) {
     fromSystemCode: SYSTEM_CODE
   });
 }
+
+// 获取圈子图片、积分规则
+export function getTradeIconRule(key) {
+  return fetch(808917, {
+    key
+  });
+}

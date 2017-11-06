@@ -34,7 +34,7 @@
       </div>
       <router-link to="/home/trade" tag="div">
         <div class="trade-wrapper">
-          <div class="trade-icon"></div>
+          <div class="trade-icon" :style="getImgSyl(tradeIcon)"></div>
         </div>
       </router-link>
       <div class="split"></div>
@@ -67,12 +67,13 @@
   import {formatImg, setTitle, getShareImg} from 'common/js/util';
   import {initShare} from 'common/js/weixin';
   import {getPageGoods, getPageNearbyGoods} from 'api/biz';
-  import {getBannerList, getPageSysNotices} from 'api/general';
+  import {getBannerList, getPageSysNotices, getTradeIconRule} from 'api/general';
 
   export default {
     data() {
       return {
         banners: [],
+        tradeIcon: '',
         hasMore: true,
         currentIndex: 0,
         goodsObj: {},
@@ -151,6 +152,7 @@
           this.getBannerList();
           this.getPageGoods();
           this.getPageNotices();
+          this.getTradeIcon();
         }
       },
       getPageGoods() {
@@ -198,6 +200,11 @@
             }
           });
         }
+      },
+      getTradeIcon() {
+        return getTradeIconRule('tradeImg').then((data) => {
+          this.tradeIcon = data.cvalue;
+        });
       },
       selectCategory(index) {
         this.currentIndex = index;

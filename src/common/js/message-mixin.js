@@ -1,14 +1,15 @@
 import {getSig, getAccountType, getTxAppCode, getUserId} from 'common/js/util';
-import {addMsg} from 'common/js/message';
-import {getTencentParamsAPi} from 'api/user';
+import {addMsg, setProfilePortrait, getProfilePortrait} from 'common/js/message';
+import {getTencentParamsAPi, getUser} from 'api/user';
 import {mapGetters, mapActions, mapMutations} from 'vuex';
-import {SET_TENCENT_LOGINED} from 'store/mutation-types';
+import {SET_TENCENT_LOGINED, SET_USER_STATE} from 'store/mutation-types';
 
 export const messageMixin = {
   computed: {
     ...mapGetters([
       'curChatUserId',
-      'userMap'
+      'userMap',
+      'user'
     ])
   },
   methods: {
@@ -43,8 +44,22 @@ export const messageMixin = {
         if (user) {
           newMsg.fromAccountNick = user.nickname;
           photo = user.photo;
+          this.saveChatHistory(addMsg(newMsg, newMsg.getSession().id(), photo));
+        } else {
+          var self = this;
+          getProfilePortrait(newMsg.fromAccount, function(res) {
+            newMsg.fromAccountNick = res.nickname;
+            photo = res.photo;
+            self.updateUserMap({
+              userId: newMsg.fromAccount,
+              nickname: res.nickname,
+              photo: res.photo
+            });
+            self.saveChatHistory(addMsg(newMsg, newMsg.getSession().id(), photo));
+          }, function() {
+            self.saveChatHistory(addMsg(newMsg, newMsg.getSession().id(), photo));
+          });
         }
-        this.saveChatHistory(addMsg(newMsg, newMsg.getSession().id(), photo));
       }
       webim.setAutoRead(selSess, true, true);
     },
@@ -78,6 +93,13 @@ export const messageMixin = {
       };
       var self = this;
       webim.login(loginInfo, listeners, options, function() {
+        getUser().then((data) => {
+          self.setUser(data);
+          let gender = self.user.gender;
+          let nickname = self.user.nickname;
+          let photo = data.photo;
+          setProfilePortrait({gender, nickname, photo});
+        });
         self.setTententLogined(true);
         self.onMsgNotify();
       }, function() {
@@ -85,10 +107,12 @@ export const messageMixin = {
       });
     },
     ...mapMutations({
-      setTententLogined: SET_TENCENT_LOGINED
+      setTententLogined: SET_TENCENT_LOGINED,
+      setUser: SET_USER_STATE
     }),
     ...mapActions([
-      'saveChatHistory'
+      'saveChatHistory',
+      'updateUserMap'
     ])
   }
 };

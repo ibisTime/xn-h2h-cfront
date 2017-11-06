@@ -16,7 +16,7 @@
         </div>
         <div class="pay-item" @click="choseJf">
           <i class="icon icon-jf"></i>
-          <div>积分 (可用积分：<label>{{(jfAccount && jfAccount.amount) | formatAmount}}</label>)</div>
+          <div>积分 (可用积分：<label>{{(jfAccount && jfAccount.amount) | formatAmount}}，{{jfRule}}</label>积分抵扣1元人民币)</div>
           <i class="icon-chose" :class="jfCls"></i>
         </div>
         <div class="pay-item" @click="showCoupon">
@@ -44,6 +44,7 @@
   import {commonMixin} from 'common/js/mixin';
   import {initPay} from 'common/js/weixin';
   import CouponMask from 'components/coupon-mask/coupon-mask';
+  import {getTradeIconRule} from 'api/general';
 
   export default {
     mixins: [commonMixin],
@@ -58,13 +59,15 @@
         wxChose: false,
         jfChose: false,
         couponCode: '',
-        couponText: '不使用优惠券'
+        couponText: '不使用优惠券',
+        jfRule: ''
       };
     },
     created() {
       Promise.all([
         this.getAccount(),
-        this.getOrder()
+        this.getOrder(),
+        this.getJFRule()
       ]).finally(() => {
         this.loadingFlag = false;
       });
@@ -147,7 +150,7 @@
             }
           } else if (this.couponCode) {
             if (this.cnyChose) {
-              type = 70;
+              type = 69;
             } else {
               type = 63;
             }
@@ -179,14 +182,14 @@
         let payType = this.getPayType();
         let code = this.$route.query.code;
         payOrder(code, payType, this.couponCode).then((data) => {
-          if (data.isSuccess) {
+          if (data.payCode) {
+            this.wxPay(data, code);
+          } else {
             this.loadingFlag = false;
             this.text = '支付成功';
             this.$refs.toast.show();
             this.editOrderListByPay({code});
             this.handleSuc();
-          } else {
-            this.wxPay(data, code);
           }
         }).catch(() => {
           this.loadingFlag = false;
@@ -221,6 +224,11 @@
             this.$router.back();
           }
         }, 1000);
+      },
+      getJFRule() {
+        getTradeIconRule('jf_dk_times').then((data) => {
+          this.jfRule = data.cvalue;
+        });
       },
       ...mapMutations({
         'setCnyAccount': SET_CNY_ACCOUNT,
@@ -333,7 +341,7 @@
         div {
           padding-left: 0.2rem;
           flex: 1;
-          font-size: $font-size-medium;
+          font-size: $font-size-medium-s;
         }
 
         .yhq-item {

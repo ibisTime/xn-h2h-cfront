@@ -13,18 +13,18 @@
         </div>
       </div>
       <div class="amounts">
-        <div class="item border-right-1px">
+        <router-link to="/user/account/cny-flowWTW_MALL" tag="div" class="item border-right-1px">
           <p class="price">{{outTotalAmount}}</p>
           <p class="title">消费金额</p>
-        </div>
-        <div class="item border-right-1px">
+        </router-link>
+        <router-link to="/user/account/cny-flow11" tag="div" class="item border-right-1px">
           <p class="price">{{inTotalAmount}}</p>
           <p class="title">充值金额</p>
-        </div>
-        <div class="item">
+        </router-link>
+        <router-link to="/user/account/cny-flow-11" tag="div" class="item">
           <p class="price">{{txTotalAmount}}</p>
           <p class="title">提现金额</p>
-        </div>
+        </router-link>
       </div>
       <full-loading v-show="loadingFlag"></full-loading>
       <confirm ref="confirm" text="未设置支付密码" :isAlert="isAlert" @confirm="goTrade"></confirm>

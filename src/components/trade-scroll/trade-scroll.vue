@@ -51,7 +51,6 @@
         });
       },
       getBg(photo) {
-        console.log(photo);
         return {
           backgroundImage: `url(${formatImg(photo)})`
         };

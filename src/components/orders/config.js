@@ -14,7 +14,7 @@ export const CATEGORYS = [{
   key: '4',
   value: '待评价'
 }, {
-  key: '5',
+  key: '5||8||91',
   value: '已完成'
 }];
 

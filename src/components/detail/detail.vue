@@ -74,7 +74,7 @@
         <footer>
           <div class="price">
             <div class="top">金额：<span class="unit">¥</span><span>{{totalAmount | formatAmount}}</span></div>
-            <div class="bottom" v-show="showDiscount">已享受8折优惠</div>
+            <div class="bottom" v-show="showDiscount">已享受{{showDiscount}}折优惠</div>
           </div>
           <div v-show="showSell" class="btn" @click="goChat">联系卖家</div>
           <div v-show="showShare" class="btn buy" @click="shareGoods">分享宝贝</div>
@@ -143,7 +143,12 @@
         return this.detail && this.detail.originalPrice || 0;
       },
       freight() {
-        return this.detail && this.detail.yunfei || 0;
+        if (this.detail) {
+          if (this.detail.activityType === '2') {
+            return 0;
+          }
+          return this.detail.yunfei && this.detail.yunfei || 0;
+        };
       },
       addr() {
         return this.detail ? `${this.detail.city} | ${this.detail.area}` : '';
@@ -174,16 +179,17 @@
         if (this.detail) {
           let price = +this.detail.price;
           let yunfei = +this.detail.yunfei;
+          this.detail.activityType === '2' ? yunfei = 0 : yunfei;
           let discount = this.detail.discount;
           discount = isUnDefined(discount) ? 10 : +discount * 10;
-          return (price + yunfei) * discount / 10;
+          return (price * discount / 10) + yunfei;
         }
         return 0;
       },
       showDiscount() {
         if (this.detail) {
           let discount = this.detail.discount;
-          return !isUnDefined(discount) && +discount !== 1;
+          return !isUnDefined(discount) && +discount !== 1 ? discount * 10 : false;
         }
         return false;
       },
@@ -338,7 +344,7 @@
         this.$emit('rating', this.code);
       },
       goBuy() {
-        this.$router.push('/category/confirm?code=' + this.code);
+        this.$router.push('/category/confirm?code=' + this.$route.params.code);
       },
       goUserCenter() {
         this.$router.push('/user/' + this.publisher.userId);

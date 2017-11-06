@@ -25,6 +25,7 @@
   import {mapMutations, mapGetters} from 'vuex';
   import {SET_CHAT_LIST, SET_CHAT_USERID} from 'store/mutation-types';
   import {getUserId, formatChatDate, setTitle} from 'common/js/util';
+  import {getProfilePortrait} from 'common/js/message';
 
   export default {
     data () {
@@ -45,6 +46,7 @@
       list() {
         let mine = getUserId();
         let chatData = this.chatData[mine];
+        getProfilePortrait(mine);
         if (chatData) {
           return chatData.users.map((userId) => {
             let list = chatData[userId].list;
@@ -86,7 +88,11 @@
           if(msg.type === 'TIMTextElem') {
             html += `<i>${msg.content.text}</i>`;
           } else if (msg.type === 'TIMFaceElem') {
-            html += `<img src="${webim.Emotions[msg.content.index][1]}"/>`;
+            if (webim.Emotions[msg.content.index] === undefined) {
+              html += `<img src="${webim.Emotions[0][1]}"/>`;
+            } else {
+              html += `<img src="${webim.Emotions[msg.content.index][1]}"/>`;
+            }
           } else if (msg.type === 'TIMImageElem') {
             html += '[图片]';
           }

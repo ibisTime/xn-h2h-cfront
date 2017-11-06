@@ -24,7 +24,7 @@
           <div v-else class="scroll-wrapper">
             <scroll :data="currentList" @pullingUp="getPageCoupons" :hasMore="hasMore">
               <ul>
-                <li v-for="item in currentList">
+                <li v-for="item in currentList" :class="{overdue: currentIndex===1 || currentIndex===2}">
                   <div class="left">
                     <div class="price">¥<span>{{item.parValue | formatAmount}}</span></div>
                     <div class="name">优惠券</div>

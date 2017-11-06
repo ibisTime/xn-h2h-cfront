@@ -13,7 +13,7 @@
               <div class="bankname">{{item.bankName}}</div>
               <div class="bankcode">
                 <h2>借记卡</h2>
-                <p>{{item.bankcardNumber}}</p>
+                <p>{{formatBankcardNum( item.bankcardNumber)}}</p>
               </div>
             </div>
             <div ref="deleteEle" class="delete" @click="deleteItem(item)">
@@ -174,6 +174,11 @@
           currentElem.style[transitionDuration] = '0ms';
         });
         this.$refs.deleteEle[index].style['zIndex'] = zIndex;
+      },
+      formatBankcardNum(num) {
+        let reg = /^(\d{4})\d+(\d{4})$/;
+        num = num.replace(reg, '**** **** **** $1');
+        return num;
       },
       ...mapMutations({
         setBankcardList: SET_BANKCARD_LIST

@@ -40,7 +40,7 @@
             </div>
             <div @click="goBirthday" class="setting-item border-bottom-1px">
               <h2>生日</h2>
-              <span v-if="user && user.birthday">{{user.birthday | formatDate('MM月dd日')}}</span>
+              <span v-if="user && user.birthday">{{getBirthday()}}</span>
               <span v-else>设置生日</span>
               <i class="arrow"></i>
             </div>
@@ -95,7 +95,7 @@
   import ClipImg from 'base/clip-img/clip-img';
   import {getUser, changeAvatar} from 'api/user';
   import {getAppId, getQiniuToken} from 'api/general';
-  import {setTitle, clearUser, formatImg, getImgData} from 'common/js/util';
+  import {setTitle, clearUser, formatImg, getImgData, formatDate} from 'common/js/util';
   import {commonMixin} from 'common/js/mixin';
 
   const genderList = {
@@ -161,6 +161,9 @@
       },
       getGender() {
         return this.user && this.user.gender && genderList[this.user.gender] || '';
+      },
+      getBirthday() {
+        return this.user && formatDate(this.user.birthday, 'yyyy年M月d日');
       },
       getQiniuToken() {
         return getQiniuToken().then((data) => {

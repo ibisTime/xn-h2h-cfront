@@ -3,7 +3,7 @@
     <scroll ref="scroll" :data="goods" @pullingUp="getPageGoods" :hasMore="hasMore">
       <div class="header">
         <router-link class="search" to="/category/search" tag="div">
-          <i class="search-icon"></i><span>鞋子</span>
+          <i class="search-icon"></i><span>搜索</span>
         </router-link>
       </div>
       <div class="cates clearfix">
@@ -55,10 +55,10 @@
     },
     computed: {
       visiableList() {
-        if (this.categories.length > 8) {
+        if (this.categories.length > 7) {
           this.showAll = true;
         }
-        return this.categories.slice(0, 8);
+        return this.categories.slice(0, 7);
       }
     },
     methods: {

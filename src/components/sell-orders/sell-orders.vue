@@ -141,7 +141,11 @@
         this.fetchText = '正在载入...';
         getOrderRating(item.code).then((data) => {
           this.fetching = false;
-          this.ratingContent = data.content;
+          if (data.status === 'A' || data.status === 'B') {
+            this.ratingContent = data.content;
+          } else {
+            this.ratingContent = '您的评论存在敏感词，请耐心等待管理人员审核。';
+          }
           this.$refs.alert.show();
         }).catch(() => {
           this.fetching = false;

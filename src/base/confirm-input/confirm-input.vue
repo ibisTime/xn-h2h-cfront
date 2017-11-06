@@ -4,7 +4,7 @@
       <div class="confirm-wrapper">
         <div class="confirm-content">
           <p class="text">{{text}}</p>
-          <div class="input"><input ref="input" type="text" v-model="content"></div>
+          <div class="input"><input ref="input" type="text" v-model="content" v-focus></div>
           <div class="operate">
             <div @click="cancel" class="operate-btn left">{{cancelBtnText}}</div>
             <div @click="confirm" class="operate-btn right">{{confirmBtnText}}</div>
@@ -29,6 +29,13 @@
       cancelBtnText: {
         type: String,
         default: '取消'
+      }
+    },
+    directives: {
+      focus: {
+        inserted: function (el) {
+          el.focus();
+        }
       }
     },
     data() {

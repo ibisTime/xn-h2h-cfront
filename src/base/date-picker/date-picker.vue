@@ -114,6 +114,7 @@
         if (this.year) {
           this.first = getYears();
           this.second = getMonths();
+          // this.third = getDays();
           index0 = this.first.findIndex((item) => {
             return +item.value === +this.year;
           });

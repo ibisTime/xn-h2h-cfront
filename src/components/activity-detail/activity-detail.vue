@@ -9,7 +9,7 @@
         </scroll>
       </div>
       <footer>
-        <button @click="goPublish">发布商品</button>
+        <button @click="goPublish">我要报名</button>
       </footer>
       <router-view></router-view>
     </div>
@@ -115,9 +115,11 @@
     background: $color-background;
 
     .scroll-wrapper {
+      display: flex;
       top: 0;
       left: 0;
       width: 100%;
+      height: 100%;
       bottom: 1.4rem;
       background: #fff;
     }

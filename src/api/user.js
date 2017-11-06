@@ -20,7 +20,7 @@ export function wxLogin(code, userReferee, activityCode, mobile, smsCaptcha) {
   };
   if (userReferee) {
     params.userReferee = userReferee;
-    params.userRefereeKind = 0;
+    params.userRefereeKind = 'C';
   }
   if (activityCode) {
     params.activityCode = activityCode;
